@@ -2,10 +2,11 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:noor/bottom_navigation.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 
 import 'package:noor/utils/device/device_utility.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
@@ -111,7 +112,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                   Row(
                     children: [
                       const SizedBox(width: 20),
-                      const Icon(Iconsax.activity5, color: Colors.white),
+                      SvgPicture.asset(SImageString.logo, height: 48.0),
                       const SizedBox(width: 10),
                       Text(S.of(context).noor,
                           style: TextStyle(

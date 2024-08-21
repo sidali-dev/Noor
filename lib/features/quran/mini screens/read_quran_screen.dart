@@ -5,6 +5,8 @@ import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:quran/quran.dart' as quran;
 
+import '../../../utils/helpers/helper_functions.dart';
+
 class ReadQuranScreen extends StatelessWidget {
   final int surahIndex;
 
@@ -20,11 +22,15 @@ class ReadQuranScreen extends StatelessWidget {
     readQuranScreenController
         .isPageSave(SharedPrefService.getInt("last_read_quran")!);
 
+    final isDark = SHelperFunctions.isDarkMode(context);
+
     return SafeArea(
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: const Color.fromARGB(255, 254, 255, 221),
+          backgroundColor: isDark
+              ? const Color.fromARGB(255, 15, 15, 15)
+              : const Color.fromARGB(255, 253, 255, 201),
           body: GestureDetector(
             onTap: () {
               readQuranScreenController.displayHideButton();
@@ -49,12 +55,17 @@ class ReadQuranScreen extends StatelessWidget {
                             Text(
                               getPageVerses(i),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 22, height: 2, color: Colors.black),
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  height: 2,
+                                  color: isDark ? Colors.white : Colors.black,
+                                  fontFamily: "Quran"),
                             ),
                             Text(i.toString(),
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.black))
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color:
+                                        isDark ? Colors.white : Colors.black))
                           ],
                         ),
                       ),

@@ -88,5 +88,14 @@ flutter:
           weight: 400
         - asset: assets\fonts\amiri\Amiri-Bold.ttf
           weight: 700
+
+    - family: Quran
+      fonts:
+        - asset: assets\fonts\quran_font\Quran-Medium.ttf
+
+    - family: Deco
+      fonts:
+        - asset: assets\fonts\quran_font\Deco-Type.ttf
+
 flutter_intl:
   enabled: true

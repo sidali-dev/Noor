@@ -16,6 +16,7 @@ class SImageString {
       "assets/images/background_images/duaa_bg_img_2.png";
 
   static const String octagon = "assets/images/svg/octagon.svg";
+  static const String logo = "assets/images/svg/logo.svg";
   static const String sunrise = "assets/images/svg/sunrise.svg";
   static const String sunset = "assets/images/svg/sunset.svg";
   static const String prayingMan = "assets/images/svg/praying_man.svg";
