@@ -2,7 +2,7 @@ name: noor
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -92,10 +92,6 @@ flutter:
     - family: Quran
       fonts:
         - asset: assets\fonts\quran_font\Quran-Medium.ttf
-
-    - family: Deco
-      fonts:
-        - asset: assets\fonts\quran_font\Deco-Type.ttf
 
 flutter_intl:
   enabled: true

@@ -1,4 +1,4 @@
-package com.example.noor
+package com.sidalidev.noor
 
 import io.flutter.embedding.android.FlutterActivity
 
