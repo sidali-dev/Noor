@@ -1,5 +1,4 @@
 import 'package:alarm/alarm.dart';
-import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -131,7 +130,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(
-                            widget.alarmSettings.notificationTitle,
+                            widget.alarmSettings.notificationSettings.title,
                             style: const TextStyle(
                                 fontSize: 40,
                                 color: Colors.white,
@@ -159,7 +158,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                     children: [
                       const SizedBox(width: 20),
                       Text(
-                        widget.alarmSettings.notificationBody,
+                        widget.alarmSettings.notificationSettings.body,
                         style:
                             const TextStyle(fontSize: 24, color: Colors.white),
                       ),

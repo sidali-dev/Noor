@@ -126,6 +126,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "sleep_adhkar": MessageLookupByLibrary.simpleMessage("Sleeping Adhkar"),
         "state": MessageLookupByLibrary.simpleMessage("State"),
+        "stop_adhan": MessageLookupByLibrary.simpleMessage("Stop Adhan"),
         "sun_rise": MessageLookupByLibrary.simpleMessage("Sunrise"),
         "sun_rising": MessageLookupByLibrary.simpleMessage("Sun is Rising"),
         "surah": MessageLookupByLibrary.simpleMessage("Surah"),

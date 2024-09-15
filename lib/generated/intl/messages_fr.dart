@@ -131,6 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sleep_adhkar":
             MessageLookupByLibrary.simpleMessage("Adhkar du coucher"),
         "state": MessageLookupByLibrary.simpleMessage("État"),
+        "stop_adhan": MessageLookupByLibrary.simpleMessage("Arrêter l\'Adhan"),
         "sun_rise": MessageLookupByLibrary.simpleMessage("Lever du soleil"),
         "sun_rising": MessageLookupByLibrary.simpleMessage("Le soleil se lève"),
         "surah": MessageLookupByLibrary.simpleMessage("Sourate"),

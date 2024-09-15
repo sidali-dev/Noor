@@ -117,6 +117,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("الإعدادات"),
         "sleep_adhkar": MessageLookupByLibrary.simpleMessage("أذكار النوم"),
         "state": MessageLookupByLibrary.simpleMessage("الولاية"),
+        "stop_adhan": MessageLookupByLibrary.simpleMessage("إيقاف الأذان"),
         "sun_rise": MessageLookupByLibrary.simpleMessage("الشروق"),
         "sun_rising": MessageLookupByLibrary.simpleMessage("الشمس تشرق"),
         "surah": MessageLookupByLibrary.simpleMessage("سورة"),

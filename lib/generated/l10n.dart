@@ -879,6 +879,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Stop Adhan`
+  String get stop_adhan {
+    return Intl.message(
+      'Stop Adhan',
+      name: 'stop_adhan',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

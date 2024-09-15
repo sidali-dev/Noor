@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:alarm/alarm.dart';
-import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -148,7 +145,8 @@ class SHelperFunctions {
       required String timing,
       required String tomorrowTiming,
       required String title,
-      required String body}) async {
+      required String body,
+      required String stopButtonText}) async {
     String time = SHelperFunctions.removeTimeZone(timing);
 
     String tomorrowTime = SHelperFunctions.removeTimeZone(timing);
@@ -165,31 +163,32 @@ class SHelperFunctions {
 
     if (dateTime.isBefore(prayerTime)) {
       AlarmSettings alarmSettings = AlarmSettings(
-          id: id,
-          notificationTitle: title,
-          notificationBody: body,
-          dateTime: prayerTime,
-          assetAudioPath: assetAudioPath,
-          loopAudio: false,
-          androidFullScreenIntent: true,
-          vibrate: true,
-          volume: 0.8,
-          fadeDuration: 3.0,
-          enableNotificationOnKill: Platform.isAndroid);
+        id: id,
+        notificationSettings: NotificationSettings(
+            title: title, body: body, stopButton: stopButtonText),
+        dateTime: prayerTime,
+        assetAudioPath: assetAudioPath,
+        loopAudio: false,
+        warningNotificationOnKill: false,
+        androidFullScreenIntent: true,
+        vibrate: true,
+        volume: 0.8,
+        fadeDuration: 3.0,
+      );
       await Alarm.set(alarmSettings: alarmSettings);
     } else {
       AlarmSettings alarmSettings = AlarmSettings(
           id: id,
-          notificationTitle: title,
-          notificationBody: body,
+          notificationSettings: NotificationSettings(
+              title: title, body: body, stopButton: stopButtonText),
           dateTime: prayerTimeTomorrow,
           assetAudioPath: assetAudioPath,
+          warningNotificationOnKill: false,
           loopAudio: false,
           androidFullScreenIntent: true,
           vibrate: true,
           volume: 0.5,
-          fadeDuration: 3.0,
-          enableNotificationOnKill: Platform.isIOS);
+          fadeDuration: 3.0);
       await Alarm.set(alarmSettings: alarmSettings);
     }
   }
@@ -197,12 +196,17 @@ class SHelperFunctions {
   static getAdhanNotificationTitle(int id) {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
     final bool isRtl = storedLanguage == "ar";
+    final bool isFr = storedLanguage == "fr";
 
     switch (id) {
       case 1:
         return isRtl ? "أذان الفجر" : "Adhan el Fajr";
       case 2:
-        return isRtl ? "وقت الشروق" : "It's Chourouk Time";
+        return isRtl
+            ? "وقت الشروق"
+            : isFr
+                ? "C'est l'heure du Chourouk"
+                : "It's Chourouk Time";
       case 3:
         return isRtl ? "أذان الظهر" : "Adhan el Dhuhr";
       case 4:
@@ -216,11 +220,43 @@ class SHelperFunctions {
 
   static getAdhanNotificationBody(int id) {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
-    final bool isRtl = storedLanguage == "ar";
     if (id == 2) {
-      return isRtl ? "الشمس تشرق" : "Sun is Rising";
+      switch (storedLanguage) {
+        case "ar":
+          return "الشمس تشرق";
+        case "fr":
+          return "Le soleil se lève";
+        case "en":
+          return "Sun is Rising";
+        default:
+          return "الشمس تشرق";
+      }
     } else {
-      return isRtl ? "حان وقت الذهاب إلى المسجد" : "Time to go to the Masjid";
+      switch (storedLanguage) {
+        case "ar":
+          return "حان وقت الذهاب إلى المسجد";
+        case "fr":
+          return "Temps d'aller à la mosquée";
+        case "en":
+          return "Time to go to the Masjid";
+        default:
+          return "حان وقت الذهاب إلى المسجد";
+      }
+    }
+  }
+
+  static getAdhanStopText() {
+    String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
+
+    switch (storedLanguage) {
+      case "ar":
+        return "إيقاف الأذان";
+      case "fr":
+        return "Arrêter l'Adhan";
+      case "en":
+        return "Stop Adhan";
+      default:
+        return "إيقاف الأذان";
     }
   }
 

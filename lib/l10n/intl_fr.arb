@@ -81,5 +81,6 @@
     "repetition" : "Répétition",
     "bookmarks" : "Signets",
     "page" : "Page",
-    "no_bookmarks" : "Pas de signets"
+    "no_bookmarks" : "Pas de signets",
+    "stop_adhan" : "Arrêter l'Adhan"
 }

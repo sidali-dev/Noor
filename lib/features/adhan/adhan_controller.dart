@@ -136,6 +136,7 @@ class AdhanController extends GetxController {
           id: 1,
           title: SHelperFunctions.getAdhanNotificationTitle(1),
           body: SHelperFunctions.getAdhanNotificationBody(1),
+          stopButtonText: SHelperFunctions.getAdhanStopText(),
           dateTime: date,
           timing: timings.fajr,
           tomorrowTiming: tomorrowTimings.fajr,
@@ -152,7 +153,8 @@ class AdhanController extends GetxController {
           tomorrowTiming: tomorrowTimings.sunrise,
           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
           title: SHelperFunctions.getAdhanNotificationTitle(2),
-          body: SHelperFunctions.getAdhanNotificationBody(2));
+          body: SHelperFunctions.getAdhanNotificationBody(2),
+          stopButtonText: SHelperFunctions.getAdhanStopText());
     } else {
       await SHelperFunctions.cancelAlarm(2);
     }
@@ -165,7 +167,8 @@ class AdhanController extends GetxController {
           tomorrowTiming: tomorrowTimings.dhuhr,
           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
           title: SHelperFunctions.getAdhanNotificationTitle(3),
-          body: SHelperFunctions.getAdhanNotificationBody(3));
+          body: SHelperFunctions.getAdhanNotificationBody(3),
+          stopButtonText: SHelperFunctions.getAdhanStopText());
     } else {
       await SHelperFunctions.cancelAlarm(3);
     }
@@ -178,7 +181,8 @@ class AdhanController extends GetxController {
           tomorrowTiming: tomorrowTimings.asr,
           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
           title: SHelperFunctions.getAdhanNotificationTitle(4),
-          body: SHelperFunctions.getAdhanNotificationBody(4));
+          body: SHelperFunctions.getAdhanNotificationBody(4),
+          stopButtonText: SHelperFunctions.getAdhanStopText());
     } else {
       await SHelperFunctions.cancelAlarm(4);
     }
@@ -191,7 +195,8 @@ class AdhanController extends GetxController {
           tomorrowTiming: tomorrowTimings.maghrib,
           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
           title: SHelperFunctions.getAdhanNotificationTitle(5),
-          body: SHelperFunctions.getAdhanNotificationBody(5));
+          body: SHelperFunctions.getAdhanNotificationBody(5),
+          stopButtonText: SHelperFunctions.getAdhanStopText());
     } else {
       await SHelperFunctions.cancelAlarm(5);
     }
@@ -204,7 +209,8 @@ class AdhanController extends GetxController {
           tomorrowTiming: tomorrowTimings.isha,
           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
           title: SHelperFunctions.getAdhanNotificationTitle(6),
-          body: SHelperFunctions.getAdhanNotificationBody(6));
+          body: SHelperFunctions.getAdhanNotificationBody(6),
+          stopButtonText: SHelperFunctions.getAdhanStopText());
     } else {
       await SHelperFunctions.cancelAlarm(6);
     }
