@@ -37,7 +37,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-    Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (context) => AdhanRingScreen(alarmSettings: alarmSettings)));
   }
 
   @override
