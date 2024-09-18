@@ -40,10 +40,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
         "chikh_afassy_1":
             MessageLookupByLibrary.simpleMessage("أذان الشيخ العفاسي 1"),
-        "chikh_mansoor":
-            MessageLookupByLibrary.simpleMessage("أذان الشيخ منصور"),
+        "chikh_elkourdi":
+            MessageLookupByLibrary.simpleMessage("أذان الشيخ أحمد الكردي"),
+        "chikh_elmajali":
+            MessageLookupByLibrary.simpleMessage("أذان الشيخ حمزة المجالي"),
         "chikh_nafees":
-            MessageLookupByLibrary.simpleMessage("أذان الشيخ النفيس"),
+            MessageLookupByLibrary.simpleMessage("أذان الشيخ أحمد النفيس"),
         "chilh_afassy_2":
             MessageLookupByLibrary.simpleMessage("أذان الشيخ العفاسي 2"),
         "city": MessageLookupByLibrary.simpleMessage("المدينة"),

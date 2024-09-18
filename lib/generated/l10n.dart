@@ -410,10 +410,10 @@ class S {
     );
   }
 
-  /// `Adhan Sheikh Nafees`
+  /// `Adhan Sheikh Ahmad Alnafees`
   String get chikh_nafees {
     return Intl.message(
-      'Adhan Sheikh Nafees',
+      'Adhan Sheikh Ahmad Alnafees',
       name: 'chikh_nafees',
       desc: '',
       args: [],
@@ -440,11 +440,21 @@ class S {
     );
   }
 
-  /// `Adhan Sheikh Mansoor`
-  String get chikh_mansoor {
+  /// `Adhan Sheikh Ahmed Elkourdi`
+  String get chikh_elkourdi {
     return Intl.message(
-      'Adhan Sheikh Mansoor',
-      name: 'chikh_mansoor',
+      'Adhan Sheikh Ahmed Elkourdi',
+      name: 'chikh_elkourdi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adhan Sheikh Hamza Elmajali`
+  String get chikh_elmajali {
+    return Intl.message(
+      'Adhan Sheikh Hamza Elmajali',
+      name: 'chikh_elmajali',
       desc: '',
       args: [],
     );

@@ -42,6 +42,7 @@ class AdhanLine extends StatelessWidget {
               color: isDark ? SColors.white : SColors.primary,
               fontSize: isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd),
         ),
+        // IconButton(onPressed: () {}, icon: const Icon(Iconsax.timer_1)),
         const Expanded(child: SizedBox()),
         GestureDetector(
           child: Obx(

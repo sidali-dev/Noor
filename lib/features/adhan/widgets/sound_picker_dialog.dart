@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -26,71 +25,96 @@ class AdhanSoundPicker extends StatelessWidget {
       backgroundColor:
           isDark ? const Color.fromARGB(255, 20, 20, 20) : Colors.white,
       child: SizedBox(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            const SizedBox(height: SSizes.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Positioned(
+                right: isRtl ? 4 : null,
+                left: isRtl ? null : 4,
+                top: 4,
+                child: IconButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    icon: const Icon(Icons.close))),
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Iconsax.volume_high,
-                    color: SColors.primary, size: 32),
-                const SizedBox(width: SSizes.sm),
-                Text(S.of(context).pick_adhan,
-                    style: TextStyle(
-                      fontSize: isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd,
-                    ))
-              ],
-            ),
-            const SizedBox(height: SSizes.xl),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SingleChildScrollView(
-                child: Column(
+                const SizedBox(height: SSizes.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AdhanSoundLine(
-                      adhanSoundPath: SSoundString.adhanAhmadAlNafees,
-                      controller: SoundPickerController(),
-                      isRtl: isRtl,
-                      title: S.of(Get.context!).chikh_nafees,
-                    ),
-                    const SDivider(
-                        color: SColors.primary,
-                        endIndent: 20,
-                        indent: 20,
-                        space: 2),
-                    AdhanSoundLine(
-                      adhanSoundPath: SSoundString.adhanAlafasy1,
-                      isRtl: isRtl,
-                      controller: SoundPickerController(),
-                      title: S.of(Get.context!).chikh_afassy_1,
-                    ),
-                    const SDivider(
-                        color: SColors.primary,
-                        endIndent: 20,
-                        indent: 20,
-                        space: 2),
-                    AdhanSoundLine(
-                      adhanSoundPath: SSoundString.adhanAlafasy2,
-                      controller: SoundPickerController(),
-                      isRtl: isRtl,
-                      title: S.of(Get.context!).chilh_afassy_2,
-                    ),
-                    const SDivider(
-                        color: SColors.primary,
-                        endIndent: 20,
-                        indent: 20,
-                        space: 2),
-                    AdhanSoundLine(
-                      controller: SoundPickerController(),
-                      adhanSoundPath: SSoundString.adhanSalahMansoor,
-                      isRtl: isRtl,
-                      title: S.of(Get.context!).chikh_mansoor,
-                    ),
-                    const SizedBox(height: 32)
+                    const Icon(Iconsax.volume_high,
+                        color: SColors.primary, size: 32),
+                    const SizedBox(width: SSizes.sm),
+                    Text(S.of(context).pick_adhan,
+                        style: TextStyle(
+                          fontSize:
+                              isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd,
+                        ))
                   ],
                 ),
-              ),
+                const SizedBox(height: SSizes.xl),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        AdhanSoundLine(
+                          adhanSoundPath: SSoundString.adhanAhmadAlNafees,
+                          controller: SoundPickerController(),
+                          isRtl: isRtl,
+                          title: S.of(Get.context!).chikh_nafees,
+                        ),
+                        const SDivider(
+                            color: SColors.primary,
+                            endIndent: 20,
+                            indent: 20,
+                            space: 2),
+                        AdhanSoundLine(
+                          adhanSoundPath: SSoundString.adhanAlafasy1,
+                          isRtl: isRtl,
+                          controller: SoundPickerController(),
+                          title: S.of(Get.context!).chikh_afassy_1,
+                        ),
+                        const SDivider(
+                            color: SColors.primary,
+                            endIndent: 20,
+                            indent: 20,
+                            space: 2),
+                        AdhanSoundLine(
+                          adhanSoundPath: SSoundString.adhanAlafasy2,
+                          controller: SoundPickerController(),
+                          isRtl: isRtl,
+                          title: S.of(Get.context!).chilh_afassy_2,
+                        ),
+                        const SDivider(
+                            color: SColors.primary,
+                            endIndent: 20,
+                            indent: 20,
+                            space: 2),
+                        AdhanSoundLine(
+                          adhanSoundPath: SSoundString.adhanAhmedElKourdi,
+                          controller: SoundPickerController(),
+                          isRtl: isRtl,
+                          title: S.of(Get.context!).chikh_elkourdi,
+                        ),
+                        const SDivider(
+                            color: SColors.primary,
+                            endIndent: 20,
+                            indent: 20,
+                            space: 2),
+                        AdhanSoundLine(
+                          adhanSoundPath: SSoundString.adhanHamzaElMajali,
+                          controller: SoundPickerController(),
+                          isRtl: isRtl,
+                          title: S.of(Get.context!).chikh_elmajali,
+                        ),
+                        const SizedBox(height: 32)
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

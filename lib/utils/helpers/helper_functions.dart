@@ -291,8 +291,10 @@ class SHelperFunctions {
         return S.of(Get.context!).chikh_afassy_1;
       case SSoundString.adhanAlafasy2:
         return S.of(Get.context!).chilh_afassy_2;
-      case SSoundString.adhanSalahMansoor:
-        return S.of(Get.context!).chikh_mansoor;
+      case SSoundString.adhanAhmedElKourdi:
+        return S.of(Get.context!).chikh_elkourdi;
+      case SSoundString.adhanHamzaElMajali:
+        return S.of(Get.context!).chikh_elmajali;
       default:
         return S.of(Get.context!).chikh_nafees;
     }
