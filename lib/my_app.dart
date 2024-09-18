@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -10,7 +7,6 @@ import 'package:noor/generals/controllers/localization_controller.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 
-import 'features/adhan/adhan_ring_screen.dart';
 import 'generals/controllers/theme_controller.dart';
 import 'utils/theme/theme.dart';
 
@@ -22,24 +18,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static StreamSubscription<AlarmSettings>? _subscription;
+  // static StreamSubscription<AlarmSettings>? _subscription;
 
-  @override
-  void initState() {
-    super.initState();
-    _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription?.cancel();
-  }
-
-  Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-    await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (context) => AdhanRingScreen(alarmSettings: alarmSettings)));
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
+  // }
+//
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  //   _subscription?.cancel();
+  // }
+//
+  // Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
+  //   await Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
+  // }
 
   @override
   Widget build(BuildContext context) {

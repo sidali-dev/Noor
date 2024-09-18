@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -14,6 +16,7 @@ import 'package:noor/utils/constants/colors.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
 
+import 'features/adhan/adhan_ring_screen.dart';
 import 'generals/controllers/location_controller.dart';
 import 'generals/widgets/settings_dialog.dart';
 
@@ -119,7 +122,7 @@ class SBottomNavigation extends StatelessWidget {
 }
 
 class SBottomNavigationController extends GetxController {
-  // static StreamSubscription<AlarmSettings>? _subscription;
+  static StreamSubscription<AlarmSettings>? _subscription;
 
   Rx<int> selectedIndex = 0.obs;
 
@@ -131,17 +134,17 @@ class SBottomNavigationController extends GetxController {
       SHelperFunctions.checkAndroidScheduleExactAlarmPermission();
     }
 
-    // _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
+    _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
   }
 
-  // Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-  //   Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
-  // }
+  Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
+    await Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
+  }
 
-  // @override
-  // onClose() {
-  //   _subscription?.cancel();
-  // }
+  @override
+  onClose() {
+    _subscription?.cancel();
+  }
 
   changeIndex(int index) {
     selectedIndex = index.obs;
