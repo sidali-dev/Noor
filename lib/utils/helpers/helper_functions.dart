@@ -171,8 +171,8 @@ class SHelperFunctions {
         loopAudio: false,
         warningNotificationOnKill: false,
         androidFullScreenIntent: true,
-        vibrate: true,
-        volume: 0.8,
+        vibrate: false,
+        volume: 0.5,
         fadeDuration: 3.0,
       );
       await Alarm.set(alarmSettings: alarmSettings);
@@ -186,7 +186,7 @@ class SHelperFunctions {
           warningNotificationOnKill: false,
           loopAudio: false,
           androidFullScreenIntent: true,
-          vibrate: true,
+          vibrate: false,
           volume: 0.5,
           fadeDuration: 3.0);
       await Alarm.set(alarmSettings: alarmSettings);

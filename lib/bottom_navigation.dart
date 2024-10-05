@@ -22,10 +22,7 @@ import 'generals/widgets/settings_dialog.dart';
 
 class SBottomNavigation extends StatelessWidget {
   final int? pageIndex;
-  const SBottomNavigation({
-    super.key,
-    this.pageIndex,
-  });
+  const SBottomNavigation({super.key, this.pageIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +99,7 @@ class SBottomNavigation extends StatelessWidget {
                         height: 32,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
-                    label: 'Favorites'),
+                    label: 'Favorites')
               ]),
         ),
         body: Obx(() => controller.screens[controller.selectedIndex.value]),
@@ -133,7 +130,6 @@ class SBottomNavigationController extends GetxController {
       SHelperFunctions.checkAndroidNotificationPermission();
       SHelperFunctions.checkAndroidScheduleExactAlarmPermission();
     }
-
     _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
   }
 

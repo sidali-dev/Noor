@@ -10,31 +10,8 @@ import 'package:noor/utils/constants/image_strings.dart';
 import 'generals/controllers/theme_controller.dart';
 import 'utils/theme/theme.dart';
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // static StreamSubscription<AlarmSettings>? _subscription;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
-  // }
-//
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  //   _subscription?.cancel();
-  // }
-//
-  // Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-  //   await Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
-  // }
 
   @override
   Widget build(BuildContext context) {

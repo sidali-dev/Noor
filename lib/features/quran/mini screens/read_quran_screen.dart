@@ -35,7 +35,8 @@ class ReadQuranScreen extends StatelessWidget {
             onTap: () {
               readQuranScreenController.displayHideButton();
             },
-            child: PageView(
+            child: PageView.builder(
+              itemCount: quran.totalPagesCount,
               onPageChanged: (value) {
                 SharedPrefService.setInt("last_read_quran", value + 1);
                 quranScreenController.updateLastSurahRead();
@@ -44,34 +45,32 @@ class ReadQuranScreen extends StatelessWidget {
                     .isPageSave(SharedPrefService.getInt("last_read_quran")!);
               },
               controller: controller,
-              children: [
-                for (var i = 1; i <= quran.totalPagesCount; i++)
-                  Center(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 24.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              getPageVerses(i),
-                              textAlign: TextAlign.center,
+              itemBuilder: (context, i) {
+                return Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            getPageVerses(i + 1), // i + 1 for 1-based index
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 22,
+                                height: 2,
+                                color: isDark ? Colors.white : Colors.black,
+                                fontFamily: "Quran"),
+                          ),
+                          Text((i + 1).toString(),
                               style: TextStyle(
-                                  fontSize: 22,
-                                  height: 2,
-                                  color: isDark ? Colors.white : Colors.black,
-                                  fontFamily: "Quran"),
-                            ),
-                            Text(i.toString(),
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color:
-                                        isDark ? Colors.white : Colors.black))
-                          ],
-                        ),
+                                  fontSize: 16,
+                                  color: isDark ? Colors.white : Colors.black))
+                        ],
                       ),
                     ),
-                  )
-              ],
+                  ),
+                );
+              },
             ),
           ),
           floatingActionButton: Obx(
@@ -110,7 +109,7 @@ class ReadQuranScreen extends StatelessWidget {
           verses.add(
               "~~~~~~~{ ${quran.getSurahNameArabic(data["surah"])} }~~~~~~~\n");
         }
-      } else {}
+      }
       for (int j = data["start"]; j <= data["end"]; j++) {
         if (j == data["end"]) {
           verses.add(
