@@ -27,7 +27,7 @@ class WaitDialog extends StatelessWidget {
           child: Text(
             S.of(context).wait_please,
             style: TextStyle(
-                color: isDark ? SColors.white : SColors.white,
+                color: isDark ? SColors.white : SColors.dark,
                 fontSize: isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd),
           ),
         )

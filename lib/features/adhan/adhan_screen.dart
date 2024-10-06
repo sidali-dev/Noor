@@ -117,9 +117,9 @@ class AdhanScreen extends StatelessWidget {
               future: controller.initController(DateTime.now().year),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return SizedBox(
+                      height: SDeviceUtils.getScreenHeight(context) * 0.7,
+                      child: WaitDialog(isDark: isDark, isRtl: isRtl));
                 }
                 return Obx(
                   () => Visibility(
