@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 
 import 'package:noor/features/adhan/adhan_controller.dart';
+import 'package:noor/features/adhan/controllers/adhan_line_controller.dart';
 import 'package:noor/features/adhan/widgets/location_picker_dialog.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_dialog.dart';
@@ -138,7 +139,7 @@ class AdhanScreen extends StatelessWidget {
                                 barrierDismissible: false,
                                 context: Get.context!,
                                 builder: (context) =>
-                                    WaitDialog(isDark: isDark, isRtl: isRtl));
+                                    WaitDialog(isDark: true, isRtl: isRtl));
                             if (await SHelperFunctions.isInternetConnected()) {
                               Get.back();
                               Map response;
@@ -161,7 +162,7 @@ class AdhanScreen extends StatelessWidget {
                                                   context: Get.context!,
                                                   builder: (context) =>
                                                       WaitDialog(
-                                                          isDark: isDark,
+                                                          isDark: true,
                                                           isRtl: isRtl));
                                               await controller.refreshAdhanData(
                                                   response["country"],
@@ -178,7 +179,7 @@ class AdhanScreen extends StatelessWidget {
                                                 context: context,
                                                 builder: (context) =>
                                                     WaitDialog(
-                                                        isDark: isDark,
+                                                        isDark: true,
                                                         isRtl: isRtl));
 
                                             Placemark placemark =
@@ -363,6 +364,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).fajr,
                           icon: Iconsax.sun_fog,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!
@@ -378,6 +380,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).sun_rise,
                           icon: Iconsax.sun_fog,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!
@@ -393,6 +396,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).dhuhr,
                           icon: Iconsax.sun_1,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!
@@ -408,6 +412,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).asr,
                           icon: Iconsax.cloud_sunny,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!
@@ -423,6 +428,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).maghrib,
                           icon: Iconsax.sun_fog,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!
@@ -438,6 +444,7 @@ class AdhanScreen extends StatelessWidget {
                         () => AdhanLine(
                           title: S.of(context).isha,
                           icon: Iconsax.moon,
+                          adhanLineController: AdhanLineController(),
                           time: SHelperFunctions.removeTimeZone(controller
                               .prayerTime
                               .value!

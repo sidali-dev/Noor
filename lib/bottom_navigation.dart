@@ -51,26 +51,26 @@ class SBottomNavigation extends StatelessWidget {
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.quran,
-                      height: 32,
+                      height: 36,
                       colorFilter: ColorFilter.mode(
                           isDark ? SColors.secondary : SColors.primary,
                           BlendMode.srcIn),
                     ),
                     icon: SvgPicture.asset(SImageString.quran,
-                        height: 32,
+                        height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
                     label: 'Liked'),
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.adhan,
-                      height: 32,
+                      height: 36,
                       colorFilter: ColorFilter.mode(
                           isDark ? SColors.secondary : SColors.primary,
                           BlendMode.srcIn),
                     ),
                     icon: SvgPicture.asset(SImageString.adhan,
-                        height: 32,
+                        height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
                     label: 'Adhan'),
@@ -90,13 +90,13 @@ class SBottomNavigation extends StatelessWidget {
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.kaaba,
-                      height: 32,
+                      height: 36,
                       colorFilter: ColorFilter.mode(
                           isDark ? SColors.secondary : SColors.primary,
                           BlendMode.srcIn),
                     ),
                     icon: SvgPicture.asset(SImageString.kaaba,
-                        height: 32,
+                        height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
                     label: 'Favorites')

@@ -135,7 +135,7 @@ class QiblaScreen extends StatelessWidget {
                   return Column(
                     children: [
                       const SizedBox(height: 56),
-                      WaitDialog(isDark: isDark, isRtl: isRtl),
+                      WaitDialog(isDark: true, isRtl: isRtl),
                     ],
                   );
                 } else if (snapshot.hasError) {

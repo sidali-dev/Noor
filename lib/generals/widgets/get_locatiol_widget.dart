@@ -33,7 +33,7 @@ class GetLocationWidget extends StatelessWidget {
         showDialog(
             barrierDismissible: false,
             context: Get.context!,
-            builder: (context) => WaitDialog(isDark: isDark, isRtl: isRtl));
+            builder: (context) => WaitDialog(isDark: true, isRtl: isRtl));
 
         if (await SHelperFunctions.isInternetConnected()) {
           Get.back();
@@ -51,7 +51,7 @@ class GetLocationWidget extends StatelessWidget {
                         barrierDismissible: false,
                         context: Get.context!,
                         builder: (context) =>
-                            WaitDialog(isDark: isDark, isRtl: isRtl));
+                            WaitDialog(isDark: true, isRtl: isRtl));
                     await controller.refreshAdhanData(
                         response["country"],
                         response["state"],
@@ -65,7 +65,7 @@ class GetLocationWidget extends StatelessWidget {
                   showDialog(
                       context: context,
                       builder: (context) =>
-                          WaitDialog(isDark: isDark, isRtl: isRtl));
+                          WaitDialog(isDark: true, isRtl: isRtl));
 
                   Placemark placemark = await SHelperFunctions.getLocation();
 

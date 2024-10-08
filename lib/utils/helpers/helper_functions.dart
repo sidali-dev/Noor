@@ -218,6 +218,51 @@ class SHelperFunctions {
     }
   }
 
+  // static getAlarmNotificationTitle(int id) {
+  //   String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
+  //   final bool isRtl = storedLanguage == "ar";
+  //   final bool isFr = storedLanguage == "fr";
+
+  //   switch (id) {
+  //     case 1:
+  //       return isRtl
+  //           ? "تنبيه أذان الفجر"
+  //           : isFr
+  //               ? "Alarme de l'adhan d'El Fajr"
+  //               : "Alarm Of Adhan El Fajr";
+  //     case 2:
+  //       return isRtl
+  //           ? "تنبيه وقت الشروق"
+  //           : isFr
+  //               ? "Alarme du Chourouk"
+  //               : "Chourouk Time's Alarm";
+  //     case 3:
+  //       return isRtl
+  //           ? "تنبيه أذان الظهر"
+  //           : isFr
+  //               ? "Alarme de l'adhan d'El Dhuhr"
+  //               : "Alarm Of Adhan El Dhuhr";
+  //     case 4:
+  //       return isRtl
+  //           ? "تنبيه أذان العصر"
+  //           : isFr
+  //               ? "Alarme de l'adhan d'El Asr"
+  //               : "Alarm Of Adhan El Asr";
+  //     case 5:
+  //       return isRtl
+  //           ? "تنبيه أذان المغرب"
+  //           : isFr
+  //               ? "Alarme de l'adhan d'El Maghrib"
+  //               : "Alarm Of Adhan El Maghrib";
+  //     case 6:
+  //       return isRtl
+  //           ? "تنبيه أذان العشاء"
+  //           : isFr
+  //               ? "Alarme de l'adhan d'El Isha"
+  //               : "Alarm Of Adhan El Isha";
+  //   }
+  // }
+
   static getAdhanNotificationBody(int id) {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
     if (id == 2) {
@@ -244,6 +289,55 @@ class SHelperFunctions {
       }
     }
   }
+
+  // static getAlarmNotificationBody(
+  //     int id, String difference, DateTime alarmTime, DateTime prayerTimer) {
+  //   String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
+
+  //   if (alarmTime.isBefore(prayerTimer)) {
+  //     switch (storedLanguage) {
+  //       case "ar":
+  //         return "تبقى $differenceد على الأذان";
+  //       case "fr":
+  //         return "Il reste $difference minutes avant l'adhan";
+  //       case "en":
+  //         return "$difference minutes remaining until the adhan";
+  //     }
+  //   } else {
+  //     switch (storedLanguage) {
+  //       case "ar":
+  //         return "مرت $differenceد على الأذان";
+  //       case "fr":
+  //         return "$difference minutes have passed since the adhan";
+  //       case "en":
+  //         return "$difference minutes se sont écoulées depuis l'adhan";
+  //     }
+  //   }
+
+  //   if (id == 2) {
+  //     switch (storedLanguage) {
+  //       case "ar":
+  //         return "الشمس تشرق";
+  //       case "fr":
+  //         return "Le soleil se lève";
+  //       case "en":
+  //         return "Sun is Rising";
+  //       default:
+  //         return "الشمس تشرق";
+  //     }
+  //   } else {
+  //     switch (storedLanguage) {
+  //       case "ar":
+  //         return "حان وقت الذهاب إلى المسجد";
+  //       case "fr":
+  //         return "Temps d'aller à la mosquée";
+  //       case "en":
+  //         return "Time to go to the Masjid";
+  //       default:
+  //         return "حان وقت الذهاب إلى المسجد";
+  //     }
+  //   }
+  // }
 
   static getAdhanStopText() {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
