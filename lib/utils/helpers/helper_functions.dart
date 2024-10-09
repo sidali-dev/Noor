@@ -138,7 +138,7 @@ class SHelperFunctions {
     }
   }
 
-  static setUpAlarm(
+  static setUpAdhan(
       {required int id,
       required DateTime dateTime,
       required String assetAudioPath,
@@ -182,6 +182,47 @@ class SHelperFunctions {
           notificationSettings: NotificationSettings(
               title: title, body: body, stopButton: stopButtonText),
           dateTime: prayerTimeTomorrow,
+          assetAudioPath: assetAudioPath,
+          warningNotificationOnKill: false,
+          loopAudio: false,
+          androidFullScreenIntent: true,
+          vibrate: false,
+          volume: 0.5,
+          fadeDuration: 3.0);
+      await Alarm.set(alarmSettings: alarmSettings);
+    }
+  }
+
+  static setUpAlarm(
+      {required int id,
+      required DateTime dateTime,
+      required String assetAudioPath,
+      required DateTime timing,
+      required DateTime tomorrowTiming,
+      required String title,
+      required String body,
+      required String stopButtonText}) async {
+    if (dateTime.isBefore(timing)) {
+      AlarmSettings alarmSettings = AlarmSettings(
+        id: id,
+        notificationSettings: NotificationSettings(
+            title: title, body: body, stopButton: stopButtonText),
+        dateTime: timing,
+        assetAudioPath: assetAudioPath,
+        loopAudio: false,
+        warningNotificationOnKill: false,
+        androidFullScreenIntent: true,
+        vibrate: false,
+        volume: 0.5,
+        fadeDuration: 3.0,
+      );
+      await Alarm.set(alarmSettings: alarmSettings);
+    } else {
+      AlarmSettings alarmSettings = AlarmSettings(
+          id: id,
+          notificationSettings: NotificationSettings(
+              title: title, body: body, stopButton: stopButtonText),
+          dateTime: tomorrowTiming,
           assetAudioPath: assetAudioPath,
           warningNotificationOnKill: false,
           loopAudio: false,
@@ -338,6 +379,17 @@ class SHelperFunctions {
   //     }
   //   }
   // }
+
+  static DateTime turnTimingToDate(String timing) {
+    String time = SHelperFunctions.removeTimeZone(timing);
+
+    DateTime dateTime = DateTime.now();
+
+    DateTime prayerTime = DateTime(dateTime.year, dateTime.month, dateTime.day,
+        int.parse(time.split(":")[0]), int.parse(time.split(":")[1]));
+
+    return prayerTime;
+  }
 
   static getAdhanStopText() {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';

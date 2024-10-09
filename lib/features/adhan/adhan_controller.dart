@@ -132,7 +132,7 @@ class AdhanController extends GetxController {
         prayerTime.data[date.month.toString()]![date.day].timings;
 
     if (SharedPrefService.getBool("fajr")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 1,
           title: SHelperFunctions.getAdhanNotificationTitle(1),
           body: SHelperFunctions.getAdhanNotificationBody(1),
@@ -146,7 +146,7 @@ class AdhanController extends GetxController {
     }
 
     if (SharedPrefService.getBool("chourouk")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 2,
           dateTime: date,
           timing: timings.sunrise,
@@ -160,7 +160,7 @@ class AdhanController extends GetxController {
     }
 
     if (SharedPrefService.getBool("dhuhr")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 3,
           dateTime: date,
           timing: timings.dhuhr,
@@ -174,7 +174,7 @@ class AdhanController extends GetxController {
     }
 
     if (SharedPrefService.getBool("asr")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 4,
           dateTime: date,
           timing: timings.asr,
@@ -188,7 +188,7 @@ class AdhanController extends GetxController {
     }
 
     if (SharedPrefService.getBool("maghrib")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 5,
           dateTime: date,
           timing: timings.maghrib,
@@ -202,7 +202,7 @@ class AdhanController extends GetxController {
     }
 
     if (SharedPrefService.getBool("isha")!) {
-      await SHelperFunctions.setUpAlarm(
+      await SHelperFunctions.setUpAdhan(
           id: 6,
           dateTime: date,
           timing: timings.isha,

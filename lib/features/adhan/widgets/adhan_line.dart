@@ -16,7 +16,7 @@ class AdhanLine extends StatelessWidget {
   final String adhanKey;
   final AdhanLineController adhanLineController;
 
-  const AdhanLine({
+  AdhanLine({
     super.key,
     required this.icon,
     required this.time,
@@ -24,6 +24,11 @@ class AdhanLine extends StatelessWidget {
     required this.adhanKey,
     required this.adhanLineController,
   });
+
+  late String alarmActivationKey1;
+  late String alarmActivationKey2;
+  late String alarmDurationKey1;
+  late String alarmDurationKey2;
 
   @override
   Widget build(BuildContext context) {
@@ -67,26 +72,51 @@ class AdhanLine extends StatelessWidget {
                         case "fajr":
                           isActive = controller.adhanFajr.value;
                           id = 1;
+                          alarmActivationKey1 = "101";
+                          alarmActivationKey2 = "102";
+                          alarmDurationKey1 = "fajr_alarm_1_duration";
+                          alarmDurationKey2 = "fajr_alarm_2_duration";
                           break;
                         case "chourouk":
                           isActive = controller.adhanChourouk.value;
                           id = 2;
+                          alarmActivationKey1 = "201";
+                          alarmActivationKey2 = "202";
+                          alarmDurationKey1 = "chourouk_alarm_1_duration";
+                          alarmDurationKey2 = "chourouk_alarm_2_duration";
                           break;
                         case "dhuhr":
                           isActive = controller.adhanDhuhr.value;
                           id = 3;
+                          alarmActivationKey1 = "301";
+                          alarmActivationKey2 = "302";
+                          alarmDurationKey1 = "dhuhr_alarm_1_duration";
+                          alarmDurationKey2 = "dhuhr_alarm_2_duration";
                           break;
                         case "asr":
                           isActive = controller.adhanAsr.value;
                           id = 4;
+                          alarmActivationKey1 = "401";
+                          alarmActivationKey2 = "402";
+                          alarmDurationKey1 = "asr_alarm_1_duration";
+                          alarmDurationKey2 = "asr_alarm_2_duration";
                           break;
                         case "maghrib":
                           isActive = controller.adhanMaghrib.value;
                           id = 5;
+
+                          alarmActivationKey1 = "501";
+                          alarmActivationKey2 = "502";
+                          alarmDurationKey1 = "maghrib_alarm_1_duration";
+                          alarmDurationKey2 = "maghrib_alarm_2_duration";
                           break;
                         case "isha":
                           isActive = controller.adhanIsha.value;
                           id = 6;
+                          alarmActivationKey1 = "601";
+                          alarmActivationKey2 = "602";
+                          alarmDurationKey1 = "isha_alarm_1_duration";
+                          alarmDurationKey2 = "isha_alarm_2_duration";
                           break;
                         default:
                           break;
@@ -136,7 +166,18 @@ class AdhanLine extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () async {
+                            if (adhanLineController.time.value == 0) {
+                              return;
+                            }
+
+                            adhanLineController.addAlarm(
+                                alarmActivationKey1,
+                                alarmActivationKey2,
+                                alarmDurationKey1,
+                                alarmDurationKey2,
+                                time);
+                          },
                           child: Material(
                             borderRadius: BorderRadius.circular(12.0),
                             elevation: 10.0,
@@ -166,15 +207,15 @@ class AdhanLine extends StatelessWidget {
                         const Expanded(child: SizedBox()),
                         IconButton(
                             onPressed: () {
-                              adhanLineController.incrementTime();
+                              adhanLineController.decrementTime();
                             },
-                            icon: const Icon(Iconsax.add)),
+                            icon: const Icon(Iconsax.minus)),
                         Obx(() => Text("${adhanLineController.time} min")),
                         IconButton(
                             onPressed: () {
-                              adhanLineController.decrementTime();
+                              adhanLineController.incrementTime();
                             },
-                            icon: const Icon(Iconsax.minus))
+                            icon: const Icon(Iconsax.add))
                       ],
                     ),
                   ),
