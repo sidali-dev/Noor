@@ -83,5 +83,16 @@
     "bookmarks" : "Signets",
     "page" : "Page",
     "no_bookmarks" : "Pas de signets",
-    "stop_adhan" : "Arrêter l'Adhan"
+    "stop_adhan" : "Arrêter l'Adhan",
+    "set_new_alarm": "définir une alarme",
+    "minute_short": "min",
+    "alarm_set_for": "Alarme réglée pour",
+"before_adhan": "avant l'adhan",
+"after_adhan": "après l'adhan"
+
+
+
+
+
+
 }

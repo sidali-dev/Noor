@@ -33,9 +33,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "adhan_isha": MessageLookupByLibrary.simpleMessage("أذان العشاء"),
         "adhan_maghrib": MessageLookupByLibrary.simpleMessage("أذان المغرب"),
         "adhkar": MessageLookupByLibrary.simpleMessage("الأذكار"),
+        "after_adhan": MessageLookupByLibrary.simpleMessage("بعد الأذان"),
         "after_prayer_adhkar":
             MessageLookupByLibrary.simpleMessage("أذكار بعد الصلاة"),
+        "alarm_set_for":
+            MessageLookupByLibrary.simpleMessage("تم ضبط المنبه لـ"),
         "asr": MessageLookupByLibrary.simpleMessage("العصر"),
+        "before_adhan": MessageLookupByLibrary.simpleMessage("قبل الأذان"),
         "bookmarks": MessageLookupByLibrary.simpleMessage("علامات الحفظ"),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
         "chikh_afassy_1":
@@ -94,6 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("حان وقت الذهاب إلى المسجد"),
         "meal_adhkar":
             MessageLookupByLibrary.simpleMessage("أذكار الطعام والشراب والضيف"),
+        "minute_short": MessageLookupByLibrary.simpleMessage("د"),
         "morning_adhkar": MessageLookupByLibrary.simpleMessage("اذكار الصباح"),
         "mosque_adhkar": MessageLookupByLibrary.simpleMessage("أذكار المسجد"),
         "no_bookmarks": MessageLookupByLibrary.simpleMessage("لا علامات حفظ"),
@@ -116,6 +121,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "repetition": MessageLookupByLibrary.simpleMessage("التكرار"),
         "sensor_not_supported":
             MessageLookupByLibrary.simpleMessage("جهازك لا يدعم المستشعر"),
+        "set_new_alarm": MessageLookupByLibrary.simpleMessage("ضبط التنبيه"),
         "settings": MessageLookupByLibrary.simpleMessage("الإعدادات"),
         "sleep_adhkar": MessageLookupByLibrary.simpleMessage("أذكار النوم"),
         "state": MessageLookupByLibrary.simpleMessage("الولاية"),

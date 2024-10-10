@@ -899,6 +899,56 @@ class S {
       args: [],
     );
   }
+
+  /// `set new alarm`
+  String get set_new_alarm {
+    return Intl.message(
+      'set new alarm',
+      name: 'set_new_alarm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `min`
+  String get minute_short {
+    return Intl.message(
+      'min',
+      name: 'minute_short',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alarm set for`
+  String get alarm_set_for {
+    return Intl.message(
+      'Alarm set for',
+      name: 'alarm_set_for',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `before adhan`
+  String get before_adhan {
+    return Intl.message(
+      'before adhan',
+      name: 'before_adhan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `after adhan`
+  String get after_adhan {
+    return Intl.message(
+      'after adhan',
+      name: 'after_adhan',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

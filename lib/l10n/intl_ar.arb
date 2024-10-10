@@ -83,7 +83,13 @@
     "bookmarks" : "علامات الحفظ",
     "page" : "الصفحة",
     "no_bookmarks" : "لا علامات حفظ",
-    "stop_adhan" : "إيقاف الأذان"
+    "stop_adhan" : "إيقاف الأذان",
+    "set_new_alarm": "ضبط التنبيه",
+    "minute_short": "د",
+    "alarm_set_for": "تم ضبط المنبه لـ",
+"before_adhan": "قبل الأذان",
+"after_adhan": "بعد الأذان"
+
 
 
 

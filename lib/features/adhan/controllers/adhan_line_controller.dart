@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../generated/l10n.dart';
 import '../../../utils/helpers/helper_functions.dart';
 import '../../../utils/local_storage/services/sharedpreferences_service.dart';
 import '../models/prayer_time.dart';
@@ -23,90 +25,6 @@ class AdhanLineController extends GetxController {
       time.value--;
     }
   }
-
-  // setNewAlarm(int prayerAlarmId, String timing, int difference) {
-  //   List<int> alarmsId = checkExtraAlarms(prayerAlarmId);
-  //   String alarmsIdText = "";
-
-  //   DateTime dateTime = DateFormat('HH:mm').parse(timing);
-  //   DateTime date = DateTime(DateTime.now().year, DateTime.now().month,
-  //       DateTime.now().day, dateTime.hour, dateTime.minute);
-  //   if (DateTime.now().isBefore(date)) {
-  //     DateTime alarmTime = date.add(Duration(minutes: difference));
-  //     String hourAndMinute = "${alarmTime.hour}:${alarmTime.minute}";
-
-  //     if (alarmsId.isNotEmpty) {
-  //       int lastAlarm = alarmsId.last;
-  //       SHelperFunctions.setUpAlarm(
-  //           id: lastAlarm + 1,
-  //           dateTime: DateTime.now(),
-  //           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
-  //           timing: hourAndMinute,
-  //           tomorrowTiming: hourAndMinute,
-  //           title: SHelperFunctions.getAlarmNotificationTitle(prayerAlarmId),
-  //           body: SHelperFunctions.getAlarmNotificationBody(
-  //               prayerAlarmId, difference.toString(), alarmTime, date),
-  //           stopButtonText: SHelperFunctions.getAdhanStopText());
-  //       // alarmsId.map((e) => alarmsIdText = "${alarmsIdText}${lastAlarm+1}-")
-  //     } else {
-  //       SHelperFunctions.setUpAlarm(
-  //           id: prayerAlarmId + 1,
-  //           dateTime: DateTime.now(),
-  //           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
-  //           timing: hourAndMinute,
-  //           tomorrowTiming: hourAndMinute,
-  //           title: SHelperFunctions.getAlarmNotificationTitle(prayerAlarmId),
-  //           body: SHelperFunctions.getAlarmNotificationBody(
-  //               prayerAlarmId, difference.toString(), alarmTime, date),
-  //           stopButtonText: SHelperFunctions.getAdhanStopText());
-  //     }
-  //   } else {
-  //     DateTime alarmTime = date.add(Duration(days: 1, minutes: difference));
-  //     String hourAndMinute = "${alarmTime.hour}:${alarmTime.minute}";
-
-  //     if (alarmsId.isNotEmpty) {
-  //       int lastAlarm = alarmsId.last;
-  //       SHelperFunctions.setUpAlarm(
-  //           id: lastAlarm + 1,
-  //           dateTime: DateTime.now(),
-  //           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
-  //           timing: hourAndMinute,
-  //           tomorrowTiming: hourAndMinute,
-  //           title: SHelperFunctions.getAlarmNotificationTitle(prayerAlarmId),
-  //           body: SHelperFunctions.getAlarmNotificationBody(
-  //               prayerAlarmId, difference.toString(), alarmTime, date),
-  //           stopButtonText: SHelperFunctions.getAdhanStopText());
-  //     } else {
-  //       SHelperFunctions.setUpAlarm(
-  //           id: prayerAlarmId + 1,
-  //           dateTime: DateTime.now(),
-  //           assetAudioPath: SharedPrefService.getString("adhan_sound_path")!,
-  //           timing: hourAndMinute,
-  //           tomorrowTiming: hourAndMinute,
-  //           title: SHelperFunctions.getAlarmNotificationTitle(prayerAlarmId),
-  //           body: SHelperFunctions.getAlarmNotificationBody(
-  //               prayerAlarmId, difference.toString(), alarmTime, date),
-  //           stopButtonText: SHelperFunctions.getAdhanStopText());
-  //     }
-  //   }
-
-  //   // checkExtraAlarms(prayerAlarmId);
-  //   // SHelperFunctions.setUpAlarm(id: id, dateTime: dateTime, assetAudioPath: assetAudioPath, timing: timing, tomorrowTiming: tomorrowTiming, title: title, body: body, stopButtonText: stopButtonText)
-  // }
-
-  // List<int> checkExtraAlarms(int prayerAlarmId) {
-  //   prayerAlarmId = prayerAlarmId * 100;
-  //   List<int> savedAlarmsId = [];
-  //   String savedAlarms =
-  //       SharedPrefService.getString(prayerAlarmId.toString()) ?? "";
-  //   if (savedAlarms != "") {
-  //     List<String> savedAlarmsText = savedAlarms.split("-");
-  //     savedAlarmsText.map((e) => savedAlarmsId.add(int.parse(e))).toList();
-  //     return savedAlarmsId;
-  //   } else {
-  //     return savedAlarmsId;
-  //   }
-  // }
 
   scheduleAlarms() async {
     DateTime date = DateTime.now();
@@ -256,8 +174,6 @@ class AdhanLineController extends GetxController {
 
       return;
     }
-    print(
-        "YOUVE HIT YOUR LIMIT///////////////////////////////////////////////");
   }
 
   static Future setUpAdhanAlarm(
@@ -286,5 +202,23 @@ class AdhanLineController extends GetxController {
     } else {
       await SHelperFunctions.cancelAlarm(alarmId);
     }
+  }
+
+  bool isAlarmsFull({required String key1, required String key2}) {
+    bool a1 = SharedPrefService.getBool(key1) ?? false;
+    bool a2 = SharedPrefService.getBool(key2) ?? false;
+
+    if (a1 == true && a2 == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  String getAlarmText(BuildContext context, int duration) {
+    if (duration > 0) {
+      return "${S.of(context).alarm_set_for} $duration ${S.of(context).minute_short} ${S.of(context).after_adhan}";
+    } else {}
+    return "${S.of(context).alarm_set_for} ${duration.abs()} ${S.of(context).minute_short} ${S.of(context).before_adhan}";
   }
 }

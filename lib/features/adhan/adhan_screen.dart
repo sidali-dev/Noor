@@ -211,10 +211,8 @@ class AdhanScreen extends StatelessWidget {
                                   builder: (context) => Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SpinKitThreeBounce(
-                                          color: isDark
-                                              ? SColors.secondary
-                                              : SColors.secondary),
+                                      const SpinKitThreeBounce(
+                                          color: SColors.secondary),
                                       const SizedBox(height: 32),
                                       Material(
                                         color: Colors.transparent,
@@ -253,20 +251,25 @@ class AdhanScreen extends StatelessWidget {
                               Get.back();
                             }
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                color: SColors.primary),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                S.of(context).add_location,
-                                style: TextStyle(
-                                    color: SColors.white,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: isRtl
-                                        ? SSizes.fontSizeMdAr
-                                        : SSizes.fontSizeMd),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(24),
+                            elevation: 10,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  color: SColors.primary),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 16),
+                                child: Text(
+                                  S.of(context).add_location,
+                                  style: TextStyle(
+                                      color: SColors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: isRtl
+                                          ? SSizes.fontSizeMdAr
+                                          : SSizes.fontSizeMd),
+                                ),
                               ),
                             ),
                           ),

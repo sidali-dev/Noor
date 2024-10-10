@@ -83,7 +83,12 @@
     "bookmarks" : "Bookmarks",
     "page" : "Page",
     "no_bookmarks" : "No Bookmarks",
-    "stop_adhan" : "Stop Adhan"
+    "stop_adhan" : "Stop Adhan",
+    "set_new_alarm": "set new alarm",
+    "minute_short": "min",
+    "alarm_set_for": "Alarm set for",
+    "before_adhan": "before adhan",
+    "after_adhan": "after adhan"
 
 
 

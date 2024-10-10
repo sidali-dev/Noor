@@ -35,9 +35,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "adhan_maghrib":
             MessageLookupByLibrary.simpleMessage("Adhan el Maghrib"),
         "adhkar": MessageLookupByLibrary.simpleMessage("El Adhkar"),
+        "after_adhan": MessageLookupByLibrary.simpleMessage("après l\'adhan"),
         "after_prayer_adhkar":
             MessageLookupByLibrary.simpleMessage("Adhkar après la prière"),
+        "alarm_set_for":
+            MessageLookupByLibrary.simpleMessage("Alarme réglée pour"),
         "asr": MessageLookupByLibrary.simpleMessage("Asr"),
+        "before_adhan": MessageLookupByLibrary.simpleMessage("avant l\'adhan"),
         "bookmarks": MessageLookupByLibrary.simpleMessage("Signets"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuler"),
         "chikh_afassy_1":
@@ -99,6 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Temps d\'aller à la mosquée"),
         "meal_adhkar": MessageLookupByLibrary.simpleMessage(
             "Adhkar pour la nourriture, les boissons et les invités"),
+        "minute_short": MessageLookupByLibrary.simpleMessage("min"),
         "morning_adhkar":
             MessageLookupByLibrary.simpleMessage("Adhkar du matin"),
         "mosque_adhkar":
@@ -129,6 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "repetition": MessageLookupByLibrary.simpleMessage("Répétition"),
         "sensor_not_supported": MessageLookupByLibrary.simpleMessage(
             "Votre appareil ne prend pas en charge le capteur"),
+        "set_new_alarm":
+            MessageLookupByLibrary.simpleMessage("définir une alarme"),
         "settings": MessageLookupByLibrary.simpleMessage("Paramètres"),
         "sleep_adhkar":
             MessageLookupByLibrary.simpleMessage("Adhkar du coucher"),
