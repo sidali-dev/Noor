@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/utils/constants/colors.dart';
+import 'package:noor/utils/helpers/helper_functions.dart';
 import 'package:quran/quran.dart' as quran;
 
 import 'package:noor/features/quran/mini%20screens/read_quran_screen.dart';
@@ -14,10 +15,11 @@ class ListBySurah extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = SHelperFunctions.isDarkMode(context);
     QuranScreenController quranScreenController = Get.find();
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: ListView.builder(
+    return Scaffold(
+      backgroundColor: isDark ? Colors.black : Colors.white,
+      body: ListView.builder(
         itemCount: quran.totalSurahCount,
         itemBuilder: (context, index) {
           int surahIndex = index + 1;

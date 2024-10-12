@@ -38,268 +38,320 @@ class QiblaScreen extends StatelessWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(alignment: Alignment.center, children: [
-              Image.asset(SImageString.backgroundImage2),
-              Positioned(
-                  child: Column(
-                children: [
-                  SizedBox(
-                      height: SDeviceUtils.getScreenHeight(context) * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        SImageString.octagon,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.white, BlendMode.srcIn),
-                      ),
-                      const SizedBox(width: SSizes.md),
-                      const Text(
-                        "فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: SSizes.fontSizeMd,
-                            fontFamily: "Amiri"),
-                      ),
-                      const SizedBox(width: SSizes.md),
-                      SvgPicture.asset(
-                        SImageString.octagon,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.white, BlendMode.srcIn),
-                      ),
-                    ],
-                  ),
-                  Divider(
-                      color: Colors.white.withOpacity(0.7),
-                      thickness: 1,
-                      indent: 80,
-                      endIndent: 80,
-                      height: 20),
-                  GetLocationWidget(
-                      isDark: isDark,
-                      isRtl: isRtl,
-                      controller: _adhanController),
-                  const SizedBox(height: 10),
-                ],
-              )),
-            ]),
-
-            // ==================THE LOWER PART OF SCREEN BELOW==================
-
-            const SizedBox(height: SSizes.dividerHeightMd),
-            Stack(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child: Container(
+          color: const Color.fromARGB(255, 59, 78, 255),
+          child: Column(
+            children: [
+              Stack(alignment: Alignment.center, children: [
+                Image.asset(SImageString.backgroundImage2),
+                Positioned(
+                    child: Column(
                   children: [
-                    Icon(Iconsax.send_2,
-                        color: isDark ? SColors.white : SColors.primary,
-                        size: 32),
-                    const SizedBox(width: 16.0),
-                    Text(
-                      S.of(context).qiblah,
-                      style: TextStyle(
-                          color: isDark ? SColors.white : SColors.primary,
-                          fontSize:
-                              isRtl ? SSizes.fontSizeXlgAr : SSizes.fontSizeXlg,
-                          fontWeight: FontWeight.w800),
-                    )
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: IconButton(
-                    onPressed: () async {
-                      await showDialog(
-                          context: context,
-                          builder: (context) => const QiblaCompassTipsDialog());
-                    },
-                    icon: CircleAvatar(
-                      radius: 22.0,
-                      backgroundColor: isDark ? SColors.dark : SColors.grey,
-                      child: Icon(Iconsax.information,
-                          size: 26,
-                          color: isDark ? SColors.secondary : SColors.primary),
+                    SizedBox(
+                        height: SDeviceUtils.getScreenHeight(context) * 0.05),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          SImageString.octagon,
+                          colorFilter: const ColorFilter.mode(
+                              Colors.white, BlendMode.srcIn),
+                        ),
+                        const SizedBox(width: SSizes.md),
+                        const Text(
+                          "فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: SSizes.fontSizeMd,
+                              fontFamily: "Amiri"),
+                        ),
+                        const SizedBox(width: SSizes.md),
+                        SvgPicture.asset(
+                          SImageString.octagon,
+                          colorFilter: const ColorFilter.mode(
+                              Colors.white, BlendMode.srcIn),
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              ],
-            ),
-            SizedBox(height: SDeviceUtils.getScreenHeight(context) * 0.04),
-            FutureBuilder(
-              future: _deviceSupport,
-              builder: (_, AsyncSnapshot snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Column(
+                    Divider(
+                        color: Colors.white.withOpacity(0.7),
+                        thickness: 1,
+                        indent: 80,
+                        endIndent: 80,
+                        height: 20),
+                    GetLocationWidget(
+                        isDark: isDark,
+                        isRtl: isRtl,
+                        controller: _adhanController),
+                    const SizedBox(height: 10),
+                  ],
+                )),
+              ]),
+
+              // ==================THE LOWER PART OF SCREEN BELOW==================
+
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(32)),
+                child: Container(
+                  color: isDark ? Colors.black : Colors.white,
+                  child: Column(
                     children: [
-                      const SizedBox(height: 56),
-                      WaitDialog(isDark: true, isRtl: isRtl),
-                    ],
-                  );
-                } else if (snapshot.hasError) {
-                  return Column(
-                    children: [
+                      const SizedBox(height: SSizes.dividerHeightMd),
+                      Stack(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Iconsax.send_2,
+                                  color:
+                                      isDark ? SColors.white : SColors.primary,
+                                  size: 32),
+                              const SizedBox(width: 16.0),
+                              Text(
+                                S.of(context).qiblah,
+                                style: TextStyle(
+                                    color: isDark
+                                        ? SColors.white
+                                        : SColors.primary,
+                                    fontSize: isRtl
+                                        ? SSizes.fontSizeXlgAr
+                                        : SSizes.fontSizeXlg,
+                                    fontWeight: FontWeight.w800),
+                              )
+                            ],
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: IconButton(
+                              onPressed: () async {
+                                await showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        const QiblaCompassTipsDialog());
+                              },
+                              icon: CircleAvatar(
+                                radius: 22.0,
+                                backgroundColor:
+                                    isDark ? SColors.dark : SColors.grey,
+                                child: Icon(Iconsax.information,
+                                    size: 26,
+                                    color: isDark
+                                        ? SColors.secondary
+                                        : SColors.primary),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                       SizedBox(
-                        height: SDeviceUtils.getScreenHeight(context) * 0.1,
-                      ),
-                      Lottie.asset(SImageString.lottieError),
-                      Text(
-                        "Error: ${snapshot.error.toString()}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: SColors.warning,
-                            fontSize: isRtl
-                                ? SSizes.fontSizeMdAr
-                                : SSizes.fontSizeMd),
-                      ),
-                    ],
-                  );
-                } else if (snapshot.data) {
-                  //====================================================================================================
-                  return GetBuilder<QiblaController>(
-                    init: QiblaController(),
-                    builder: (controller) {
-                      return StreamBuilder(
-                        stream: controller.stream,
-                        builder:
-                            (context, AsyncSnapshot<LocationStatus> snapshot) {
+                          height: SDeviceUtils.getScreenHeight(context) * 0.04),
+                      FutureBuilder(
+                        future: _deviceSupport,
+                        builder: (_, AsyncSnapshot snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const SizedBox();
-                          } else if (snapshot.data!.enabled) {
-                            //this means that the gps signal is on, but not necessiraly that the permission is granted.
+                            return Column(
+                              children: [
+                                const SizedBox(height: 56),
+                                WaitDialog(isDark: true, isRtl: isRtl),
+                              ],
+                            );
+                          } else if (snapshot.hasError) {
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  height:
+                                      SDeviceUtils.getScreenHeight(context) *
+                                          0.1,
+                                ),
+                                Lottie.asset(SImageString.lottieError),
+                                Text(
+                                  "Error: ${snapshot.error.toString()}",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: SColors.warning,
+                                      fontSize: isRtl
+                                          ? SSizes.fontSizeMdAr
+                                          : SSizes.fontSizeMd),
+                                ),
+                              ],
+                            );
+                          } else if (snapshot.data) {
+                            //====================================================================================================
+                            return GetBuilder<QiblaController>(
+                              init: QiblaController(),
+                              builder: (controller) {
+                                return StreamBuilder(
+                                  stream: controller.stream,
+                                  builder: (context,
+                                      AsyncSnapshot<LocationStatus> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const SizedBox();
+                                    } else if (snapshot.data!.enabled) {
+                                      //this means that the gps signal is on, but not necessiraly that the permission is granted.
 
-                            switch (snapshot.data!.status) {
-                              case LocationPermission.always:
-                              case LocationPermission.whileInUse:
-                                //this means that the gps signal is on, and the permission is granted.
+                                      switch (snapshot.data!.status) {
+                                        case LocationPermission.always:
+                                        case LocationPermission.whileInUse:
+                                          //this means that the gps signal is on, and the permission is granted.
 
-                                return QiblaCompass();
+                                          return QiblaCompass();
 
-                              case LocationPermission.denied:
-                              case LocationPermission.deniedForever:
-                                //this means that the gps signal is on, and the permission is not granted.
+                                        case LocationPermission.denied:
+                                        case LocationPermission.deniedForever:
+                                          //this means that the gps signal is on, and the permission is not granted.
 
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Lottie.asset(SImageString.lottieAddLocation,
-                                        height: SDeviceUtils.getScreenHeight(
-                                                context) *
-                                            0.3),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        requestPermission();
-                                        controller.restartCheckLocationStatus();
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
-                                              color: SColors.primary),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 16.0,
-                                                vertical: 10.0),
-                                            child: Text(
-                                              S
-                                                  .of(context)
-                                                  .enable_location_permission,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: SColors.white,
-                                                  fontSize: isRtl
-                                                      ? SSizes.fontSizeMdAr
-                                                      : SSizes.fontSizeMd),
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Lottie.asset(
+                                                  SImageString
+                                                      .lottieAddLocation,
+                                                  height: SDeviceUtils
+                                                          .getScreenHeight(
+                                                              context) *
+                                                      0.3),
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  requestPermission();
+                                                  controller
+                                                      .restartCheckLocationStatus();
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(24),
+                                                        color: SColors.primary),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 16.0,
+                                                          vertical: 10.0),
+                                                      child: Text(
+                                                        S
+                                                            .of(context)
+                                                            .enable_location_permission,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            color:
+                                                                SColors.white,
+                                                            fontSize: isRtl
+                                                                ? SSizes
+                                                                    .fontSizeMdAr
+                                                                : SSizes
+                                                                    .fontSizeMd),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+
+                                        default:
+                                          return const SizedBox();
+                                      }
+                                    } else {
+                                      //this means that the gps signal is off, but not necessiraly that the permission is not granted.
+
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Lottie.asset(
+                                              SImageString.lottieAddLocation,
+                                              height:
+                                                  SDeviceUtils.getScreenHeight(
+                                                          context) *
+                                                      0.3),
+                                          const SizedBox(height: 24),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await requestPermission();
+                                              try {
+                                                await Geolocator
+                                                    .getCurrentPosition();
+                                                controller
+                                                    .restartCheckLocationStatus();
+                                              } catch (_) {}
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16.0),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            24),
+                                                    color: SColors.primary),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 10.0,
+                                                      horizontal: 16.0),
+                                                  child: Text(
+                                                    S
+                                                        .of(context)
+                                                        .enable_location,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: SColors.white,
+                                                        fontSize: isRtl
+                                                            ? SSizes
+                                                                .fontSizeMdAr
+                                                            : SSizes
+                                                                .fontSizeMd),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-
-                              default:
-                                return const SizedBox();
-                            }
-                          } else {
-                            //this means that the gps signal is off, but not necessiraly that the permission is not granted.
-
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Lottie.asset(SImageString.lottieAddLocation,
-                                    height:
-                                        SDeviceUtils.getScreenHeight(context) *
-                                            0.3),
-                                const SizedBox(height: 24),
-                                GestureDetector(
-                                  onTap: () async {
-                                    await requestPermission();
-                                    try {
-                                      await Geolocator.getCurrentPosition();
-                                      controller.restartCheckLocationStatus();
-                                    } catch (_) {}
+                                        ],
+                                      );
+                                    }
                                   },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(24),
-                                          color: SColors.primary),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10.0, horizontal: 16.0),
-                                        child: Text(
-                                          S.of(context).enable_location,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: SColors.white,
-                                              fontSize: isRtl
-                                                  ? SSizes.fontSizeMdAr
-                                                  : SSizes.fontSizeMd),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                );
+                              },
+                            );
+                          } else {
+                            // Device does not support the sensor, Display Maps widget
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  height:
+                                      SDeviceUtils.getScreenHeight(context) *
+                                          0.1,
+                                ),
+                                Lottie.asset(SImageString.lottieError),
+                                Text(
+                                  S.of(context).sensor_not_supported,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: SColors.warning,
+                                      fontSize: isRtl
+                                          ? SSizes.fontSizeMdAr
+                                          : SSizes.fontSizeMd),
                                 ),
                               ],
                             );
                           }
                         },
-                      );
-                    },
-                  );
-                } else {
-                  // Device does not support the sensor, Display Maps widget
-                  return Column(
-                    children: [
-                      SizedBox(
-                        height: SDeviceUtils.getScreenHeight(context) * 0.1,
-                      ),
-                      Lottie.asset(SImageString.lottieError),
-                      Text(
-                        S.of(context).sensor_not_supported,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: SColors.warning,
-                            fontSize: isRtl
-                                ? SSizes.fontSizeMdAr
-                                : SSizes.fontSizeMd),
                       ),
                     ],
-                  );
-                }
-              },
-            ),
-          ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
