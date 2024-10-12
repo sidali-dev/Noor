@@ -60,7 +60,7 @@ class SBottomNavigation extends StatelessWidget {
                         height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
-                    label: 'Liked'),
+                    label: 'QURAN'),
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.adhan,
@@ -73,7 +73,7 @@ class SBottomNavigation extends StatelessWidget {
                         height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
-                    label: 'Adhan'),
+                    label: 'ADHAN'),
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.prayingHands,
@@ -86,7 +86,7 @@ class SBottomNavigation extends StatelessWidget {
                         height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
-                    label: 'History'),
+                    label: 'DUAA'),
                 NavigationDestination(
                     selectedIcon: SvgPicture.asset(
                       SImageString.kaaba,
@@ -99,7 +99,7 @@ class SBottomNavigation extends StatelessWidget {
                         height: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.grey, BlendMode.srcIn)),
-                    label: 'Favorites')
+                    label: 'COMPASS')
               ]),
         ),
         body: Obx(() => controller.screens[controller.selectedIndex.value]),

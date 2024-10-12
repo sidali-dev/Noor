@@ -127,8 +127,8 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                       const SizedBox(width: 20),
                       SizedBox(
                         width: SDeviceUtils.getScreenWidth(context) * 0.9,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: SDeviceUtils.getScreenWidth(context) * 0.8,
                           child: Text(
                             widget.alarmSettings.notificationSettings.title,
                             style: const TextStyle(
@@ -157,10 +157,13 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                   Row(
                     children: [
                       const SizedBox(width: 20),
-                      Text(
-                        widget.alarmSettings.notificationSettings.body,
-                        style:
-                            const TextStyle(fontSize: 24, color: Colors.white),
+                      SizedBox(
+                        width: SDeviceUtils.getScreenWidth(context) * 0.8,
+                        child: Text(
+                          widget.alarmSettings.notificationSettings.body,
+                          style: const TextStyle(
+                              fontSize: 24, color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -178,6 +181,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                     },
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Colors.transparent),
+                      elevation: 10.0,
                       backgroundColor: SColors.secondary.withOpacity(0.9),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32)),
@@ -198,6 +202,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Colors.transparent),
                       backgroundColor: Colors.white.withOpacity(0.1),
+                      // elevation: 0.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
                       ),

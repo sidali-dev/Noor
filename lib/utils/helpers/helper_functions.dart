@@ -259,50 +259,50 @@ class SHelperFunctions {
     }
   }
 
-  // static getAlarmNotificationTitle(int id) {
-  //   String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
-  //   final bool isRtl = storedLanguage == "ar";
-  //   final bool isFr = storedLanguage == "fr";
+  static getAlarmNotificationTitle(int id) {
+    String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
+    final bool isRtl = storedLanguage == "ar";
+    final bool isFr = storedLanguage == "fr";
 
-  //   switch (id) {
-  //     case 1:
-  //       return isRtl
-  //           ? "تنبيه أذان الفجر"
-  //           : isFr
-  //               ? "Alarme de l'adhan d'El Fajr"
-  //               : "Alarm Of Adhan El Fajr";
-  //     case 2:
-  //       return isRtl
-  //           ? "تنبيه وقت الشروق"
-  //           : isFr
-  //               ? "Alarme du Chourouk"
-  //               : "Chourouk Time's Alarm";
-  //     case 3:
-  //       return isRtl
-  //           ? "تنبيه أذان الظهر"
-  //           : isFr
-  //               ? "Alarme de l'adhan d'El Dhuhr"
-  //               : "Alarm Of Adhan El Dhuhr";
-  //     case 4:
-  //       return isRtl
-  //           ? "تنبيه أذان العصر"
-  //           : isFr
-  //               ? "Alarme de l'adhan d'El Asr"
-  //               : "Alarm Of Adhan El Asr";
-  //     case 5:
-  //       return isRtl
-  //           ? "تنبيه أذان المغرب"
-  //           : isFr
-  //               ? "Alarme de l'adhan d'El Maghrib"
-  //               : "Alarm Of Adhan El Maghrib";
-  //     case 6:
-  //       return isRtl
-  //           ? "تنبيه أذان العشاء"
-  //           : isFr
-  //               ? "Alarme de l'adhan d'El Isha"
-  //               : "Alarm Of Adhan El Isha";
-  //   }
-  // }
+    switch (id) {
+      case 101 || 102:
+        return isRtl
+            ? "تنبيه أذان الفجر"
+            : isFr
+                ? "Alarme de l'adhan d'El Fajr"
+                : "Alarm Of Adhan El Fajr";
+      case 201 || 202:
+        return isRtl
+            ? "تنبيه وقت الشروق"
+            : isFr
+                ? "Alarme du Chourouk"
+                : "Chourouk Time's Alarm";
+      case 301 || 302:
+        return isRtl
+            ? "تنبيه أذان الظهر"
+            : isFr
+                ? "Alarme de l'adhan d'El Dhuhr"
+                : "Alarm Of Adhan El Dhuhr";
+      case 401 || 402:
+        return isRtl
+            ? "تنبيه أذان العصر"
+            : isFr
+                ? "Alarme de l'adhan d'El Asr"
+                : "Alarm Of Adhan El Asr";
+      case 501 || 502:
+        return isRtl
+            ? "تنبيه أذان المغرب"
+            : isFr
+                ? "Alarme de l'adhan d'El Maghrib"
+                : "Alarm Of Adhan El Maghrib";
+      case 601 || 602:
+        return isRtl
+            ? "تنبيه أذان العشاء"
+            : isFr
+                ? "Alarme de l'adhan d'El Isha"
+                : "Alarm Of Adhan El Isha";
+    }
+  }
 
   static getAdhanNotificationBody(int id) {
     String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
@@ -331,54 +331,51 @@ class SHelperFunctions {
     }
   }
 
-  // static getAlarmNotificationBody(
-  //     int id, String difference, DateTime alarmTime, DateTime prayerTimer) {
-  //   String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
+  static getAlarmNotificationBody(int id, int difference) {
+    String storedLanguage = SharedPrefService.getString("language") ?? 'ar';
 
-  //   if (alarmTime.isBefore(prayerTimer)) {
-  //     switch (storedLanguage) {
-  //       case "ar":
-  //         return "تبقى $differenceد على الأذان";
-  //       case "fr":
-  //         return "Il reste $difference minutes avant l'adhan";
-  //       case "en":
-  //         return "$difference minutes remaining until the adhan";
-  //     }
-  //   } else {
-  //     switch (storedLanguage) {
-  //       case "ar":
-  //         return "مرت $differenceد على الأذان";
-  //       case "fr":
-  //         return "$difference minutes have passed since the adhan";
-  //       case "en":
-  //         return "$difference minutes se sont écoulées depuis l'adhan";
-  //     }
-  //   }
-
-  //   if (id == 2) {
-  //     switch (storedLanguage) {
-  //       case "ar":
-  //         return "الشمس تشرق";
-  //       case "fr":
-  //         return "Le soleil se lève";
-  //       case "en":
-  //         return "Sun is Rising";
-  //       default:
-  //         return "الشمس تشرق";
-  //     }
-  //   } else {
-  //     switch (storedLanguage) {
-  //       case "ar":
-  //         return "حان وقت الذهاب إلى المسجد";
-  //       case "fr":
-  //         return "Temps d'aller à la mosquée";
-  //       case "en":
-  //         return "Time to go to the Masjid";
-  //       default:
-  //         return "حان وقت الذهاب إلى المسجد";
-  //     }
-  //   }
-  // }
+    if (id != 2) {
+      if (difference < 0) {
+        switch (storedLanguage) {
+          case "ar":
+            return "تبقى ${difference.abs().toString()}د على الأذان";
+          case "fr":
+            return "Il reste ${difference.abs().toString()} minutes avant l'adhan";
+          case "en":
+            return "${difference.abs().toString()} minutes remaining until the adhan";
+        }
+      } else {
+        switch (storedLanguage) {
+          case "ar":
+            return "مرت $differenceد على الأذان";
+          case "en":
+            return "$difference minutes have passed since the adhan";
+          case "fr":
+            return "$difference minutes se sont écoulées depuis l'adhan";
+        }
+      }
+    } else {
+      if (difference < 0) {
+        switch (storedLanguage) {
+          case "ar":
+            return "تبقى ${difference.abs().toString()} د على شروق الشمس";
+          case "fr":
+            return "Il reste ${difference.abs().toString()} minutes avant le lever du soleil";
+          case "en":
+            return "${difference.abs().toString()} minutes left until sunrise";
+        }
+      } else {
+        switch (storedLanguage) {
+          case "ar":
+            return "مضى على شروق الشمس $difference د";
+          case "fr":
+            return "$difference minutes se sont écoulées depuis le lever du soleil";
+          case "en":
+            return "$difference minutes have passed since sunrise";
+        }
+      }
+    }
+  }
 
   static DateTime turnTimingToDate(String timing) {
     String time = SHelperFunctions.removeTimeZone(timing);
@@ -412,17 +409,17 @@ class SHelperFunctions {
 
   static getAlarmColor(int id) {
     switch (id) {
-      case 1:
+      case 1 || 101 || 102:
         return const Color(0xFFFFD700); // Fajr (Golden Yellow)
-      case 2:
+      case 2 || 201 || 202:
         return const Color(0xFFFFA500); // Chourouk (Orange)
-      case 3:
+      case 3 || 301 || 302:
         return const Color(0xFF87CEEB); // Dhuhr (Sky Blue)
-      case 4:
+      case 4 || 401 || 402:
         return const Color(0xFFFFD700); // Asr (Golden Yellow)
-      case 5:
+      case 5 || 501 || 502:
         return const Color(0xFFFF4500); // Maghrib (Orange Red)
-      case 6:
+      case 6 || 601 || 602:
         return const Color(0xFF191970); // Isha (Midnight Blue)
       default:
         return Colors.indigo;

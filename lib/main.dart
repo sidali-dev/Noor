@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
+import 'package:noor/features/adhan/controllers/adhan_line_controller.dart';
 import 'package:noor/my_app.dart';
 
 import 'package:noor/utils/helpers/helper_functions.dart';
@@ -24,6 +25,7 @@ void callbackDispatcher() {
           await Alarm.init();
 
           await AdhanController.scheduleAdhans();
+          await AdhanLineController.scheduleAlarms();
         } catch (_) {}
       default:
     }

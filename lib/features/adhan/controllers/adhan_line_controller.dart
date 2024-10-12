@@ -14,6 +14,33 @@ class AdhanLineController extends GetxController {
   final RxBool isExpanded = false.obs;
   final RxInt time = 0.obs;
 
+  late RxBool isAlarm1Active = false.obs;
+  late RxBool isAlarm2Active = false.obs;
+  late RxBool isAlarmFull = false.obs;
+
+  onAlarmExpanded({required String alarmKey1, required String alarmKey2}) {
+    isAlarm1Active.value = (SharedPrefService.getBool(alarmKey1) ?? false);
+    isAlarm2Active.value = (SharedPrefService.getBool(alarmKey2) ?? false);
+
+    isAlarmFull.value =
+        isAlarm1Active.value == true && isAlarm2Active.value == true
+            ? true
+            : false;
+  }
+
+  isAlarmSet({required String alarmKey, required int alarmNumber}) {
+    if (alarmNumber == 1) {
+      isAlarm1Active.value = (SharedPrefService.getBool(alarmKey) ?? false);
+    } else if (alarmNumber == 2) {
+      isAlarm2Active.value = (SharedPrefService.getBool(alarmKey) ?? false);
+    }
+
+    isAlarmFull.value =
+        isAlarm1Active.value == true && isAlarm2Active.value == true
+            ? true
+            : false;
+  }
+
   incrementTime() {
     if (time.value < 60) {
       time.value++;
@@ -26,7 +53,7 @@ class AdhanLineController extends GetxController {
     }
   }
 
-  scheduleAlarms() async {
+  static scheduleAlarms() async {
     DateTime date = DateTime.now();
 
     String? adhanYear = SharedPrefService.getString("Adhan${date.year}");
@@ -134,7 +161,7 @@ class AdhanLineController extends GetxController {
         alarmDurationKey: "isha_alarm_2_duration");
   }
 
-  addAlarm(String alarmActivationKey1, String alarmActivationKey2,
+  Future addAlarm(String alarmActivationKey1, String alarmActivationKey2,
       String alarmDurationKey1, String alarmDurationKey2, String timing) async {
     //in case notification permission isn't granted
     if (!await Permission.notification.isGranted) {
@@ -189,8 +216,8 @@ class AdhanLineController extends GetxController {
               .add(Duration(minutes: duration))) {
         await SHelperFunctions.setUpAlarm(
             id: alarmId,
-            title: "aa", //ADD LATER
-            body: "bb", //ADD LATER
+            title: SHelperFunctions.getAlarmNotificationTitle(alarmId),
+            body: SHelperFunctions.getAlarmNotificationBody(alarmId, duration),
             stopButtonText: SHelperFunctions.getAdhanStopText(),
             dateTime: date,
             timing: SHelperFunctions.turnTimingToDate(timings)

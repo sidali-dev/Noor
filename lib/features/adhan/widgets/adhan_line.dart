@@ -41,6 +41,9 @@ class AdhanLine extends StatelessWidget {
 
     return InkWell(
       onTap: () {
+        adhanLineController.onAlarmExpanded(
+            alarmKey1: alarmActivationKey1, alarmKey2: alarmActivationKey2);
+
         adhanLineController.isExpanded.value =
             !adhanLineController.isExpanded.value;
       },
@@ -164,79 +167,91 @@ class AdhanLine extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
-                      AdhanAlarmData(
-                          adhanLineController: adhanLineController,
-                          alarmActivationKey: alarmActivationKey1,
-                          alarmDurationKey: alarmDurationKey1,
-                          time: time,
-                          isDark: isDark),
-                      AdhanAlarmData(
-                          adhanLineController: adhanLineController,
-                          alarmActivationKey: alarmActivationKey2,
-                          alarmDurationKey: alarmDurationKey2,
-                          time: time,
-                          isDark: isDark),
-                      Visibility(
-                        visible: !adhanLineController.isAlarmsFull(
-                            key1: alarmActivationKey1,
-                            key2: alarmActivationKey2),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () async {
-                                if (adhanLineController.time.value == 0) {
-                                  return;
-                                }
-                                adhanLineController.addAlarm(
-                                    alarmActivationKey1,
-                                    alarmActivationKey2,
-                                    alarmDurationKey1,
-                                    alarmDurationKey2,
-                                    time);
-                              },
-                              child: Material(
-                                borderRadius: BorderRadius.circular(12.0),
-                                elevation: 10.0,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4.0),
-                                  decoration: BoxDecoration(
-                                      color: isDark
-                                          ? SColors.secondary
-                                          : SColors.primary,
-                                      borderRadius:
-                                          BorderRadius.circular(12.0)),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.add_alarm,
-                                          color: Colors.white),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        S.of(context).set_new_alarm,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w800),
-                                      )
-                                    ],
+                      Obx(
+                        () => AdhanAlarmData(
+                            alarmNum: 1,
+                            isVisible: adhanLineController.isAlarm1Active.value,
+                            adhanLineController: adhanLineController,
+                            alarmActivationKey: alarmActivationKey1,
+                            alarmDurationKey: alarmDurationKey1,
+                            time: time,
+                            isDark: isDark),
+                      ),
+                      Obx(
+                        () => AdhanAlarmData(
+                            alarmNum: 2,
+                            isVisible: adhanLineController.isAlarm2Active.value,
+                            adhanLineController: adhanLineController,
+                            alarmActivationKey: alarmActivationKey2,
+                            alarmDurationKey: alarmDurationKey2,
+                            time: time,
+                            isDark: isDark),
+                      ),
+                      Obx(
+                        () => Visibility(
+                          visible: !adhanLineController.isAlarmFull.value,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  if (adhanLineController.time.value == 0) {
+                                    return;
+                                  }
+                                  await adhanLineController.addAlarm(
+                                      alarmActivationKey1,
+                                      alarmActivationKey2,
+                                      alarmDurationKey1,
+                                      alarmDurationKey2,
+                                      time);
+
+                                  adhanLineController.onAlarmExpanded(
+                                      alarmKey1: alarmActivationKey1,
+                                      alarmKey2: alarmActivationKey2);
+                                },
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  elevation: 10.0,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                        color: isDark
+                                            ? SColors.secondary
+                                            : SColors.primary,
+                                        borderRadius:
+                                            BorderRadius.circular(12.0)),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.add_alarm,
+                                            color: Colors.white),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          S.of(context).set_new_alarm,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w800),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const Expanded(child: SizedBox()),
-                            IconButton(
-                                onPressed: () {
-                                  adhanLineController.decrementTime();
-                                },
-                                icon: const Icon(Iconsax.minus)),
-                            Obx(() => Text(
-                                "${adhanLineController.time} ${S.of(context).minute_short}")),
-                            IconButton(
-                                onPressed: () {
-                                  adhanLineController.incrementTime();
-                                },
-                                icon: const Icon(Iconsax.add))
-                          ],
+                              const Expanded(child: SizedBox()),
+                              IconButton(
+                                  onPressed: () {
+                                    adhanLineController.decrementTime();
+                                  },
+                                  icon: const Icon(Iconsax.minus)),
+                              Obx(() => Text(
+                                  "${adhanLineController.time} ${S.of(context).minute_short}")),
+                              IconButton(
+                                  onPressed: () {
+                                    adhanLineController.incrementTime();
+                                  },
+                                  icon: const Icon(Iconsax.add))
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -259,6 +274,8 @@ class AdhanAlarmData extends StatelessWidget {
     required this.alarmDurationKey,
     required this.time,
     required this.isDark,
+    required this.isVisible,
+    required this.alarmNum,
   });
 
   final AdhanLineController adhanLineController;
@@ -266,21 +283,27 @@ class AdhanAlarmData extends StatelessWidget {
   final String alarmActivationKey;
   final String alarmDurationKey;
 
+  final int alarmNum;
+
   final String time;
   final bool isDark;
+
+  final bool isVisible;
 
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: SharedPrefService.getBool(alarmActivationKey) ?? false,
+      visible: isVisible,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           IconButton(
               onPressed: () async {
-                SharedPrefService.setBool(alarmActivationKey, false);
-                SharedPrefService.setInt(alarmDurationKey, 0);
-                Alarm.stop(int.parse(alarmActivationKey));
+                await SharedPrefService.setBool(alarmActivationKey, false);
+                await SharedPrefService.setInt(alarmDurationKey, 0);
+                await Alarm.stop(int.parse(alarmActivationKey));
+                adhanLineController.isAlarmSet(
+                    alarmKey: alarmActivationKey, alarmNumber: alarmNum);
               },
               icon: Icon(Icons.close, color: Colors.red[900])),
           const SizedBox(width: 16),
