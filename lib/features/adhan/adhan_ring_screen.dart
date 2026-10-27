@@ -8,7 +8,6 @@ import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
-import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -55,6 +54,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
+    final deep = Color.lerp(n.primary, Colors.black, 0.3)!;
     final baseId = AdhanScheduler.baseOf(widget.alarmSettings.id);
     final prayer = _prayerFromBaseId(baseId);
 
@@ -83,9 +83,9 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) => SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(
-                    NoorSpace.xl,
                     NoorSpace.xxl,
-                    NoorSpace.xl,
+                    NoorSpace.xxl,
+                    NoorSpace.xxl,
                     NoorSpace.xxl,
                   ),
                   child: ConstrainedBox(
@@ -96,7 +96,13 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Center(child: NoorMark(size: 44)),
+                          Center(
+                            child: SvgPicture.asset(
+                              n.isDark ? NoorArt.emblemDark : NoorArt.emblem,
+                              height: 48,
+                              excludeFromSemantics: true,
+                            ),
+                          ),
                           const Spacer(flex: 3),
                           Center(
                             child: _Mihrab(
@@ -120,16 +126,19 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
                                   if (title.isNotEmpty)
                                     Text(
                                       title,
-                                      style: NoorText.display(context).copyWith(
-                                          fontSize: 28, color: n.primary),
+                                      style: NoorText.section(context).copyWith(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w700,
+                                          color: deep),
                                       textAlign: TextAlign.center,
                                     ),
                                   Text(
                                     formattedTime,
-                                    style: NoorText.numeral(
-                                      context,
-                                      size: 52,
-                                      color: n.primary,
+                                    style: NoorText.section(context).copyWith(
+                                      fontSize: 50,
+                                      height: 1.2,
+                                      fontWeight: FontWeight.w500,
+                                      color: deep,
                                     ),
                                   ),
                                   const SizedBox(height: NoorSpace.md),
@@ -178,7 +187,7 @@ class _Mihrab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width * 0.56;
+    final width = MediaQuery.sizeOf(context).width * 0.5;
     return CustomPaint(
       painter: _MihrabPainter(context.noor.card, context.noor.primary),
       child: ConstrainedBox(
@@ -230,19 +239,19 @@ class _MihrabPainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = accent.withValues(alpha: 0.10)
+        ..color = accent.withValues(alpha: 0.025)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
     );
     canvas.drawPath(
       path,
       Paint()
         ..shader = vertical([
-          fill.withValues(alpha: 0.85),
-          accent.withValues(alpha: 0.07),
+          Color.lerp(fill, Colors.white, 0.4)!.withValues(alpha: 0.75),
+          accent.withValues(alpha: 0.03),
           accent.withValues(alpha: 0),
         ], const [
           0,
-          0.55,
+          0.6,
           1
         ]).createShader(rect),
     );
@@ -318,7 +327,7 @@ class _PrimaryAction extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: n.primary.withValues(alpha: 0.28),
+            color: n.primary.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -417,7 +426,7 @@ class _BackdropPainter extends CustomPainter {
     final w = size.width, h = size.height;
 
     final cloud = Paint()
-      ..color = tint.withValues(alpha: 0.07)
+      ..color = tint.withValues(alpha: 0.04)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
     for (final c in [
       Offset(w * 0.02, h * 0.2),
@@ -433,10 +442,11 @@ class _BackdropPainter extends CustomPainter {
       );
     }
 
-    // Skyline sits on a ground line ~21% above the bottom.
-    final g = h * 0.79;
+    final g = h * 0.715; // ground line
     final u = w / 100; // 1 unit = 1% of width
-    final sil = Paint()..color = tint.withValues(alpha: 0.11);
+    final cx = w / 2;
+    final sil = Paint()..color = tint.withValues(alpha: 0.09);
+    const pi = 3.14159;
 
     canvas.drawPath(
       Path()
@@ -448,42 +458,38 @@ class _BackdropPainter extends CustomPainter {
       Paint()..color = tint.withValues(alpha: 0.05),
     );
 
-    // Main dome, crescent, hall.
-    final cx = w * 0.5;
-    canvas.drawRect(Rect.fromLTRB(cx - u * 13, g - u * 7, cx + u * 13, g), sil);
-    canvas.drawArc(
-      Rect.fromCenter(
-          center: Offset(cx, g - u * 7), width: u * 22, height: u * 26),
-      3.14159,
-      3.14159,
-      true,
-      sil,
-    );
-    canvas.drawCircle(Offset(cx, g - u * 21), u * 1.6, sil);
-    // Side domes.
-    for (final dx in [-17.0, -10.0, 10.0, 17.0]) {
-      canvas.drawArc(
-        Rect.fromCenter(
-            center: Offset(cx + u * dx, g - u * 5),
-            width: u * 7,
-            height: u * 8),
-        3.14159,
-        3.14159,
-        true,
-        sil,
-      );
+    void dome(double dx, double base, double width, double height) =>
+        canvas.drawArc(
+          Rect.fromCenter(
+            center: Offset(cx + u * dx, g - u * base),
+            width: u * width,
+            height: u * height,
+          ),
+          pi,
+          pi,
+          true,
+          sil,
+        );
+
+    // Main dome, crescent, hall and side domes.
+    canvas.drawRect(Rect.fromLTRB(cx - u * 12, g - u * 7, cx + u * 12, g), sil);
+    dome(0, 7, 12, 14);
+    canvas.drawCircle(Offset(cx, g - u * 15), u * 1, sil);
+    for (final dx in [-9.0, 9.0, -14.0, 14.0]) {
+      dome(dx, 5, 5, 6);
     }
+
     // Minarets: shaft, balcony, pointed cap.
-    for (final dx in [-27.0, 27.0, -41.0, 40.0]) {
-      final tall = dx.abs() < 30;
-      final top = g - u * (tall ? 30 : 17);
+    for (final dx in [-10.5, 10.5, -17.0, 17.0]) {
+      final tall = dx.abs() < 12;
+      final top = g - u * (tall ? 21 : 12);
       final x = cx + u * dx;
-      final half = u * (tall ? 1.6 : 1.2);
+      final half = u * (tall ? 1.4 : 1.1);
       canvas.drawRect(Rect.fromLTRB(x - half, top, x + half, g), sil);
       canvas.drawRect(
-          Rect.fromLTRB(
-              x - half * 1.7, top + u * 3, x + half * 1.7, top + u * 4),
-          sil);
+        Rect.fromLTRB(x - half * 1.7, top + u * 3, x + half * 1.7, top + u * 4),
+        sil,
+      );
       canvas.drawPath(
         Path()
           ..moveTo(x - half, top)
@@ -493,8 +499,9 @@ class _BackdropPainter extends CustomPainter {
         sil,
       );
     }
+
     // Palms and bushes.
-    for (final dx in [-33.0, -37.0, 46.0]) {
+    for (final dx in [-29.0, -32.0, 30.0]) {
       final x = cx + u * dx;
       canvas.drawLine(
         Offset(x, g),
@@ -504,19 +511,21 @@ class _BackdropPainter extends CustomPainter {
           ..strokeWidth = u * 0.8,
       );
       for (final a in [-0.9, -0.3, 0.3, 0.9]) {
-        canvas.save();
-        canvas.translate(x, g - u * 9);
-        canvas.rotate(a);
-        canvas.drawOval(Rect.fromLTWH(-u * 0.6, -u * 4, u * 1.2, u * 4.5), sil);
-        canvas.restore();
+        canvas
+          ..save()
+          ..translate(x, g - u * 9)
+          ..rotate(a)
+          ..drawOval(Rect.fromLTWH(-u * 0.6, -u * 4, u * 1.2, u * 4.5), sil)
+          ..restore();
       }
     }
-    for (final dx in [-22.0, 21.0, -45.0, 36.0]) {
+    for (final dx in [-20.0, 20.0, -34.0, 34.0]) {
       canvas.drawOval(
         Rect.fromCenter(
-            center: Offset(cx + u * dx, g - u * 1.2),
-            width: u * 12,
-            height: u * 4.5),
+          center: Offset(cx + u * dx, g - u * 1.2),
+          width: u * 12,
+          height: u * 4.5,
+        ),
         sil,
       );
     }
