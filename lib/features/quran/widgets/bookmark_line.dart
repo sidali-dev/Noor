@@ -44,7 +44,7 @@ class BookmarkLine extends StatelessWidget {
             },
             child: Transform(
               alignment: Alignment.center,
-              transform: Matrix4.identity()..scale(isRtl ? -1.0 : 1.0, 1.0),
+              transform: Matrix4.identity()..scaleByDouble(isRtl ? -1.0 : 1.0, 1.0, 1.0, 1.0),
               child: Icon(Iconsax.play,
                   color: isDark ? SColors.secondary : SColors.primary),
             )),

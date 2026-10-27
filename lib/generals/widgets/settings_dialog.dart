@@ -64,7 +64,7 @@ class DialogSettings extends StatelessWidget {
                             : Colors.grey.shade300),
                 thumbColor: WidgetStateProperty.resolveWith<Color>(
                     (Set<WidgetState> states) => Colors.transparent),
-                activeColor: Colors.lightBlue.shade500,
+                activeThumbColor: Colors.lightBlue.shade500,
                 thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
                     (Set<WidgetState> states) {
                   if (SHelperFunctions.isDarkMode(context)) {
@@ -112,7 +112,7 @@ class DialogSettings extends StatelessWidget {
                   child: DropdownButtonFormField(
                     autofocus: true,
                     alignment: Alignment.center,
-                    value: SHelperFunctions.getLangluageCode(),
+                    initialValue: SHelperFunctions.getLangluageCode(),
                     onChanged: (value) async {
                       showDialog(
                           barrierDismissible: false,

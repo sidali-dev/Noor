@@ -18,7 +18,7 @@ class AdhkarDisplayScreen extends StatelessWidget {
   final List<AdhkarModel> adhkar;
   AdhkarDisplayScreen({super.key, required this.title, required this.adhkar});
 
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController = CarouselSliderController();
   final List<CarouselCards> cards = [];
 
   @override

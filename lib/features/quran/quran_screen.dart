@@ -61,7 +61,7 @@ class QuranScreen extends StatelessWidget {
                       ],
                     ),
                     Divider(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         thickness: 1,
                         indent: 80,
                         endIndent: 80,
@@ -126,7 +126,7 @@ class QuranScreen extends StatelessWidget {
                               Transform(
                                   alignment: Alignment.center,
                                   transform: Matrix4.identity()
-                                    ..scale(isRtl ? -1.0 : 1.0, 1.0),
+                                    ..scaleByDouble(isRtl ? -1.0 : 1.0, 1.0, 1.0, 1.0),
                                   child: const Icon(Iconsax.play,
                                       color: SColors.secondary)),
                               const SizedBox(width: 8),

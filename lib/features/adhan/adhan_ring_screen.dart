@@ -182,7 +182,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Colors.transparent),
                       elevation: 10.0,
-                      backgroundColor: SColors.secondary.withOpacity(0.9),
+                      backgroundColor: SColors.secondary.withValues(alpha: 0.9),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32)),
                       padding: const EdgeInsets.symmetric(
@@ -201,7 +201,7 @@ class _AdhanRingScreenState extends State<AdhanRingScreen>
                     },
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Colors.transparent),
-                      backgroundColor: Colors.white.withOpacity(0.1),
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
                       // elevation: 0.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),

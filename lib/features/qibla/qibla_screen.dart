@@ -74,7 +74,7 @@ class QiblaScreen extends StatelessWidget {
                       ],
                     ),
                     Divider(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         thickness: 1,
                         indent: 80,
                         endIndent: 80,

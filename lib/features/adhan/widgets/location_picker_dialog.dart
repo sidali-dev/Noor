@@ -1,4 +1,4 @@
-import 'package:csc_picker/csc_picker.dart';
+import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -46,7 +46,7 @@ class LocationPicker extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 26),
               //Country Picker Widget
-              child: CSCPicker(
+              child: CSCPickerPlus(
                 flagState: CountryFlag.DISABLE,
                 dropdownDecoration: BoxDecoration(
                     color: isDark ? Colors.black : Colors.white,
