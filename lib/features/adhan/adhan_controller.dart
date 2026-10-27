@@ -15,12 +15,9 @@ class AdhanController extends GetxController {
   final Rx<DateTime> date = DateTime.now().obs;
   final RxBool isLoading = false.obs;
 
-  late final RxBool adhanFajr = AppPrefs.prayerEnabled('fajr').obs;
-  late final RxBool adhanChourouk = AppPrefs.prayerEnabled('chourouk').obs;
-  late final RxBool adhanDhuhr = AppPrefs.prayerEnabled('dhuhr').obs;
-  late final RxBool adhanAsr = AppPrefs.prayerEnabled('asr').obs;
-  late final RxBool adhanMaghrib = AppPrefs.prayerEnabled('maghrib').obs;
-  late final RxBool adhanIsha = AppPrefs.prayerEnabled('isha').obs;
+  final Map<String, RxBool> _enabledPrayers = {
+    for (final p in Prayer.all) p.key: AppPrefs.prayerEnabled(p.key).obs,
+  };
 
   final LocationController locationController = Get.put(LocationController());
 
@@ -32,22 +29,12 @@ class AdhanController extends GetxController {
 
   /// Returns the RxBool for a given prayer key.
   RxBool enabledFor(String key) {
-    switch (key) {
-      case 'fajr':
-        return adhanFajr;
-      case 'chourouk':
-        return adhanChourouk;
-      case 'dhuhr':
-        return adhanDhuhr;
-      case 'asr':
-        return adhanAsr;
-      case 'maghrib':
-        return adhanMaghrib;
-      case 'isha':
-        return adhanIsha;
-      default:
-        throw ArgumentError('Unknown prayer key: $key');
+    var rx = _enabledPrayers[key];
+    if (rx == null) {
+      rx = AppPrefs.prayerEnabled(key).obs;
+      _enabledPrayers[key] = rx;
     }
+    return rx;
   }
 
   /// Toggles the prayer on/off state, persists it, and syncs alarms.
@@ -159,12 +146,6 @@ class AdhanController extends GetxController {
   @Deprecated('Use AdhanScheduler.sync()')
   static Future<void> scheduleAdhans() => AdhanScheduler.sync();
 
-  @Deprecated('Use toggle(prayerName)')
-  Future<void> switchAdhan(String prayerName) async {
-    await toggle(prayerName);
-  }
-
-  @Deprecated('Managed in onInit / refreshAdhanData')
   Future<void> initController(int year) async {
     locationController.getLocation();
     final jsonStr = AppPrefs.prayerYearJson(year);
@@ -175,27 +156,21 @@ class AdhanController extends GetxController {
       } catch (_) {}
     }
 
-    if (locationController.city.value.isNotEmpty) {
+    final city = locationController.city.value.isNotEmpty
+        ? locationController.city.value
+        : AppPrefs.city;
+    final country = locationController.country.value.isNotEmpty
+        ? locationController.country.value
+        : AppPrefs.country;
+    final state = locationController.state.value.isNotEmpty
+        ? locationController.state.value
+        : AppPrefs.state;
+
+    if (city.isNotEmpty && country.isNotEmpty) {
       try {
-        await refreshAdhanData(
-          locationController.country.value,
-          locationController.state.value,
-          locationController.city.value,
-          year,
-        );
+        await refreshAdhanData(country, state, city, year);
       } catch (_) {}
     }
-  }
-
-  @Deprecated('Use refreshAdhanData')
-  Future<void> getAdhanTimeCalendarByCity(int year) async {
-    final response = await SHttpHelper.get(
-      locationController.country.value,
-      locationController.city.value,
-      year.toString(),
-    );
-    prayerTime.value = PrayerTime.fromJson(response);
-    await AppPrefs.setPrayerYearJson(year, jsonEncode(prayerTime.value));
   }
 
   void incrementDay() {

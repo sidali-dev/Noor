@@ -1,322 +1,316 @@
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/controllers/adhan_line_controller.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/features/adhan/models/prayer.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/generals/widgets/icon_tile.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
-import '../../../generated/l10n.dart';
-import '../../../utils/constants/colors.dart';
-import '../../../utils/constants/sizes.dart';
-import '../../../utils/helpers/helper_functions.dart';
+extension PrayerUI on Prayer {
+  String localizedTitle(BuildContext context) {
+    final s = S.of(context);
+    switch (this) {
+      case Prayer.fajr:
+        return s.fajr;
+      case Prayer.chourouk:
+        return s.sun_rise;
+      case Prayer.dhuhr:
+        return s.dhuhr;
+      case Prayer.asr:
+        return s.asr;
+      case Prayer.maghrib:
+        return s.maghrib;
+      case Prayer.isha:
+        return s.isha;
+    }
+  }
 
-class AdhanLine extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String time;
-  final String adhanKey;
-  final AdhanLineController adhanLineController;
+  IconData get icon {
+    switch (this) {
+      case Prayer.fajr:
+      case Prayer.chourouk:
+      case Prayer.maghrib:
+        return Iconsax.sun_fog;
+      case Prayer.dhuhr:
+        return Iconsax.sun_1;
+      case Prayer.asr:
+        return Iconsax.cloud_sunny;
+      case Prayer.isha:
+        return Iconsax.moon;
+    }
+  }
 
-  const AdhanLine({
-    super.key,
-    required this.icon,
-    required this.time,
-    required this.title,
-    required this.adhanKey,
-    required this.adhanLineController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    String alarmActivationKey1 = "";
-    String alarmActivationKey2 = "";
-    String alarmDurationKey1 = "";
-    String alarmDurationKey2 = "";
-
-    AdhanController controller = Get.find();
-
-    bool isDark = SHelperFunctions.isDarkMode(context);
-    bool isRtl = SHelperFunctions.isRtl(context);
-
-    return InkWell(
-      onTap: () {
-        adhanLineController.onAlarmExpanded(
-            alarmKey1: alarmActivationKey1, alarmKey2: alarmActivationKey2);
-
-        adhanLineController.isExpanded.value =
-            !adhanLineController.isExpanded.value;
-      },
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      child: Obx(
-        () => Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: SSizes.lg),
-                Icon(icon, color: SColors.secondary, size: SSizes.iconLg),
-                const SizedBox(width: SSizes.sm),
-                Text(
-                  title,
-                  style: TextStyle(
-                      color: isDark ? SColors.white : SColors.primary,
-                      fontSize:
-                          isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd),
-                ),
-                const Expanded(child: SizedBox()),
-                GestureDetector(
-                  child: Obx(
-                    () {
-                      bool isActive = false;
-                      int id = 0;
-                      switch (adhanKey) {
-                        case "fajr":
-                          isActive = controller.adhanFajr.value;
-                          id = 1;
-                          alarmActivationKey1 = "101";
-                          alarmActivationKey2 = "102";
-                          alarmDurationKey1 = "fajr_alarm_1_duration";
-                          alarmDurationKey2 = "fajr_alarm_2_duration";
-                          break;
-                        case "chourouk":
-                          isActive = controller.adhanChourouk.value;
-                          id = 2;
-                          alarmActivationKey1 = "201";
-                          alarmActivationKey2 = "202";
-                          alarmDurationKey1 = "chourouk_alarm_1_duration";
-                          alarmDurationKey2 = "chourouk_alarm_2_duration";
-                          break;
-                        case "dhuhr":
-                          isActive = controller.adhanDhuhr.value;
-                          id = 3;
-                          alarmActivationKey1 = "301";
-                          alarmActivationKey2 = "302";
-                          alarmDurationKey1 = "dhuhr_alarm_1_duration";
-                          alarmDurationKey2 = "dhuhr_alarm_2_duration";
-                          break;
-                        case "asr":
-                          isActive = controller.adhanAsr.value;
-                          id = 4;
-                          alarmActivationKey1 = "401";
-                          alarmActivationKey2 = "402";
-                          alarmDurationKey1 = "asr_alarm_1_duration";
-                          alarmDurationKey2 = "asr_alarm_2_duration";
-                          break;
-                        case "maghrib":
-                          isActive = controller.adhanMaghrib.value;
-                          id = 5;
-
-                          alarmActivationKey1 = "501";
-                          alarmActivationKey2 = "502";
-                          alarmDurationKey1 = "maghrib_alarm_1_duration";
-                          alarmDurationKey2 = "maghrib_alarm_2_duration";
-                          break;
-                        case "isha":
-                          isActive = controller.adhanIsha.value;
-                          id = 6;
-                          alarmActivationKey1 = "601";
-                          alarmActivationKey2 = "602";
-                          alarmDurationKey1 = "isha_alarm_1_duration";
-                          alarmDurationKey2 = "isha_alarm_2_duration";
-                          break;
-                      }
-
-                      return IconButton(
-                        icon: Icon(
-                            isActive
-                                ? Iconsax.volume_high
-                                : Iconsax.volume_cross,
-                            size: SSizes.iconLg,
-                            color: isDark ? SColors.white : SColors.primary),
-                        onPressed: () async {
-                          await controller.switchAdhan(adhanKey);
-                          if (!SharedPrefService.getBool(adhanKey)!) {
-                            await SHelperFunctions.cancelAlarm(id);
-                          } else {
-                            AdhanController.scheduleAdhans();
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: SSizes.sm),
-                Text(time,
-                    style: TextStyle(
-                        color: isDark ? SColors.white : SColors.primary,
-                        fontSize:
-                            isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd)),
-                const SizedBox(width: SSizes.md),
-                Icon(
-                    adhanLineController.isExpanded.value
-                        ? Iconsax.arrow_up_2
-                        : Iconsax.arrow_down_1,
-                    color: isDark ? SColors.secondary : SColors.primary),
-                const SizedBox(width: SSizes.md),
-              ],
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: Visibility(
-                visible: adhanLineController.isExpanded.value,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      Obx(
-                        () => AdhanAlarmData(
-                            alarmNum: 1,
-                            isVisible: adhanLineController.isAlarm1Active.value,
-                            adhanLineController: adhanLineController,
-                            alarmActivationKey: alarmActivationKey1,
-                            alarmDurationKey: alarmDurationKey1,
-                            time: time,
-                            isDark: isDark),
-                      ),
-                      Obx(
-                        () => AdhanAlarmData(
-                            alarmNum: 2,
-                            isVisible: adhanLineController.isAlarm2Active.value,
-                            adhanLineController: adhanLineController,
-                            alarmActivationKey: alarmActivationKey2,
-                            alarmDurationKey: alarmDurationKey2,
-                            time: time,
-                            isDark: isDark),
-                      ),
-                      Obx(
-                        () => Visibility(
-                          visible: !adhanLineController.isAlarmFull.value,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  if (adhanLineController.time.value == 0) {
-                                    return;
-                                  }
-                                  await adhanLineController.addAlarm(
-                                      alarmActivationKey1,
-                                      alarmActivationKey2,
-                                      alarmDurationKey1,
-                                      alarmDurationKey2,
-                                      time);
-
-                                  adhanLineController.onAlarmExpanded(
-                                      alarmKey1: alarmActivationKey1,
-                                      alarmKey2: alarmActivationKey2);
-                                },
-                                child: Material(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  elevation: 10.0,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 4.0),
-                                    decoration: BoxDecoration(
-                                        color: isDark
-                                            ? SColors.secondary
-                                            : SColors.primary,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0)),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.add_alarm,
-                                            color: Colors.white),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          S.of(context).set_new_alarm,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              IconButton(
-                                  onPressed: () {
-                                    adhanLineController.decrementTime();
-                                  },
-                                  icon: const Icon(Iconsax.minus)),
-                              Obx(() => Text(
-                                  "${adhanLineController.time} ${S.of(context).minute_short}")),
-                              IconButton(
-                                  onPressed: () {
-                                    adhanLineController.incrementTime();
-                                  },
-                                  icon: const Icon(Iconsax.add))
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+  NoorTint get tint {
+    switch (this) {
+      case Prayer.fajr:
+        return NoorTint.blue;
+      case Prayer.chourouk:
+        return NoorTint.amber;
+      case Prayer.dhuhr:
+        return NoorTint.sage;
+      case Prayer.asr:
+        return NoorTint.mint;
+      case Prayer.maghrib:
+        return NoorTint.lilac;
+      case Prayer.isha:
+        return NoorTint.blue;
+    }
   }
 }
 
-class AdhanAlarmData extends StatelessWidget {
-  const AdhanAlarmData({
+class AdhanLine extends StatefulWidget {
+  final Prayer prayer;
+  final String time;
+  final bool isNext;
+
+  const AdhanLine({
     super.key,
-    required this.adhanLineController,
-    required this.alarmActivationKey,
-    required this.alarmDurationKey,
+    required this.prayer,
     required this.time,
-    required this.isDark,
-    required this.isVisible,
-    required this.alarmNum,
+    this.isNext = false,
   });
 
-  final AdhanLineController adhanLineController;
+  @override
+  State<AdhanLine> createState() => _AdhanLineState();
+}
 
-  final String alarmActivationKey;
-  final String alarmDurationKey;
+class _AdhanLineState extends State<AdhanLine> {
+  bool _isExpanded = false;
+  int _minutes = 10;
 
-  final int alarmNum;
+  void _incrementMinutes() {
+    setState(() {
+      if (_minutes < 60) {
+        _minutes++;
+        if (_minutes == 0) _minutes = 1;
+      }
+    });
+  }
 
-  final String time;
-  final bool isDark;
-
-  final bool isVisible;
+  void _decrementMinutes() {
+    setState(() {
+      if (_minutes > -60) {
+        _minutes--;
+        if (_minutes == 0) _minutes = -1;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: isVisible,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          IconButton(
-              onPressed: () async {
-                await SharedPrefService.setBool(alarmActivationKey, false);
-                await SharedPrefService.setInt(alarmDurationKey, 0);
-                await Alarm.stop(int.parse(alarmActivationKey));
-                adhanLineController.isAlarmSet(
-                    alarmKey: alarmActivationKey, alarmNumber: alarmNum);
-              },
-              icon: Icon(Icons.close, color: Colors.red[900])),
-          const SizedBox(width: 16),
-          Text(
-            adhanLineController.getAlarmText(
-                context, SharedPrefService.getInt(alarmDurationKey) ?? 0),
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: isDark ? SColors.secondary : SColors.primary),
-          )
-        ],
+    final n = context.noor;
+    final controller = Get.find<AdhanController>();
+    final s = S.of(context);
+    final reminders = AdhanScheduler.reminders(widget.prayer);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
+        },
+        borderRadius: BorderRadius.circular(NoorRadius.tile),
+        child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: NoorSpace.lg,
+          vertical: NoorSpace.md,
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconTile(
+                  icon: widget.prayer.icon,
+                  tint: widget.prayer.tint,
+                  size: 40,
+                ),
+                const SizedBox(width: NoorSpace.md),
+                if (widget.isNext) ...[
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: n.gold,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: NoorSpace.xs),
+                ],
+                Text(
+                  widget.prayer.localizedTitle(context),
+                  style: NoorText.rowTitle(context).copyWith(color: n.ink),
+                ),
+                const Spacer(),
+                Text(
+                  widget.time,
+                  style: NoorText.numeral(context, size: 20),
+                ),
+                const SizedBox(width: NoorSpace.sm),
+                Obx(() {
+                  final isEnabled =
+                      controller.enabledFor(widget.prayer.key).value;
+                  return IconButton(
+                    icon: Icon(
+                      isEnabled ? Iconsax.volume_high : Iconsax.volume_cross,
+                      color: isEnabled ? n.primary : n.muted,
+                      size: 22,
+                    ),
+                    tooltip: widget.prayer.localizedTitle(context),
+                    onPressed: () => controller.toggle(widget.prayer.key),
+                  );
+                }),
+                AnimatedRotation(
+                  turns: _isExpanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: n.muted,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              child: _isExpanded
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: NoorSpace.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final reminder in reminders) ...[
+                            Container(
+                              margin:
+                                  const EdgeInsets.only(bottom: NoorSpace.sm),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: NoorSpace.md,
+                                vertical: NoorSpace.xs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: n.isDark ? n.line : n.paper,
+                                borderRadius:
+                                    BorderRadius.circular(NoorRadius.input),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.alarm_on_rounded,
+                                    size: 18,
+                                    color: n.primary,
+                                  ),
+                                  const SizedBox(width: NoorSpace.sm),
+                                  Expanded(
+                                    child: Text(
+                                      getAlarmText(context, reminder.minutes),
+                                      style: NoorText.body(context).copyWith(
+                                        fontSize: 13,
+                                        color: n.ink,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      await AdhanScheduler.removeReminder(
+                                        widget.prayer,
+                                        reminder.slot,
+                                      );
+                                      if (mounted) setState(() {});
+                                    },
+                                    child: Text(
+                                      s.remove,
+                                      style: TextStyle(
+                                        color: n.danger,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (reminders.length < 2) ...[
+                            const SizedBox(height: NoorSpace.xs),
+                            Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: n.isDark ? n.line : n.paper,
+                                    borderRadius:
+                                        BorderRadius.circular(NoorRadius.input),
+                                    border: Border.all(color: n.line),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove_rounded,
+                                            size: 18),
+                                        onPressed: _decrementMinutes,
+                                        padding: const EdgeInsets.all(6),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 36,
+                                          minHeight: 36,
+                                        ),
+                                        color: n.ink,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        child: Text(
+                                          '${_minutes > 0 ? "+$_minutes" : _minutes} ${s.minute_short}',
+                                          style: NoorText.numeral(context,
+                                              size: 14),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.add_rounded,
+                                            size: 18),
+                                        onPressed: _incrementMinutes,
+                                        padding: const EdgeInsets.all(6),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 36,
+                                          minHeight: 36,
+                                        ),
+                                        color: n.ink,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: NoorSpace.md),
+                                Expanded(
+                                  child: NoorButton(
+                                    label: s.set_new_alarm,
+                                    variant: NoorButtonVariant.tonal,
+                                    onPressed: () async {
+                                      await AdhanScheduler.addReminder(
+                                        widget.prayer,
+                                        _minutes,
+                                      );
+                                      if (mounted) setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
+    ),
     );
   }
 }

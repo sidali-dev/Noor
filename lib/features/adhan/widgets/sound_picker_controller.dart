@@ -1,27 +1,57 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
+import 'package:noor/utils/local_storage/app_prefs.dart';
 
 class SoundPickerController extends GetxController {
-  RxBool isPlaying = false.obs;
-  RxString adhanSoundName = SHelperFunctions.getAdhanChikhName().obs;
-  final player = AudioPlayer();
+  final AudioPlayer player;
+  final RxString adhanSoundName = ''.obs;
+  final Rx<String?> playingPath = Rx<String?>(null);
 
-  playOrPauseSound(String path) async {
-    await player.setSource(AssetSource(path.replaceFirst("assets/", "")));
+  SoundPickerController({AudioPlayer? player})
+      : player = player ?? AudioPlayer();
 
-    if (isPlaying.value) {
-      await player.resume();
+  @override
+  void onInit() {
+    super.onInit();
+    updateAdhanName();
+    player.onPlayerComplete.listen((_) {
+      playingPath.value = null;
+    });
+  }
+
+  void updateAdhanName() {
+    final name = AppPrefs.adhanSoundName;
+    if (name.isNotEmpty) {
+      adhanSoundName.value = name;
     } else {
-      await player.stop();
+      adhanSoundName.value = SHelperFunctions.getAdhanChikhName();
     }
   }
 
-  updateAdhanName() {
-    adhanSoundName.value = SHelperFunctions.getAdhanChikhName();
+  Future<void> togglePreview(String path) async {
+    if (playingPath.value == path) {
+      await stopPreview();
+    } else {
+      await player.stop();
+      playingPath.value = path;
+      final cleanPath = path.startsWith('assets/')
+          ? path.replaceFirst('assets/', '')
+          : path;
+      await player.play(AssetSource(cleanPath));
+    }
   }
 
-  playOrPause() {
-    isPlaying.value = !isPlaying.value;
+  Future<void> stopPreview() async {
+    playingPath.value = null;
+    try {
+      await player.stop().timeout(const Duration(milliseconds: 300));
+    } catch (_) {}
+  }
+
+  @override
+  void onClose() {
+    player.dispose();
+    super.onClose();
   }
 }

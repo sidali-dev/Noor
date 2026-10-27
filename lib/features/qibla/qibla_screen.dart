@@ -1,363 +1,75 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/qibla/qibla_controller.dart';
-import 'package:noor/features/qibla/widgets/qibla_tips_dialog.dart';
+import 'package:noor/features/qibla/widgets/qibla_calibration_sheet.dart';
+import 'package:noor/features/qibla/widgets/qibla_compass.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
-import 'package:noor/utils/helpers/helper_functions.dart';
+import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/location_pill.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_header.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/constants/image_strings.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../generals/widgets/get_locatiol_widget.dart';
-import '../../generals/widgets/wait_dialog.dart';
-import '../../generated/l10n.dart';
-import '../../utils/constants/colors.dart';
-import '../../utils/constants/image_strings.dart';
-import '../../utils/constants/sizes.dart';
-import '../../utils/device/device_utility.dart';
-import 'widgets/qibla_compass.dart';
-
-class QiblaScreen extends StatelessWidget {
-  QiblaScreen({super.key});
-
-  final _deviceSupport = FlutterQiblah.androidDeviceSensorSupport();
-
-  final AdhanController _adhanController = Get.put(AdhanController());
-  final LocationController _locationController = Get.put(LocationController());
+class QiblaScreen extends StatefulWidget {
+  const QiblaScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = SHelperFunctions.isDarkMode(context);
-    final isRtl = SHelperFunctions.isRtl(context);
+  State<QiblaScreen> createState() => _QiblaScreenState();
+}
 
-    _locationController.getLocation();
+class _QiblaScreenState extends State<QiblaScreen> {
+  late final QiblaController _controller;
+  late final Future<bool?> _deviceSupport;
+  double? _distanceKm;
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          color: const Color.fromARGB(255, 59, 78, 255),
-          child: Column(
-            children: [
-              Stack(alignment: Alignment.center, children: [
-                Image.asset(SImageString.backgroundImage2),
-                Positioned(
-                    child: Column(
-                  children: [
-                    SizedBox(
-                        height: SDeviceUtils.getScreenHeight(context) * 0.05),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          SImageString.octagon,
-                          colorFilter: const ColorFilter.mode(
-                              Colors.white, BlendMode.srcIn),
-                        ),
-                        const SizedBox(width: SSizes.md),
-                        const Text(
-                          "فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: SSizes.fontSizeMd,
-                              fontFamily: "Amiri"),
-                        ),
-                        const SizedBox(width: SSizes.md),
-                        SvgPicture.asset(
-                          SImageString.octagon,
-                          colorFilter: const ColorFilter.mode(
-                              Colors.white, BlendMode.srcIn),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        thickness: 1,
-                        indent: 80,
-                        endIndent: 80,
-                        height: 20),
-                    GetLocationWidget(
-                        isDark: isDark,
-                        isRtl: isRtl,
-                        controller: _adhanController),
-                    const SizedBox(height: 10),
-                  ],
-                )),
-              ]),
+  @override
+  void initState() {
+    super.initState();
+    // Create controller once
+    _controller = Get.put(QiblaController());
 
-              // ==================THE LOWER PART OF SCREEN BELOW==================
+    // Ensure AdhanController is registered for LocationPill
+    if (!Get.isRegistered<AdhanController>()) {
+      Get.put(AdhanController());
+    }
 
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(32)),
-                child: Container(
-                  color: isDark ? Colors.black : Colors.white,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: SSizes.dividerHeightMd),
-                      Stack(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Iconsax.send_2,
-                                  color:
-                                      isDark ? SColors.white : SColors.primary,
-                                  size: 32),
-                              const SizedBox(width: 16.0),
-                              Text(
-                                S.of(context).qiblah,
-                                style: TextStyle(
-                                    color: isDark
-                                        ? SColors.white
-                                        : SColors.primary,
-                                    fontSize: isRtl
-                                        ? SSizes.fontSizeXlgAr
-                                        : SSizes.fontSizeXlg,
-                                    fontWeight: FontWeight.w800),
-                              )
-                            ],
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: IconButton(
-                              onPressed: () async {
-                                await showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        const QiblaCompassTipsDialog());
-                              },
-                              icon: CircleAvatar(
-                                radius: 22.0,
-                                backgroundColor:
-                                    isDark ? SColors.dark : SColors.grey,
-                                child: Icon(Iconsax.information,
-                                    size: 26,
-                                    color: isDark
-                                        ? SColors.secondary
-                                        : SColors.primary),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                          height: SDeviceUtils.getScreenHeight(context) * 0.04),
-                      FutureBuilder(
-                        future: _deviceSupport,
-                        builder: (_, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Column(
-                              children: [
-                                const SizedBox(height: 56),
-                                WaitDialog(isDark: true, isRtl: isRtl),
-                              ],
-                            );
-                          } else if (snapshot.hasError) {
-                            return Column(
-                              children: [
-                                SizedBox(
-                                  height:
-                                      SDeviceUtils.getScreenHeight(context) *
-                                          0.1,
-                                ),
-                                Lottie.asset(SImageString.lottieError),
-                                Text(
-                                  "Error: ${snapshot.error.toString()}",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: SColors.warning,
-                                      fontSize: isRtl
-                                          ? SSizes.fontSizeMdAr
-                                          : SSizes.fontSizeMd),
-                                ),
-                              ],
-                            );
-                          } else if (snapshot.data) {
-                            //====================================================================================================
-                            return GetBuilder<QiblaController>(
-                              init: QiblaController(),
-                              builder: (controller) {
-                                return StreamBuilder(
-                                  stream: controller.stream,
-                                  builder: (context,
-                                      AsyncSnapshot<LocationStatus> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const SizedBox();
-                                    } else if (snapshot.data!.enabled) {
-                                      //this means that the gps signal is on, but not necessiraly that the permission is granted.
+    // Move LocationController.getLocation() out of build into initState
+    final locationController = Get.isRegistered<LocationController>()
+        ? Get.find<LocationController>()
+        : Get.put(LocationController());
+    locationController.getLocation();
 
-                                      switch (snapshot.data!.status) {
-                                        case LocationPermission.always:
-                                        case LocationPermission.whileInUse:
-                                          //this means that the gps signal is on, and the permission is granted.
+    // Check device sensor support
+    _deviceSupport = FlutterQiblah.androidDeviceSensorSupport();
 
-                                          return QiblaCompass();
-
-                                        case LocationPermission.denied:
-                                        case LocationPermission.deniedForever:
-                                          //this means that the gps signal is on, and the permission is not granted.
-
-                                          return Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Lottie.asset(
-                                                  SImageString
-                                                      .lottieAddLocation,
-                                                  height: SDeviceUtils
-                                                          .getScreenHeight(
-                                                              context) *
-                                                      0.3),
-                                              GestureDetector(
-                                                onTap: () async {
-                                                  requestPermission();
-                                                  controller
-                                                      .restartCheckLocationStatus();
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16.0),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(24),
-                                                        color: SColors.primary),
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 16.0,
-                                                          vertical: 10.0),
-                                                      child: Text(
-                                                        S
-                                                            .of(context)
-                                                            .enable_location_permission,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: TextStyle(
-                                                            color:
-                                                                SColors.white,
-                                                            fontSize: isRtl
-                                                                ? SSizes
-                                                                    .fontSizeMdAr
-                                                                : SSizes
-                                                                    .fontSizeMd),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-
-                                        default:
-                                          return const SizedBox();
-                                      }
-                                    } else {
-                                      //this means that the gps signal is off, but not necessiraly that the permission is not granted.
-
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Lottie.asset(
-                                              SImageString.lottieAddLocation,
-                                              height:
-                                                  SDeviceUtils.getScreenHeight(
-                                                          context) *
-                                                      0.3),
-                                          const SizedBox(height: 24),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await requestPermission();
-                                              try {
-                                                await Geolocator
-                                                    .getCurrentPosition();
-                                                controller
-                                                    .restartCheckLocationStatus();
-                                              } catch (_) {}
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16.0),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            24),
-                                                    color: SColors.primary),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 10.0,
-                                                      horizontal: 16.0),
-                                                  child: Text(
-                                                    S
-                                                        .of(context)
-                                                        .enable_location,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                        color: SColors.white,
-                                                        fontSize: isRtl
-                                                            ? SSizes
-                                                                .fontSizeMdAr
-                                                            : SSizes
-                                                                .fontSizeMd),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                  },
-                                );
-                              },
-                            );
-                          } else {
-                            // Device does not support the sensor, Display Maps widget
-                            return Column(
-                              children: [
-                                SizedBox(
-                                  height:
-                                      SDeviceUtils.getScreenHeight(context) *
-                                          0.1,
-                                ),
-                                Lottie.asset(SImageString.lottieError),
-                                Text(
-                                  S.of(context).sensor_not_supported,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: SColors.warning,
-                                      fontSize: isRtl
-                                          ? SSizes.fontSizeMdAr
-                                          : SSizes.fontSizeMd),
-                                ),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+    // Fetch distance to Kaaba
+    _fetchDistance();
   }
 
-  Future<void> requestPermission() async {
+  @override
+  void dispose() {
+    Get.delete<QiblaController>();
+    super.dispose();
+  }
+
+  Future<void> _fetchDistance() async {
+    final double? distance = await _controller.distanceToKaabaKm();
+    if (mounted) {
+      setState(() => _distanceKm = distance);
+    }
+  }
+
+  Future<void> _requestPermission() async {
     if (await Permission.location.isDenied) {
       await Permission.location.request();
     }
@@ -365,5 +77,273 @@ class QiblaScreen extends StatelessWidget {
       await openAppSettings();
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.noor.paper,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const NoorHeader(),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                NoorSpace.xl,
+                NoorSpace.xs,
+                NoorSpace.xl,
+                NoorSpace.sm,
+              ),
+              child: LocationPill(),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(
+                  left: NoorSpace.xl,
+                  right: NoorSpace.xl,
+                  top: NoorSpace.xs,
+                  bottom: 96,
+                ),
+                child: FutureBuilder<bool?>(
+                  future: _deviceSupport,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildCalmSpinner();
+                    }
+
+                    if (snapshot.hasError) {
+                      return EmptyState(
+                        lottie: SImageString.lottieError,
+                        message: '${snapshot.error}',
+                        actionLabel: S.of(context).try_again,
+                        onAction: () => setState(() {}),
+                      );
+                    }
+
+                    // If sensor unsupported
+                    if (snapshot.data == false) {
+                      return EmptyState(
+                        lottie: SImageString.lottieError,
+                        message: S.of(context).sensor_not_supported,
+                        actionLabel: S.of(context).try_again,
+                        onAction: () => setState(() {}),
+                      );
+                    }
+
+                    // Sensor supported: stream location status
+                    return StreamBuilder<LocationStatus>(
+                      stream: _controller.stream,
+                      builder: (context, locationSnapshot) {
+                        if (locationSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return _buildCalmSpinner();
+                        }
+
+                        if (locationSnapshot.hasError) {
+                          return EmptyState(
+                            message: '${locationSnapshot.error}',
+                            actionLabel: S.of(context).try_again,
+                            onAction: () =>
+                                _controller.restartCheckLocationStatus(),
+                          );
+                        }
+
+                        final LocationStatus? status = locationSnapshot.data;
+                        if (status == null) {
+                          return _buildCalmSpinner();
+                        }
+
+                        // GPS signal is off
+                        if (!status.enabled) {
+                          return EmptyState(
+                            lottie: SImageString.lottieAddLocation,
+                            message: S.of(context).enable_location,
+                            actionLabel: S.of(context).enable_location,
+                            onAction: () async {
+                              await _requestPermission();
+                              try {
+                                await Geolocator.getCurrentPosition();
+                                await _controller.restartCheckLocationStatus();
+                                _fetchDistance();
+                              } catch (_) {}
+                            },
+                          );
+                        }
+
+                        // Permission check
+                        switch (status.status) {
+                          case LocationPermission.always:
+                          case LocationPermission.whileInUse:
+                            return _buildActiveCompass();
+
+                          case LocationPermission.denied:
+                          case LocationPermission.deniedForever:
+                            return EmptyState(
+                              lottie: SImageString.lottieAddLocation,
+                              message: S.of(context).enable_location_permission,
+                              actionLabel:
+                                  S.of(context).enable_location_permission,
+                              onAction: () async {
+                                await _requestPermission();
+                                await _controller.restartCheckLocationStatus();
+                                _fetchDistance();
+                              },
+                            );
+
+                          default:
+                            return _buildCalmSpinner();
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalmSpinner() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: NoorSpace.xxxl * 2),
+      child: Center(
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveCompass() {
+    return StreamBuilder<QiblahDirection>(
+      stream: FlutterQiblah.qiblahStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            !snapshot.hasData) {
+          return _buildCalmSpinner();
+        }
+
+        final QiblahDirection qiblahDirection = snapshot.data!;
+
+        return Column(
+          children: [
+            const SizedBox(height: NoorSpace.md),
+            QiblaCompass(
+              direction: qiblahDirection.direction,
+              qiblah: qiblahDirection.qiblah,
+            ),
+            const SizedBox(height: NoorSpace.xxl),
+            QiblaDirectionCard(
+              offset: qiblahDirection.offset,
+              distanceKm: _distanceKm,
+              onCalibrate: () => showQiblaCalibrationSheet(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
-//handle when the user turn down the location permission
+
+class QiblaDirectionCard extends StatelessWidget {
+  final double offset;
+  final double? distanceKm;
+  final VoidCallback? onCalibrate;
+
+  const QiblaDirectionCard({
+    super.key,
+    required this.offset,
+    this.distanceKm,
+    this.onCalibrate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+
+    return NoorCard(
+      padding: const EdgeInsets.all(NoorSpace.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context).qibla_direction,
+                      style: NoorText.rowTitle(context).copyWith(
+                        color: n.muted,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: NoorSpace.xs),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        '${offset.toStringAsFixed(2)}°',
+                        style: NoorText.numeral(
+                          context,
+                          size: 56,
+                          color: n.ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: NoorSpace.md),
+              NoorButton(
+                label: S.of(context).calibrate,
+                icon: const Icon(Icons.explore_outlined, size: 20),
+                variant: NoorButtonVariant.tonal,
+                onPressed: onCalibrate,
+              ),
+            ],
+          ),
+          if (distanceKm != null) ...[
+            Container(
+              height: 1,
+              color: n.line,
+              margin: const EdgeInsets.symmetric(vertical: NoorSpace.md),
+            ),
+            Row(
+              children: [
+                Icon(
+                  Iconsax.location,
+                  size: 18,
+                  color: n.muted,
+                ),
+                const SizedBox(width: NoorSpace.sm),
+                Text(
+                  S.of(context).distance_to_kaaba,
+                  style: NoorText.body(context).copyWith(
+                    color: n.muted,
+                    fontSize: 14,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '~ ${distanceKm!.toInt()} km',
+                  style: NoorText.numeral(
+                    context,
+                    size: 15,
+                    color: n.muted,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
