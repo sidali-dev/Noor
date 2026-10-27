@@ -1,14 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
-
-import '../../../generated/l10n.dart';
-import '../../../utils/helpers/helper_functions.dart';
-import '../../../utils/local_storage/services/sharedpreferences_service.dart';
-import '../models/prayer_time.dart';
-import '../models/sub_models.dart/timings.dart';
+import 'package:noor/features/adhan/models/prayer.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/local_storage/app_prefs.dart';
 
 class AdhanLineController extends GetxController {
   final RxBool isExpanded = false.obs;
@@ -18,234 +13,80 @@ class AdhanLineController extends GetxController {
   late RxBool isAlarm2Active = false.obs;
   late RxBool isAlarmFull = false.obs;
 
-  onAlarmExpanded({required String alarmKey1, required String alarmKey2}) {
-    isAlarm1Active.value = (SharedPrefService.getBool(alarmKey1) ?? false);
-    isAlarm2Active.value = (SharedPrefService.getBool(alarmKey2) ?? false);
+  void onAlarmExpanded(
+      {required String alarmKey1, required String alarmKey2}) {
+    isAlarm1Active.value =
+        AppPrefs.reminderActive(int.tryParse(alarmKey1) ?? 0);
+    isAlarm2Active.value =
+        AppPrefs.reminderActive(int.tryParse(alarmKey2) ?? 0);
 
-    isAlarmFull.value =
-        isAlarm1Active.value == true && isAlarm2Active.value == true
-            ? true
-            : false;
+    isAlarmFull.value = isAlarm1Active.value && isAlarm2Active.value;
   }
 
-  isAlarmSet({required String alarmKey, required int alarmNumber}) {
+  void isAlarmSet({required String alarmKey, required int alarmNumber}) {
+    final active = AppPrefs.reminderActive(int.tryParse(alarmKey) ?? 0);
     if (alarmNumber == 1) {
-      isAlarm1Active.value = (SharedPrefService.getBool(alarmKey) ?? false);
+      isAlarm1Active.value = active;
     } else if (alarmNumber == 2) {
-      isAlarm2Active.value = (SharedPrefService.getBool(alarmKey) ?? false);
+      isAlarm2Active.value = active;
     }
 
-    isAlarmFull.value =
-        isAlarm1Active.value == true && isAlarm2Active.value == true
-            ? true
-            : false;
+    isAlarmFull.value = isAlarm1Active.value && isAlarm2Active.value;
   }
 
-  incrementTime() {
+  void incrementTime() {
     if (time.value < 60) {
       time.value++;
     }
   }
 
-  decrementTime() {
+  void decrementTime() {
     if (time.value > -60) {
       time.value--;
     }
   }
 
-  static scheduleAlarms() async {
-    DateTime date = DateTime.now();
-
-    String? adhanYear = SharedPrefService.getString("Adhan${date.year}");
-
-    //in case notification permission isn't granted
-    if (!await Permission.notification.isGranted) {
-      return;
-    }
-
-    //in case the adhan data isn't set up
-    if (adhanYear == null) {
-      return;
-    }
-
-    PrayerTime prayerTime = PrayerTime.fromJson(jsonDecode(adhanYear));
-
-    Timings timings =
-        prayerTime.data[date.month.toString()]![date.day - 1].timings;
-
-    Timings tomorrowTimings =
-        prayerTime.data[date.month.toString()]![date.day].timings;
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.fajr,
-        tomorrowTimings: tomorrowTimings.fajr,
-        alarmId: 101,
-        alarmDurationKey: "fajr_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.fajr,
-        tomorrowTimings: tomorrowTimings.fajr,
-        alarmId: 102,
-        alarmDurationKey: "fajr_alarm_2_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.sunrise,
-        tomorrowTimings: tomorrowTimings.sunrise,
-        alarmId: 201,
-        alarmDurationKey: "chourouk_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.sunrise,
-        tomorrowTimings: tomorrowTimings.sunrise,
-        alarmId: 202,
-        alarmDurationKey: "chourouk_alarm_2_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.dhuhr,
-        tomorrowTimings: tomorrowTimings.dhuhr,
-        alarmId: 301,
-        alarmDurationKey: "dhuhr_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.dhuhr,
-        tomorrowTimings: tomorrowTimings.dhuhr,
-        alarmId: 302,
-        alarmDurationKey: "dhuhr_alarm_2_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.asr,
-        tomorrowTimings: tomorrowTimings.asr,
-        alarmId: 401,
-        alarmDurationKey: "asr_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.asr,
-        tomorrowTimings: tomorrowTimings.asr,
-        alarmId: 402,
-        alarmDurationKey: "asr_alarm_2_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.maghrib,
-        tomorrowTimings: tomorrowTimings.maghrib,
-        alarmId: 501,
-        alarmDurationKey: "maghrib_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.maghrib,
-        tomorrowTimings: tomorrowTimings.maghrib,
-        alarmId: 502,
-        alarmDurationKey: "maghrib_alarm_2_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.isha,
-        tomorrowTimings: tomorrowTimings.isha,
-        alarmId: 601,
-        alarmDurationKey: "isha_alarm_1_duration");
-
-    await setUpAdhanAlarm(
-        date: date,
-        timings: timings.isha,
-        tomorrowTimings: tomorrowTimings.isha,
-        alarmId: 602,
-        alarmDurationKey: "isha_alarm_2_duration");
+  @Deprecated('Use AdhanScheduler.sync()')
+  static Future<void> scheduleAlarms() async {
+    await AdhanScheduler.sync();
   }
 
-  Future addAlarm(String alarmActivationKey1, String alarmActivationKey2,
-      String alarmDurationKey1, String alarmDurationKey2, String timing) async {
-    //in case notification permission isn't granted
-    if (!await Permission.notification.isGranted) {
-      return;
-    }
+  Future<void> addAlarm(
+      String alarmActivationKey1,
+      String alarmActivationKey2,
+      String alarmDurationKey1,
+      String alarmDurationKey2,
+      String timing) async {
+    final prayer = Prayer.all.where((p) =>
+        p.alarmId1.toString() == alarmActivationKey1 ||
+        p.alarmId2.toString() == alarmActivationKey2).firstOrNull;
 
-    bool? alarm1IsUp = SharedPrefService.getBool(alarmActivationKey1);
-
-    if (alarm1IsUp == null || alarm1IsUp == false) {
-      await SharedPrefService.setBool(alarmActivationKey1, true);
-
-      await SharedPrefService.setInt(alarmDurationKey1, time.value);
-
-      await setUpAdhanAlarm(
-          date: DateTime.now(),
-          timings: timing,
-          tomorrowTimings: timing,
-          alarmId: int.parse(alarmActivationKey1),
-          alarmDurationKey: alarmDurationKey1);
-
-      return;
-    }
-
-    bool? alarm2IsUp = SharedPrefService.getBool(alarmActivationKey2);
-
-    if (alarm2IsUp == null || alarm2IsUp == false) {
-      SharedPrefService.setBool(alarmActivationKey2, true);
-
-      await SharedPrefService.setInt(alarmDurationKey2, time.value);
-
-      await setUpAdhanAlarm(
-          date: DateTime.now(),
-          timings: timing,
-          tomorrowTimings: timing,
-          alarmId: int.parse(alarmActivationKey2),
-          alarmDurationKey: alarmDurationKey2);
-
-      return;
+    if (prayer != null) {
+      await AdhanScheduler.addReminder(prayer, time.value);
     }
   }
 
-  static Future setUpAdhanAlarm(
-      {required DateTime date,
-      required String timings,
-      required String tomorrowTimings,
-      required int alarmId,
-      required String alarmDurationKey}) async {
-    if (SharedPrefService.getBool(alarmId.toString()) ?? false) {
-      int duration = SharedPrefService.getInt(alarmDurationKey)!;
-      if (date !=
-          SHelperFunctions.turnTimingToDate(timings)
-              .add(Duration(minutes: duration))) {
-        await SHelperFunctions.setUpAlarm(
-            id: alarmId,
-            title: SHelperFunctions.getAlarmNotificationTitle(alarmId),
-            body: SHelperFunctions.getAlarmNotificationBody(alarmId, duration),
-            stopButtonText: SHelperFunctions.getAdhanStopText(),
-            dateTime: date,
-            timing: SHelperFunctions.turnTimingToDate(timings)
-                .add(Duration(minutes: duration)),
-            tomorrowTiming: SHelperFunctions.turnTimingToDate(tomorrowTimings)
-                .add(Duration(minutes: duration, days: 1)),
-            assetAudioPath: SharedPrefService.getString("adhan_sound_path")!);
-      }
-    } else {
-      await SHelperFunctions.cancelAlarm(alarmId);
-    }
+  @Deprecated('Use AdhanScheduler')
+  static Future<void> setUpAdhanAlarm({
+    required DateTime date,
+    required String timings,
+    required String tomorrowTimings,
+    required int alarmId,
+    required String alarmDurationKey,
+  }) async {
+    await AdhanScheduler.sync();
   }
 
   bool isAlarmsFull({required String key1, required String key2}) {
-    bool a1 = SharedPrefService.getBool(key1) ?? false;
-    bool a2 = SharedPrefService.getBool(key2) ?? false;
-
-    if (a1 == true && a2 == true) {
-      return true;
-    } else {
-      return false;
-    }
+    final a1 = AppPrefs.reminderActive(int.tryParse(key1) ?? 0);
+    final a2 = AppPrefs.reminderActive(int.tryParse(key2) ?? 0);
+    return a1 && a2;
   }
 
   String getAlarmText(BuildContext context, int duration) {
     if (duration > 0) {
       return "${S.of(context).alarm_set_for} $duration ${S.of(context).minute_short} ${S.of(context).after_adhan}";
-    } else {}
+    }
     return "${S.of(context).alarm_set_for} ${duration.abs()} ${S.of(context).minute_short} ${S.of(context).before_adhan}";
   }
 }

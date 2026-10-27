@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:noor/generated/l10n.dart';
-
-import '../../utils/constants/colors.dart';
-import '../../utils/constants/sizes.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
 class WaitDialog extends StatelessWidget {
   const WaitDialog({
@@ -17,21 +15,36 @@ class WaitDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SpinKitThreeBounce(color: isDark ? SColors.secondary : SColors.primary),
-        const SizedBox(height: 32),
-        Material(
-          color: Colors.transparent,
-          child: Text(
-            S.of(context).wait_please,
-            style: TextStyle(
-                color: isDark ? SColors.white : SColors.primary,
-                fontSize: isRtl ? SSizes.fontSizeMdAr : SSizes.fontSizeMd),
-          ),
-        )
-      ],
+    final n = context.noor;
+    return Dialog(
+      backgroundColor: n.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: n.isDark ? BorderSide(color: n.line, width: 1) : BorderSide.none,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SpinKitThreeBounce(
+              color: n.primary,
+              size: 28,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              S.of(context).wait_please,
+              textAlign: TextAlign.center,
+              style: NoorText.body(context).copyWith(
+                fontWeight: FontWeight.w500,
+                color: n.ink,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

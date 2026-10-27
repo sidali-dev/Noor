@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:noor/utils/constants/sizes.dart';
-import 'package:noor/utils/helpers/helper_functions.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
 class CheckDialog extends StatefulWidget {
   final String title;
@@ -27,10 +26,9 @@ class _CheckDialogState extends State<CheckDialog>
   void initState() {
     super.initState();
     _lottieController = AnimationController(vsync: this);
-    _lottieController.addStatusListener((status) async {
-      if (status == AnimationStatus.completed) {
-        Navigator.pop(context);
-        _lottieController.reset();
+    _lottieController.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
     });
   }
@@ -43,45 +41,42 @@ class _CheckDialogState extends State<CheckDialog>
 
   @override
   Widget build(BuildContext context) {
-    bool isRtl = SHelperFunctions.isRtl(context);
+    final n = context.noor;
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 35,
-      child: SizedBox(
-        height: 250,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 20),
-              Expanded(
-                child: Lottie.asset(
-                  fit: BoxFit.contain,
-                  widget.imagePath,
-                  repeat: false,
-                  controller: _lottieController,
-                  onLoaded: (p0) {
-                    _lottieController.duration = p0.duration;
-                    _lottieController.forward();
-                  },
-                ),
+      backgroundColor: n.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: n.isDark ? BorderSide(color: n.line, width: 1) : BorderSide.none,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 120,
+              child: Lottie.asset(
+                widget.imagePath,
+                fit: BoxFit.contain,
+                repeat: false,
+                controller: _lottieController,
+                onLoaded: (comp) {
+                  _lottieController.duration = comp.duration;
+                  _lottieController.forward();
+                },
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                flex: 0,
-                child: Text(
-                  widget.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: isRtl ? SSizes.fontSizeLgAr : SSizes.fontSizeLg,
-                      color: widget.color,
-                      fontWeight: FontWeight.w500),
-                ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.title,
+              textAlign: TextAlign.center,
+              style: NoorText.rowTitle(context).copyWith(
+                color:
+                    widget.color == Colors.transparent ? n.ink : widget.color,
               ),
-              const SizedBox(height: 20)
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

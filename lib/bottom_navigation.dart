@@ -2,23 +2,17 @@ import 'dart:async';
 
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
-
+import 'package:noor/features/adhan/adhan_ring_screen.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
 import 'package:noor/features/quran/quran_screen.dart';
-import 'package:noor/utils/constants/colors.dart';
-import 'package:noor/utils/constants/image_strings.dart';
+import 'package:noor/generals/controllers/location_controller.dart';
+import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
-
-import 'features/adhan/adhan_ring_screen.dart';
-import 'generals/controllers/location_controller.dart';
-import 'generals/widgets/settings_dialog.dart';
 
 class SBottomNavigation extends StatelessWidget {
   final int? pageIndex;
@@ -27,104 +21,47 @@ class SBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SBottomNavigationController());
+    if (pageIndex != null) {
+      controller.selectedIndex.value = pageIndex!;
+    }
 
     Get.lazyPut(() => SoundPickerController());
-
     Get.lazyPut(() => AdhanController());
-
     Get.lazyPut(() => LocationController());
 
-    final isDark = SHelperFunctions.isDarkMode(context);
-
     return Scaffold(
-        bottomNavigationBar: Obx(
-          () => NavigationBar(
-              backgroundColor: isDark ? Colors.black : SColors.white,
-              indicatorColor: Colors.transparent,
-              height: 60.0,
-              elevation: 0,
-              selectedIndex: controller.selectedIndex.value,
-              onDestinationSelected: (value) =>
-                  controller.selectedIndex.value = value,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-              destinations: [
-                NavigationDestination(
-                    selectedIcon: SvgPicture.asset(
-                      SImageString.quran,
-                      height: 36,
-                      colorFilter: ColorFilter.mode(
-                          isDark ? SColors.secondary : SColors.primary,
-                          BlendMode.srcIn),
-                    ),
-                    icon: SvgPicture.asset(SImageString.quran,
-                        height: 36,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.grey, BlendMode.srcIn)),
-                    label: 'QURAN'),
-                NavigationDestination(
-                    selectedIcon: SvgPicture.asset(
-                      SImageString.adhan,
-                      height: 36,
-                      colorFilter: ColorFilter.mode(
-                          isDark ? SColors.secondary : SColors.primary,
-                          BlendMode.srcIn),
-                    ),
-                    icon: SvgPicture.asset(SImageString.adhan,
-                        height: 36,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.grey, BlendMode.srcIn)),
-                    label: 'ADHAN'),
-                NavigationDestination(
-                    selectedIcon: SvgPicture.asset(
-                      SImageString.prayingHands,
-                      height: 36,
-                      colorFilter: ColorFilter.mode(
-                          isDark ? SColors.secondary : SColors.primary,
-                          BlendMode.srcIn),
-                    ),
-                    icon: SvgPicture.asset(SImageString.prayingHands,
-                        height: 36,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.grey, BlendMode.srcIn)),
-                    label: 'DUAA'),
-                NavigationDestination(
-                    selectedIcon: SvgPicture.asset(
-                      SImageString.kaaba,
-                      height: 36,
-                      colorFilter: ColorFilter.mode(
-                          isDark ? SColors.secondary : SColors.primary,
-                          BlendMode.srcIn),
-                    ),
-                    icon: SvgPicture.asset(SImageString.kaaba,
-                        height: 36,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.grey, BlendMode.srcIn)),
-                    label: 'COMPASS')
-              ]),
+      extendBody: true,
+      body: Obx(() {
+        switch (controller.selectedIndex.value) {
+          case 0:
+            return const QuranScreen();
+          case 1:
+            return const AdhanScreen();
+          case 2:
+            return DuaaScreen();
+          case 3:
+            return QiblaScreen();
+          default:
+            return const QuranScreen();
+        }
+      }),
+      bottomNavigationBar: Obx(
+        () => NoorNavBar(
+          selectedIndex: controller.selectedIndex.value,
+          onItemSelected: controller.changeIndex,
         ),
-        body: Obx(() => controller.screens[controller.selectedIndex.value]),
-        floatingActionButton: FloatingActionButton.small(
-          shape: const CircleBorder(),
-          onPressed: () {
-            showDialog(
-                context: context, builder: (context) => const DialogSettings());
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Iconsax.setting_4, color: Colors.white),
-        ),
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.miniStartTop);
+      ),
+    );
   }
 }
 
 class SBottomNavigationController extends GetxController {
   static StreamSubscription<AlarmSettings>? _subscription;
 
-  Rx<int> selectedIndex = 0.obs;
+  final Rx<int> selectedIndex = 0.obs;
 
   @override
-  onInit() {
+  void onInit() {
     super.onInit();
     if (Alarm.android) {
       SHelperFunctions.checkAndroidNotificationPermission();
@@ -138,18 +75,12 @@ class SBottomNavigationController extends GetxController {
   }
 
   @override
-  onClose() {
+  void onClose() {
     _subscription?.cancel();
+    super.onClose();
   }
 
-  changeIndex(int index) {
-    selectedIndex = index.obs;
+  void changeIndex(int index) {
+    selectedIndex.value = index;
   }
-
-  final screens = [
-    const QuranScreen(),
-    const AdhanScreen(),
-    DuaaScreen(),
-    QiblaScreen(),
-  ];
 }

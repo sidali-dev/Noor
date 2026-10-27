@@ -1,23 +1,22 @@
 import 'package:get/get.dart';
-
-import '../../utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/utils/local_storage/app_prefs.dart';
 
 class LocationController extends GetxController {
-  RxString country = "".obs;
-  RxString state = "".obs;
-  RxString city = "".obs;
+  final RxString country = "".obs;
+  final RxString state = "".obs;
+  final RxString city = "".obs;
 
-  //upsert the location of the user to shared prefs
-  insertNewLocation(String country, String state, String city) async {
-    await SharedPrefService.setString("country", country);
-    await SharedPrefService.setString("state", state);
-    await SharedPrefService.setString("city", city);
+  Future<void> insertNewLocation(
+      String country, String state, String city) async {
+    await AppPrefs.setLocation(country, state, city);
+    this.country.value = country;
+    this.state.value = state;
+    this.city.value = city;
   }
 
-  //gets the user location from shared prefs
-  getLocation() {
-    country.value = SharedPrefService.getString("country")!;
-    state.value = SharedPrefService.getString("state")!;
-    city.value = SharedPrefService.getString("city")!;
+  void getLocation() {
+    country.value = AppPrefs.country;
+    state.value = AppPrefs.state;
+    city.value = AppPrefs.city;
   }
 }

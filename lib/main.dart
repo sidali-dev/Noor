@@ -1,16 +1,15 @@
+import 'dart:async';
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:noor/features/adhan/adhan_controller.dart';
-import 'package:noor/features/adhan/controllers/adhan_line_controller.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/my_app.dart';
-
 import 'package:noor/utils/helpers/helper_functions.dart';
 import 'package:noor/utils/local_storage/services/database_service.dart';
+import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:workmanager/workmanager.dart';
-
-import 'utils/local_storage/services/sharedpreferences_service.dart';
 
 const String scheduleAdhan = "schedule adhan key";
 
@@ -21,11 +20,8 @@ void callbackDispatcher() {
       case scheduleAdhan:
         try {
           await SharedPrefService.init();
-
           await Alarm.init();
-
-          await AdhanController.scheduleAdhans();
-          await AdhanLineController.scheduleAlarms();
+          await AdhanScheduler.sync();
         } catch (_) {}
       default:
     }
@@ -51,6 +47,8 @@ void main() async {
 
   await Workmanager().registerPeriodicTask("adhan scheduler", scheduleAdhan,
       frequency: const Duration(hours: 12));
+
+  unawaited(AdhanScheduler.sync());
 
   runApp(const MyApp());
 }
