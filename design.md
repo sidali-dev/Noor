@@ -1,4 +1,4 @@
-# Noor Design System
+# Noor Imene Design System
 
 Derived from `assets/screens/Noor Islamic App UI Showcase 1-3.png`. Source of truth in code: `lib/utils/theme/noor_theme.dart` (tokens) and `lib/generals/widgets/` (components).
 
@@ -32,7 +32,7 @@ Derived from `assets/screens/Noor Islamic App UI Showcase 1-3.png`. Source of tr
 ## Typography
 | Role | Face | Size / weight | Notes |
 |---|---|---|---|
-| Wordmark | Spectral | 26 / 500 | "Noor", always LTR |
+| Wordmark | Spectral | 26 / 500 | "Noor Imene", always LTR, single line, scales down to fit |
 | Page title | Amiri Bold (ar) · Spectral Medium (fr/en) | 34 | `ink`, centred or start-aligned per screen |
 | Section title | Plex Sans Arabic | 20 / 600 | |
 | Row title | Plex Sans Arabic | 17 / 600 | |
@@ -50,7 +50,7 @@ Derived from `assets/screens/Noor Islamic App UI Showcase 1-3.png`. Source of tr
 - Motion: 200–300 ms, ease-out-cubic. Page content fades in once; selection changes slide. No looping animation except the compass and the active alarm screen.
 
 ## Components
-- **NoorHeader**: LTR row, sunburst mark + "Noor" wordmark at the start, settings icon button at the end.
+- **NoorHeader**: LTR row, sunburst mark + "Noor Imene" wordmark at the start, settings icon button at the end.
 - **NoorCard**: `card` fill, radius 20, soft shadow, optional ink-well.
 - **IconTile**: 48dp circle in a tint, icon in the tint's icon colour.
 - **NoorListRow**: tile or number circle, title (row title), meta line, chevron that mirrors in RTL. Used for adhkar categories, surahs and hizbs.
@@ -59,6 +59,10 @@ Derived from `assets/screens/Noor Islamic App UI Showcase 1-3.png`. Source of tr
 - **NoorButton**: `primary` filled / `tonal` / `outline`, height 52, radius 16, label 16/600.
 - **NoorSheet** (bottom sheet): `card`, radius 28 top, drag handle, title, content; replaces most dialogs.
 - **NoorNavBar**: floating card, radius 28, 4 items (icon + label), selected = `primary` colour with a 2dp underline pill.
+- **NoorSearchField**: `card` fill, radius 14, 48dp, search icon at the start, clear button when non-empty. Sits under the page title on Adhkar and Quran.
+- **NoorProgressBar**: 4dp rounded track in `line`, fill in `primary`; paired with a small numeral percentage (surah rows) or "n of 604 pages" (continue-reading card).
+- **Calibration sheet**: animated figure-8 guide (a `primary` dot tracing a lemniscate over a faint `line` path), three short steps, then the usual tips.
+- **Tab labels**: Quran, Prayers, Adhkar, Qibla (ar: القرآن، الصلاة، الأذكار، القبلة).
 - **EmptyState**: Lottie or icon tile, one sentence, one `NoorButton`.
 - **Compass dial**: 1.5dp green ring, 60 ticks (major at 15°), N/E/S/W in Spectral, gold fixed heading tick on top, Kaaba glyph centre, green arrow to the qibla.
 

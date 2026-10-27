@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefService {
@@ -9,6 +10,10 @@ class SharedPrefService {
   static Future<SharedPreferences> init() async {
     return _prefs ??= await SharedPreferences.getInstance();
   }
+
+  /// Drops the cached instance so tests can re-init against a fresh mock store.
+  @visibleForTesting
+  static void resetForTest() => _prefs = null;
 
   // Getters for various data types
   static String? getString(String key) {

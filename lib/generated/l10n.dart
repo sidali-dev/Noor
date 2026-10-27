@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -18,8 +19,10 @@ class S {
   static S? _current;
 
   static S get current {
-    assert(_current != null,
-        'No instance of S was loaded. Try to initialize the S delegate before accessing S.current.');
+    assert(
+      _current != null,
+      'No instance of S was loaded. Try to initialize the S delegate before accessing S.current.',
+    );
     return _current!;
   }
 
@@ -41,8 +44,10 @@ class S {
 
   static S of(BuildContext context) {
     final instance = S.maybeOf(context);
-    assert(instance != null,
-        'No instance of S present in the widget tree. Did you add S.delegate in localizationsDelegates?');
+    assert(
+      instance != null,
+      'No instance of S present in the widget tree. Did you add S.delegate in localizationsDelegates?',
+    );
     return instance!;
   }
 
@@ -52,32 +57,17 @@ class S {
 
   /// `Settings`
   String get settings {
-    return Intl.message(
-      'Settings',
-      name: 'settings',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Settings', name: 'settings', desc: '', args: []);
   }
 
   /// `Dark Mode`
   String get dark_mode {
-    return Intl.message(
-      'Dark Mode',
-      name: 'dark_mode',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Dark Mode', name: 'dark_mode', desc: '', args: []);
   }
 
   /// `Language`
   String get language {
-    return Intl.message(
-      'Language',
-      name: 'language',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Language', name: 'language', desc: '', args: []);
   }
 
   /// `Pick Your Location`
@@ -92,32 +82,17 @@ class S {
 
   /// `Country`
   String get country {
-    return Intl.message(
-      'Country',
-      name: 'country',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Country', name: 'country', desc: '', args: []);
   }
 
   /// `State`
   String get state {
-    return Intl.message(
-      'State',
-      name: 'state',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('State', name: 'state', desc: '', args: []);
   }
 
   /// `City`
   String get city {
-    return Intl.message(
-      'City',
-      name: 'city',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('City', name: 'city', desc: '', args: []);
   }
 
   /// `Pick Your Country`
@@ -152,22 +127,12 @@ class S {
 
   /// `Confirm`
   String get confirm {
-    return Intl.message(
-      'Confirm',
-      name: 'confirm',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Confirm', name: 'confirm', desc: '', args: []);
   }
 
   /// `Cancel`
   String get cancel {
-    return Intl.message(
-      'Cancel',
-      name: 'cancel',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
   }
 
   /// `Please add your location`
@@ -182,52 +147,27 @@ class S {
 
   /// `Fajr`
   String get fajr {
-    return Intl.message(
-      'Fajr',
-      name: 'fajr',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Fajr', name: 'fajr', desc: '', args: []);
   }
 
   /// `Dhuhr`
   String get dhuhr {
-    return Intl.message(
-      'Dhuhr',
-      name: 'dhuhr',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Dhuhr', name: 'dhuhr', desc: '', args: []);
   }
 
   /// `Asr`
   String get asr {
-    return Intl.message(
-      'Asr',
-      name: 'asr',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Asr', name: 'asr', desc: '', args: []);
   }
 
   /// `Maghrib`
   String get maghrib {
-    return Intl.message(
-      'Maghrib',
-      name: 'maghrib',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Maghrib', name: 'maghrib', desc: '', args: []);
   }
 
   /// `Isha`
   String get isha {
-    return Intl.message(
-      'Isha',
-      name: 'isha',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Isha', name: 'isha', desc: '', args: []);
   }
 
   /// `Enter Your Location`
@@ -252,12 +192,7 @@ class S {
 
   /// `Sunrise`
   String get sun_rise {
-    return Intl.message(
-      'Sunrise',
-      name: 'sun_rise',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Sunrise', name: 'sun_rise', desc: '', args: []);
   }
 
   /// `This might take a moment`
@@ -290,10 +225,10 @@ class S {
     );
   }
 
-  /// `It's Chourouk Time `
+  /// `It's Chourouk Time`
   String get adhan_chourouk {
     return Intl.message(
-      'It\'s Chourouk Time ',
+      'It\'s Chourouk Time',
       name: 'adhan_chourouk',
       desc: '',
       args: [],
@@ -312,12 +247,7 @@ class S {
 
   /// `Adhan el Asr`
   String get adhan_asr {
-    return Intl.message(
-      'Adhan el Asr',
-      name: 'adhan_asr',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Adhan el Asr', name: 'adhan_asr', desc: '', args: []);
   }
 
   /// `Adhan el Maghrib`
@@ -362,52 +292,27 @@ class S {
 
   /// `it's`
   String get its {
-    return Intl.message(
-      'it\'s',
-      name: 'its',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('it\'s', name: 'its', desc: '', args: []);
   }
 
-  /// `Noor`
+  /// `Noor Imene`
   String get noor {
-    return Intl.message(
-      'Noor',
-      name: 'noor',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Noor Imene', name: 'noor', desc: '', args: []);
   }
 
   /// `Close`
   String get close {
-    return Intl.message(
-      'Close',
-      name: 'close',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Close', name: 'close', desc: '', args: []);
   }
 
   /// `Open Adhkar`
   String get open_adhkar {
-    return Intl.message(
-      'Open Adhkar',
-      name: 'open_adhkar',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Open Adhkar', name: 'open_adhkar', desc: '', args: []);
   }
 
   /// `Pick Adhan`
   String get pick_adhan {
-    return Intl.message(
-      'Pick Adhan',
-      name: 'pick_adhan',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Pick Adhan', name: 'pick_adhan', desc: '', args: []);
   }
 
   /// `Adhan Sheikh Ahmad Alnafees`
@@ -462,22 +367,12 @@ class S {
 
   /// `Today`
   String get today {
-    return Intl.message(
-      'Today',
-      name: 'today',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Today', name: 'today', desc: '', args: []);
   }
 
   /// `El Qiblah`
   String get qiblah {
-    return Intl.message(
-      'El Qiblah',
-      name: 'qiblah',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('El Qiblah', name: 'qiblah', desc: '', args: []);
   }
 
   /// `Please Enable The GPS Signal`
@@ -522,22 +417,12 @@ class S {
 
   /// `Manually`
   String get manually {
-    return Intl.message(
-      'Manually',
-      name: 'manually',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Manually', name: 'manually', desc: '', args: []);
   }
 
   /// `GPS`
   String get gps {
-    return Intl.message(
-      'GPS',
-      name: 'gps',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('GPS', name: 'gps', desc: '', args: []);
   }
 
   /// `Hold Your Phone Flat`
@@ -602,12 +487,7 @@ class S {
 
   /// `Tips`
   String get tips {
-    return Intl.message(
-      'Tips',
-      name: 'tips',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Tips', name: 'tips', desc: '', args: []);
   }
 
   /// `Continue Reading`
@@ -622,42 +502,22 @@ class S {
 
   /// `Last Read`
   String get last_read {
-    return Intl.message(
-      'Last Read',
-      name: 'last_read',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Last Read', name: 'last_read', desc: '', args: []);
   }
 
   /// `Hizb`
   String get hizb {
-    return Intl.message(
-      'Hizb',
-      name: 'hizb',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Hizb', name: 'hizb', desc: '', args: []);
   }
 
   /// `El Adhkar`
   String get adhkar {
-    return Intl.message(
-      'El Adhkar',
-      name: 'adhkar',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('El Adhkar', name: 'adhkar', desc: '', args: []);
   }
 
   /// `Surah`
   String get surah {
-    return Intl.message(
-      'Surah',
-      name: 'surah',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Surah', name: 'surah', desc: '', args: []);
   }
 
   /// `Morning Adhkar`
@@ -732,12 +592,7 @@ class S {
 
   /// `Tasbeehs`
   String get tasbeeh {
-    return Intl.message(
-      'Tasbeehs',
-      name: 'tasbeeh',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Tasbeehs', name: 'tasbeeh', desc: '', args: []);
   }
 
   /// `Prophet's Duaa`
@@ -752,12 +607,7 @@ class S {
 
   /// `Quranic Duaa`
   String get quran_dua {
-    return Intl.message(
-      'Quranic Duaa',
-      name: 'quran_dua',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Quranic Duaa', name: 'quran_dua', desc: '', args: []);
   }
 
   /// `Prophets' Duaa`
@@ -802,12 +652,7 @@ class S {
 
   /// `Wudu Adhkar`
   String get wudu_adhkar {
-    return Intl.message(
-      'Wudu Adhkar',
-      name: 'wudu_adhkar',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Wudu Adhkar', name: 'wudu_adhkar', desc: '', args: []);
   }
 
   /// `Adhkar for Entering and Leaving the House`
@@ -852,32 +697,17 @@ class S {
 
   /// `Repetition`
   String get repetition {
-    return Intl.message(
-      'Repetition',
-      name: 'repetition',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Repetition', name: 'repetition', desc: '', args: []);
   }
 
   /// `Bookmarks`
   String get bookmarks {
-    return Intl.message(
-      'Bookmarks',
-      name: 'bookmarks',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Bookmarks', name: 'bookmarks', desc: '', args: []);
   }
 
   /// `Page`
   String get page {
-    return Intl.message(
-      'Page',
-      name: 'page',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Page', name: 'page', desc: '', args: []);
   }
 
   /// `No Bookmarks`
@@ -892,12 +722,7 @@ class S {
 
   /// `Stop Adhan`
   String get stop_adhan {
-    return Intl.message(
-      'Stop Adhan',
-      name: 'stop_adhan',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Stop Adhan', name: 'stop_adhan', desc: '', args: []);
   }
 
   /// `set new alarm`
@@ -912,12 +737,7 @@ class S {
 
   /// `min`
   String get minute_short {
-    return Intl.message(
-      'min',
-      name: 'minute_short',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('min', name: 'minute_short', desc: '', args: []);
   }
 
   /// `Alarm set for`
@@ -942,9 +762,329 @@ class S {
 
   /// `after adhan`
   String get after_adhan {
+    return Intl.message('after adhan', name: 'after_adhan', desc: '', args: []);
+  }
+
+  /// `Quran`
+  String get nav_quran {
+    return Intl.message('Quran', name: 'nav_quran', desc: '', args: []);
+  }
+
+  /// `Prayers`
+  String get nav_prayers {
+    return Intl.message('Prayers', name: 'nav_prayers', desc: '', args: []);
+  }
+
+  /// `Adhkar`
+  String get nav_adhkar {
+    return Intl.message('Adhkar', name: 'nav_adhkar', desc: '', args: []);
+  }
+
+  /// `Qibla`
+  String get nav_qibla {
+    return Intl.message('Qibla', name: 'nav_qibla', desc: '', args: []);
+  }
+
+  /// `Peace for the heart, calm for the soul`
+  String get adhkar_subtitle {
     return Intl.message(
-      'after adhan',
-      name: 'after_adhan',
+      'Peace for the heart, calm for the soul',
+      name: 'adhkar_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Noble Quran`
+  String get quran_title {
+    return Intl.message(
+      'The Noble Quran',
+      name: 'quran_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `God's words, a light for your life`
+  String get quran_subtitle {
+    return Intl.message(
+      'God\'s words, a light for your life',
+      name: 'quran_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} verses`
+  String verse_count(int count) {
+    return Intl.message(
+      '$count verses',
+      name: 'verse_count',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} adhkar`
+  String adhkar_count(int count) {
+    return Intl.message(
+      '$count adhkar',
+      name: 'adhkar_count',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Meccan`
+  String get meccan {
+    return Intl.message('Meccan', name: 'meccan', desc: '', args: []);
+  }
+
+  /// `Medinan`
+  String get medinan {
+    return Intl.message('Medinan', name: 'medinan', desc: '', args: []);
+  }
+
+  /// `Qibla direction`
+  String get qibla_direction {
+    return Intl.message(
+      'Qibla direction',
+      name: 'qibla_direction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Distance to the Kaaba`
+  String get distance_to_kaaba {
+    return Intl.message(
+      'Distance to the Kaaba',
+      name: 'distance_to_kaaba',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next`
+  String get next_prayer {
+    return Intl.message('Next', name: 'next_prayer', desc: '', args: []);
+  }
+
+  /// `{prayer} in {time}`
+  String next_prayer_in(String prayer, String time) {
+    return Intl.message(
+      '$prayer in $time',
+      name: 'next_prayer_in',
+      desc: '',
+      args: [prayer, time],
+    );
+  }
+
+  /// `{hours}h {minutes}m`
+  String duration_hm(int hours, int minutes) {
+    return Intl.message(
+      '${hours}h ${minutes}m',
+      name: 'duration_hm',
+      desc: '',
+      args: [hours, minutes],
+    );
+  }
+
+  /// `{minutes}m`
+  String duration_m(int minutes) {
+    return Intl.message(
+      '${minutes}m',
+      name: 'duration_m',
+      desc: '',
+      args: [minutes],
+    );
+  }
+
+  /// `Remove`
+  String get remove {
+    return Intl.message('Remove', name: 'remove', desc: '', args: []);
+  }
+
+  /// `Done`
+  String get done {
+    return Intl.message('Done', name: 'done', desc: '', args: []);
+  }
+
+  /// `Try again`
+  String get try_again {
+    return Intl.message('Try again', name: 'try_again', desc: '', args: []);
+  }
+
+  /// `Open settings`
+  String get open_settings {
+    return Intl.message(
+      'Open settings',
+      name: 'open_settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reminders`
+  String get reminders {
+    return Intl.message('Reminders', name: 'reminders', desc: '', args: []);
+  }
+
+  /// `Couldn't find your location`
+  String get location_failed {
+    return Intl.message(
+      'Couldn\'t find your location',
+      name: 'location_failed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{prayer} reminder`
+  String reminder_title(String prayer) {
+    return Intl.message(
+      '$prayer reminder',
+      name: 'reminder_title',
+      desc: '',
+      args: [prayer],
+    );
+  }
+
+  /// `{minutes} min until {prayer}`
+  String reminder_before(int minutes, String prayer) {
+    return Intl.message(
+      '$minutes min until $prayer',
+      name: 'reminder_before',
+      desc: '',
+      args: [minutes, prayer],
+    );
+  }
+
+  /// `{minutes} min since {prayer}`
+  String reminder_after(int minutes, String prayer) {
+    return Intl.message(
+      '$minutes min since $prayer',
+      name: 'reminder_after',
+      desc: '',
+      args: [minutes, prayer],
+    );
+  }
+
+  /// `Search adhkar`
+  String get search_adhkar {
+    return Intl.message(
+      'Search adhkar',
+      name: 'search_adhkar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search surah`
+  String get search_surah {
+    return Intl.message(
+      'Search surah',
+      name: 'search_surah',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No results`
+  String get no_results {
+    return Intl.message('No results', name: 'no_results', desc: '', args: []);
+  }
+
+  /// `In the adhkar`
+  String get in_adhkar_text {
+    return Intl.message(
+      'In the adhkar',
+      name: 'in_adhkar_text',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reading progress`
+  String get reading_progress {
+    return Intl.message(
+      'Reading progress',
+      name: 'reading_progress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{read} of {total} pages`
+  String pages_read(int read, int total) {
+    return Intl.message(
+      '$read of $total pages',
+      name: 'pages_read',
+      desc: '',
+      args: [read, total],
+    );
+  }
+
+  /// `Reset reading progress`
+  String get reset_progress {
+    return Intl.message(
+      'Reset reading progress',
+      name: 'reset_progress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This clears the pages marked as read. Your bookmarks are kept.`
+  String get reset_progress_body {
+    return Intl.message(
+      'This clears the pages marked as read. Your bookmarks are kept.',
+      name: 'reset_progress_body',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calibrate`
+  String get calibrate {
+    return Intl.message('Calibrate', name: 'calibrate', desc: '', args: []);
+  }
+
+  /// `Calibrate the compass`
+  String get calibrate_title {
+    return Intl.message(
+      'Calibrate the compass',
+      name: 'calibrate_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move your phone in a slow figure-8 a few times.`
+  String get calibrate_step_1 {
+    return Intl.message(
+      'Move your phone in a slow figure-8 a few times.',
+      name: 'calibrate_step_1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep away from metal, magnets and speakers.`
+  String get calibrate_step_2 {
+    return Intl.message(
+      'Keep away from metal, magnets and speakers.',
+      name: 'calibrate_step_2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hold the phone flat, then check the arrow again.`
+  String get calibrate_step_3 {
+    return Intl.message(
+      'Hold the phone flat, then check the arrow again.',
+      name: 'calibrate_step_3',
       desc: '',
       args: [],
     );

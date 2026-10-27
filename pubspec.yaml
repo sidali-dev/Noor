@@ -1,4 +1,4 @@
-﻿name: noor
+name: noor
 description: "A new Flutter project."
 publish_to: 'none'
 
@@ -81,6 +81,26 @@ flutter:
           weight: 800
         - asset: assets\fonts\poppins\Poppins-ExtraBold.ttf
           weight: 900
+
+    - family: Plex
+      fonts:
+        - asset: assets/fonts/plex/IBMPlexSansArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/plex/IBMPlexSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/plex/IBMPlexSansArabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/plex/IBMPlexSansArabic-Bold.ttf
+          weight: 700
+
+    - family: Spectral
+      fonts:
+        - asset: assets/fonts/spectral/Spectral-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/spectral/Spectral-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/spectral/Spectral-SemiBold.ttf
+          weight: 600
 
     - family: Amiri
       fonts:

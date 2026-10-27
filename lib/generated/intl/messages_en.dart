@@ -20,134 +20,234 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(count) => "${count} adhkar";
+
+  static String m1(hours, minutes) => "${hours}h ${minutes}m";
+
+  static String m2(minutes) => "${minutes}m";
+
+  static String m3(prayer, time) => "${prayer} in ${time}";
+
+  static String m4(read, total) => "${read} of ${total} pages";
+
+  static String m5(minutes, prayer) => "${minutes} min since ${prayer}";
+
+  static String m6(minutes, prayer) => "${minutes} min until ${prayer}";
+
+  static String m7(prayer) => "${prayer} reminder";
+
+  static String m8(count) => "${count} verses";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "add_location":
-            MessageLookupByLibrary.simpleMessage("Please add your location"),
-        "adhan_adhkar": MessageLookupByLibrary.simpleMessage(
-            "Adhkar for Hearing the Adhan"),
-        "adhan_asr": MessageLookupByLibrary.simpleMessage("Adhan el Asr"),
-        "adhan_chourouk":
-            MessageLookupByLibrary.simpleMessage("It\'s Chourouk Time "),
-        "adhan_dhuhr": MessageLookupByLibrary.simpleMessage("Adhan el Dhuhr"),
-        "adhan_fajr": MessageLookupByLibrary.simpleMessage("Adhan el Fajr"),
-        "adhan_isha": MessageLookupByLibrary.simpleMessage("Adhan el Isha"),
-        "adhan_maghrib":
-            MessageLookupByLibrary.simpleMessage("Adhan el Maghrib"),
-        "adhkar": MessageLookupByLibrary.simpleMessage("El Adhkar"),
-        "after_adhan": MessageLookupByLibrary.simpleMessage("after adhan"),
-        "after_prayer_adhkar":
-            MessageLookupByLibrary.simpleMessage("After Prayer Adhkar"),
-        "alarm_set_for": MessageLookupByLibrary.simpleMessage("Alarm set for"),
-        "asr": MessageLookupByLibrary.simpleMessage("Asr"),
-        "before_adhan": MessageLookupByLibrary.simpleMessage("before adhan"),
-        "bookmarks": MessageLookupByLibrary.simpleMessage("Bookmarks"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
-        "chikh_afassy_1":
-            MessageLookupByLibrary.simpleMessage("Adhan Sheikh Alafasy 1"),
-        "chikh_elkourdi":
-            MessageLookupByLibrary.simpleMessage("Adhan Sheikh Ahmed Elkourdi"),
-        "chikh_elmajali":
-            MessageLookupByLibrary.simpleMessage("Adhan Sheikh Hamza Elmajali"),
-        "chikh_nafees":
-            MessageLookupByLibrary.simpleMessage("Adhan Sheikh Ahmad Alnafees"),
-        "chilh_afassy_2":
-            MessageLookupByLibrary.simpleMessage("Adhan Sheikh Alafasy 2"),
-        "city": MessageLookupByLibrary.simpleMessage("City"),
-        "close": MessageLookupByLibrary.simpleMessage("Close"),
-        "comprehensive_duaa":
-            MessageLookupByLibrary.simpleMessage("Comprehensive Duaa"),
-        "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
-        "continue_reading":
-            MessageLookupByLibrary.simpleMessage("Continue Reading"),
-        "country": MessageLookupByLibrary.simpleMessage("Country"),
-        "dark_mode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
-        "dhuhr": MessageLookupByLibrary.simpleMessage("Dhuhr"),
-        "enable_location": MessageLookupByLibrary.simpleMessage(
-            "Please Enable The GPS Signal"),
-        "enable_location_body": MessageLookupByLibrary.simpleMessage(
-            "Make sure your phone\'s GPS and location services are turned on. This can help improve the accuracy of the compass by providing additional data."),
-        "enable_location_permission": MessageLookupByLibrary.simpleMessage(
-            "Please Enable Location Permission"),
-        "enable_location_title":
-            MessageLookupByLibrary.simpleMessage("Enable Location Services"),
-        "enter_location":
-            MessageLookupByLibrary.simpleMessage("Enter Your Location"),
-        "evening_adhkar":
-            MessageLookupByLibrary.simpleMessage("Evening Adhkar"),
-        "fajr": MessageLookupByLibrary.simpleMessage("Fajr"),
-        "flat_phone_body": MessageLookupByLibrary.simpleMessage(
-            "For the most accurate reading, hold your phone flat in your hand, parallel to the ground. Tilting the phone can affect the compass reading."),
-        "flat_phone_title":
-            MessageLookupByLibrary.simpleMessage("Hold Your Phone Flat"),
-        "general_Adhkar":
-            MessageLookupByLibrary.simpleMessage("General Adhkar"),
-        "gps": MessageLookupByLibrary.simpleMessage("GPS"),
-        "hajj_adhkar":
-            MessageLookupByLibrary.simpleMessage("Hajj and Umrah Adhkar"),
-        "hizb": MessageLookupByLibrary.simpleMessage("Hizb"),
-        "home_adhkar": MessageLookupByLibrary.simpleMessage(
-            "Adhkar for Entering and Leaving the House"),
-        "isha": MessageLookupByLibrary.simpleMessage("Isha"),
-        "its": MessageLookupByLibrary.simpleMessage("it\'s"),
-        "keep_from_magnetic_body": MessageLookupByLibrary.simpleMessage(
-            "Avoid using your phone\'s compass near large metal objects, electrical equipment, or magnets, as these can interfere with the accuracy of the compass."),
-        "keep_from_magnetic_title": MessageLookupByLibrary.simpleMessage(
-            "Keep Away from Magnetic Interference"),
-        "language": MessageLookupByLibrary.simpleMessage("Language"),
-        "last_read": MessageLookupByLibrary.simpleMessage("Last Read"),
-        "maghrib": MessageLookupByLibrary.simpleMessage("Maghrib"),
-        "manually": MessageLookupByLibrary.simpleMessage("Manually"),
-        "masjid_time":
-            MessageLookupByLibrary.simpleMessage("Time to go to the Masjid"),
-        "meal_adhkar": MessageLookupByLibrary.simpleMessage(
-            "Adhkar for Food, Drink, and Guests"),
-        "minute_short": MessageLookupByLibrary.simpleMessage("min"),
-        "morning_adhkar":
-            MessageLookupByLibrary.simpleMessage("Morning Adhkar"),
-        "mosque_adhkar": MessageLookupByLibrary.simpleMessage("Mosque Adhkar"),
-        "no_bookmarks": MessageLookupByLibrary.simpleMessage("No Bookmarks"),
-        "no_internet":
-            MessageLookupByLibrary.simpleMessage("No Internet Connection"),
-        "noor": MessageLookupByLibrary.simpleMessage("Noor"),
-        "open_adhkar": MessageLookupByLibrary.simpleMessage("Open Adhkar"),
-        "page": MessageLookupByLibrary.simpleMessage("Page"),
-        "pick_adhan": MessageLookupByLibrary.simpleMessage("Pick Adhan"),
-        "pick_city": MessageLookupByLibrary.simpleMessage("Pick Your City"),
-        "pick_country":
-            MessageLookupByLibrary.simpleMessage("Pick Your Country"),
-        "pick_location":
-            MessageLookupByLibrary.simpleMessage("Pick Your Location"),
-        "pick_state": MessageLookupByLibrary.simpleMessage("Pick Your State"),
-        "prayer_adhkar": MessageLookupByLibrary.simpleMessage("Prayer Adhkar"),
-        "prophet_dua": MessageLookupByLibrary.simpleMessage("Prophet\'s Duaa"),
-        "prophets_dua": MessageLookupByLibrary.simpleMessage("Prophets\' Duaa"),
-        "qiblah": MessageLookupByLibrary.simpleMessage("El Qiblah"),
-        "qiblah_is_at":
-            MessageLookupByLibrary.simpleMessage("The Qiblah is at"),
-        "quran_dua": MessageLookupByLibrary.simpleMessage("Quranic Duaa"),
-        "repetition": MessageLookupByLibrary.simpleMessage("Repetition"),
-        "sensor_not_supported": MessageLookupByLibrary.simpleMessage(
-            "Your Device Does Not Support The Sensor"),
-        "set_new_alarm": MessageLookupByLibrary.simpleMessage("set new alarm"),
-        "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "sleep_adhkar": MessageLookupByLibrary.simpleMessage("Sleeping Adhkar"),
-        "state": MessageLookupByLibrary.simpleMessage("State"),
-        "stop_adhan": MessageLookupByLibrary.simpleMessage("Stop Adhan"),
-        "sun_rise": MessageLookupByLibrary.simpleMessage("Sunrise"),
-        "sun_rising": MessageLookupByLibrary.simpleMessage("Sun is Rising"),
-        "surah": MessageLookupByLibrary.simpleMessage("Surah"),
-        "tasbeeh": MessageLookupByLibrary.simpleMessage("Tasbeehs"),
-        "tips": MessageLookupByLibrary.simpleMessage("Tips"),
-        "today": MessageLookupByLibrary.simpleMessage("Today"),
-        "wait_please":
-            MessageLookupByLibrary.simpleMessage("This might take a moment"),
-        "wake_up_adhkar":
-            MessageLookupByLibrary.simpleMessage("Waking Up Adhkar"),
-        "wc_adhkar": MessageLookupByLibrary.simpleMessage(
-            "Adhkar for Entering and Leaving the Bathroom"),
-        "wudu_adhkar": MessageLookupByLibrary.simpleMessage("Wudu Adhkar"),
-        "year_ended": MessageLookupByLibrary.simpleMessage(
-            "The days of the year are over")
-      };
+    "add_location": MessageLookupByLibrary.simpleMessage(
+      "Please add your location",
+    ),
+    "adhan_adhkar": MessageLookupByLibrary.simpleMessage(
+      "Adhkar for Hearing the Adhan",
+    ),
+    "adhan_asr": MessageLookupByLibrary.simpleMessage("Adhan el Asr"),
+    "adhan_chourouk": MessageLookupByLibrary.simpleMessage(
+      "It\'s Chourouk Time",
+    ),
+    "adhan_dhuhr": MessageLookupByLibrary.simpleMessage("Adhan el Dhuhr"),
+    "adhan_fajr": MessageLookupByLibrary.simpleMessage("Adhan el Fajr"),
+    "adhan_isha": MessageLookupByLibrary.simpleMessage("Adhan el Isha"),
+    "adhan_maghrib": MessageLookupByLibrary.simpleMessage("Adhan el Maghrib"),
+    "adhkar": MessageLookupByLibrary.simpleMessage("El Adhkar"),
+    "adhkar_count": m0,
+    "adhkar_subtitle": MessageLookupByLibrary.simpleMessage(
+      "Peace for the heart, calm for the soul",
+    ),
+    "after_adhan": MessageLookupByLibrary.simpleMessage("after adhan"),
+    "after_prayer_adhkar": MessageLookupByLibrary.simpleMessage(
+      "After Prayer Adhkar",
+    ),
+    "alarm_set_for": MessageLookupByLibrary.simpleMessage("Alarm set for"),
+    "asr": MessageLookupByLibrary.simpleMessage("Asr"),
+    "before_adhan": MessageLookupByLibrary.simpleMessage("before adhan"),
+    "bookmarks": MessageLookupByLibrary.simpleMessage("Bookmarks"),
+    "calibrate": MessageLookupByLibrary.simpleMessage("Calibrate"),
+    "calibrate_step_1": MessageLookupByLibrary.simpleMessage(
+      "Move your phone in a slow figure-8 a few times.",
+    ),
+    "calibrate_step_2": MessageLookupByLibrary.simpleMessage(
+      "Keep away from metal, magnets and speakers.",
+    ),
+    "calibrate_step_3": MessageLookupByLibrary.simpleMessage(
+      "Hold the phone flat, then check the arrow again.",
+    ),
+    "calibrate_title": MessageLookupByLibrary.simpleMessage(
+      "Calibrate the compass",
+    ),
+    "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "chikh_afassy_1": MessageLookupByLibrary.simpleMessage(
+      "Adhan Sheikh Alafasy 1",
+    ),
+    "chikh_elkourdi": MessageLookupByLibrary.simpleMessage(
+      "Adhan Sheikh Ahmed Elkourdi",
+    ),
+    "chikh_elmajali": MessageLookupByLibrary.simpleMessage(
+      "Adhan Sheikh Hamza Elmajali",
+    ),
+    "chikh_nafees": MessageLookupByLibrary.simpleMessage(
+      "Adhan Sheikh Ahmad Alnafees",
+    ),
+    "chilh_afassy_2": MessageLookupByLibrary.simpleMessage(
+      "Adhan Sheikh Alafasy 2",
+    ),
+    "city": MessageLookupByLibrary.simpleMessage("City"),
+    "close": MessageLookupByLibrary.simpleMessage("Close"),
+    "comprehensive_duaa": MessageLookupByLibrary.simpleMessage(
+      "Comprehensive Duaa",
+    ),
+    "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+    "continue_reading": MessageLookupByLibrary.simpleMessage(
+      "Continue Reading",
+    ),
+    "country": MessageLookupByLibrary.simpleMessage("Country"),
+    "dark_mode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
+    "dhuhr": MessageLookupByLibrary.simpleMessage("Dhuhr"),
+    "distance_to_kaaba": MessageLookupByLibrary.simpleMessage(
+      "Distance to the Kaaba",
+    ),
+    "done": MessageLookupByLibrary.simpleMessage("Done"),
+    "duration_hm": m1,
+    "duration_m": m2,
+    "enable_location": MessageLookupByLibrary.simpleMessage(
+      "Please Enable The GPS Signal",
+    ),
+    "enable_location_body": MessageLookupByLibrary.simpleMessage(
+      "Make sure your phone\'s GPS and location services are turned on. This can help improve the accuracy of the compass by providing additional data.",
+    ),
+    "enable_location_permission": MessageLookupByLibrary.simpleMessage(
+      "Please Enable Location Permission",
+    ),
+    "enable_location_title": MessageLookupByLibrary.simpleMessage(
+      "Enable Location Services",
+    ),
+    "enter_location": MessageLookupByLibrary.simpleMessage(
+      "Enter Your Location",
+    ),
+    "evening_adhkar": MessageLookupByLibrary.simpleMessage("Evening Adhkar"),
+    "fajr": MessageLookupByLibrary.simpleMessage("Fajr"),
+    "flat_phone_body": MessageLookupByLibrary.simpleMessage(
+      "For the most accurate reading, hold your phone flat in your hand, parallel to the ground. Tilting the phone can affect the compass reading.",
+    ),
+    "flat_phone_title": MessageLookupByLibrary.simpleMessage(
+      "Hold Your Phone Flat",
+    ),
+    "general_Adhkar": MessageLookupByLibrary.simpleMessage("General Adhkar"),
+    "gps": MessageLookupByLibrary.simpleMessage("GPS"),
+    "hajj_adhkar": MessageLookupByLibrary.simpleMessage(
+      "Hajj and Umrah Adhkar",
+    ),
+    "hizb": MessageLookupByLibrary.simpleMessage("Hizb"),
+    "home_adhkar": MessageLookupByLibrary.simpleMessage(
+      "Adhkar for Entering and Leaving the House",
+    ),
+    "in_adhkar_text": MessageLookupByLibrary.simpleMessage("In the adhkar"),
+    "isha": MessageLookupByLibrary.simpleMessage("Isha"),
+    "its": MessageLookupByLibrary.simpleMessage("it\'s"),
+    "keep_from_magnetic_body": MessageLookupByLibrary.simpleMessage(
+      "Avoid using your phone\'s compass near large metal objects, electrical equipment, or magnets, as these can interfere with the accuracy of the compass.",
+    ),
+    "keep_from_magnetic_title": MessageLookupByLibrary.simpleMessage(
+      "Keep Away from Magnetic Interference",
+    ),
+    "language": MessageLookupByLibrary.simpleMessage("Language"),
+    "last_read": MessageLookupByLibrary.simpleMessage("Last Read"),
+    "location_failed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t find your location",
+    ),
+    "maghrib": MessageLookupByLibrary.simpleMessage("Maghrib"),
+    "manually": MessageLookupByLibrary.simpleMessage("Manually"),
+    "masjid_time": MessageLookupByLibrary.simpleMessage(
+      "Time to go to the Masjid",
+    ),
+    "meal_adhkar": MessageLookupByLibrary.simpleMessage(
+      "Adhkar for Food, Drink, and Guests",
+    ),
+    "meccan": MessageLookupByLibrary.simpleMessage("Meccan"),
+    "medinan": MessageLookupByLibrary.simpleMessage("Medinan"),
+    "minute_short": MessageLookupByLibrary.simpleMessage("min"),
+    "morning_adhkar": MessageLookupByLibrary.simpleMessage("Morning Adhkar"),
+    "mosque_adhkar": MessageLookupByLibrary.simpleMessage("Mosque Adhkar"),
+    "nav_adhkar": MessageLookupByLibrary.simpleMessage("Adhkar"),
+    "nav_prayers": MessageLookupByLibrary.simpleMessage("Prayers"),
+    "nav_qibla": MessageLookupByLibrary.simpleMessage("Qibla"),
+    "nav_quran": MessageLookupByLibrary.simpleMessage("Quran"),
+    "next_prayer": MessageLookupByLibrary.simpleMessage("Next"),
+    "next_prayer_in": m3,
+    "no_bookmarks": MessageLookupByLibrary.simpleMessage("No Bookmarks"),
+    "no_internet": MessageLookupByLibrary.simpleMessage(
+      "No Internet Connection",
+    ),
+    "no_results": MessageLookupByLibrary.simpleMessage("No results"),
+    "noor": MessageLookupByLibrary.simpleMessage("Noor Imene"),
+    "open_adhkar": MessageLookupByLibrary.simpleMessage("Open Adhkar"),
+    "open_settings": MessageLookupByLibrary.simpleMessage("Open settings"),
+    "page": MessageLookupByLibrary.simpleMessage("Page"),
+    "pages_read": m4,
+    "pick_adhan": MessageLookupByLibrary.simpleMessage("Pick Adhan"),
+    "pick_city": MessageLookupByLibrary.simpleMessage("Pick Your City"),
+    "pick_country": MessageLookupByLibrary.simpleMessage("Pick Your Country"),
+    "pick_location": MessageLookupByLibrary.simpleMessage("Pick Your Location"),
+    "pick_state": MessageLookupByLibrary.simpleMessage("Pick Your State"),
+    "prayer_adhkar": MessageLookupByLibrary.simpleMessage("Prayer Adhkar"),
+    "prophet_dua": MessageLookupByLibrary.simpleMessage("Prophet\'s Duaa"),
+    "prophets_dua": MessageLookupByLibrary.simpleMessage("Prophets\' Duaa"),
+    "qibla_direction": MessageLookupByLibrary.simpleMessage("Qibla direction"),
+    "qiblah": MessageLookupByLibrary.simpleMessage("El Qiblah"),
+    "qiblah_is_at": MessageLookupByLibrary.simpleMessage("The Qiblah is at"),
+    "quran_dua": MessageLookupByLibrary.simpleMessage("Quranic Duaa"),
+    "quran_subtitle": MessageLookupByLibrary.simpleMessage(
+      "God\'s words, a light for your life",
+    ),
+    "quran_title": MessageLookupByLibrary.simpleMessage("The Noble Quran"),
+    "reading_progress": MessageLookupByLibrary.simpleMessage(
+      "Reading progress",
+    ),
+    "reminder_after": m5,
+    "reminder_before": m6,
+    "reminder_title": m7,
+    "reminders": MessageLookupByLibrary.simpleMessage("Reminders"),
+    "remove": MessageLookupByLibrary.simpleMessage("Remove"),
+    "repetition": MessageLookupByLibrary.simpleMessage("Repetition"),
+    "reset_progress": MessageLookupByLibrary.simpleMessage(
+      "Reset reading progress",
+    ),
+    "reset_progress_body": MessageLookupByLibrary.simpleMessage(
+      "This clears the pages marked as read. Your bookmarks are kept.",
+    ),
+    "search_adhkar": MessageLookupByLibrary.simpleMessage("Search adhkar"),
+    "search_surah": MessageLookupByLibrary.simpleMessage("Search surah"),
+    "sensor_not_supported": MessageLookupByLibrary.simpleMessage(
+      "Your Device Does Not Support The Sensor",
+    ),
+    "set_new_alarm": MessageLookupByLibrary.simpleMessage("set new alarm"),
+    "settings": MessageLookupByLibrary.simpleMessage("Settings"),
+    "sleep_adhkar": MessageLookupByLibrary.simpleMessage("Sleeping Adhkar"),
+    "state": MessageLookupByLibrary.simpleMessage("State"),
+    "stop_adhan": MessageLookupByLibrary.simpleMessage("Stop Adhan"),
+    "sun_rise": MessageLookupByLibrary.simpleMessage("Sunrise"),
+    "sun_rising": MessageLookupByLibrary.simpleMessage("Sun is Rising"),
+    "surah": MessageLookupByLibrary.simpleMessage("Surah"),
+    "tasbeeh": MessageLookupByLibrary.simpleMessage("Tasbeehs"),
+    "tips": MessageLookupByLibrary.simpleMessage("Tips"),
+    "today": MessageLookupByLibrary.simpleMessage("Today"),
+    "try_again": MessageLookupByLibrary.simpleMessage("Try again"),
+    "verse_count": m8,
+    "wait_please": MessageLookupByLibrary.simpleMessage(
+      "This might take a moment",
+    ),
+    "wake_up_adhkar": MessageLookupByLibrary.simpleMessage("Waking Up Adhkar"),
+    "wc_adhkar": MessageLookupByLibrary.simpleMessage(
+      "Adhkar for Entering and Leaving the Bathroom",
+    ),
+    "wudu_adhkar": MessageLookupByLibrary.simpleMessage("Wudu Adhkar"),
+    "year_ended": MessageLookupByLibrary.simpleMessage(
+      "The days of the year are over",
+    ),
+  };
 }

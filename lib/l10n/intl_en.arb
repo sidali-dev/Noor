@@ -23,7 +23,7 @@
     "wait_please" : "This might take a moment",
     "year_ended" : "The days of the year are over",
     "adhan_fajr" : "Adhan el Fajr",
-    "adhan_chourouk" : "It's Chourouk Time ",
+    "adhan_chourouk" : "It's Chourouk Time",
     "adhan_dhuhr" : "Adhan el Dhuhr",
     "adhan_asr" : "Adhan el Asr",
     "adhan_maghrib" : "Adhan el Maghrib",
@@ -31,7 +31,7 @@
     "masjid_time" : "Time to go to the Masjid",
     "sun_rising" : "Sun is Rising",
     "its" : "it's",
-    "noor" : "Noor",
+    "noor" : "Noor Imene",
     "close" : "Close",
     "open_adhkar" : "Open Adhkar" ,
     "pick_adhan" : "Pick Adhan",
@@ -88,7 +88,96 @@
     "minute_short": "min",
     "alarm_set_for": "Alarm set for",
     "before_adhan": "before adhan",
-    "after_adhan": "after adhan"
+    "after_adhan": "after adhan",
+    "nav_quran" : "Quran",
+    "nav_prayers" : "Prayers",
+    "nav_adhkar" : "Adhkar",
+    "nav_qibla" : "Qibla",
+    "adhkar_subtitle" : "Peace for the heart, calm for the soul",
+    "quran_title" : "The Noble Quran",
+    "quran_subtitle" : "God's words, a light for your life",
+    "verse_count" : "{count} verses",
+    "@verse_count" : {
+        "placeholders" : {
+            "count" : { "type" : "int" }
+        }
+    },
+    "adhkar_count" : "{count} adhkar",
+    "@adhkar_count" : {
+        "placeholders" : {
+            "count" : { "type" : "int" }
+        }
+    },
+    "meccan" : "Meccan",
+    "medinan" : "Medinan",
+    "qibla_direction" : "Qibla direction",
+    "distance_to_kaaba" : "Distance to the Kaaba",
+    "next_prayer" : "Next",
+    "next_prayer_in" : "{prayer} in {time}",
+    "@next_prayer_in" : {
+        "placeholders" : {
+            "prayer" : { "type" : "String" },
+            "time" : { "type" : "String" }
+        }
+    },
+    "duration_hm" : "{hours}h {minutes}m",
+    "@duration_hm" : {
+        "placeholders" : {
+            "hours" : { "type" : "int" },
+            "minutes" : { "type" : "int" }
+        }
+    },
+    "duration_m" : "{minutes}m",
+    "@duration_m" : {
+        "placeholders" : {
+            "minutes" : { "type" : "int" }
+        }
+    },
+    "remove" : "Remove",
+    "done" : "Done",
+    "try_again" : "Try again",
+    "open_settings" : "Open settings",
+    "reminders" : "Reminders",
+    "location_failed" : "Couldn't find your location",
+    "reminder_title" : "{prayer} reminder",
+    "@reminder_title" : {
+        "placeholders" : {
+            "prayer" : { "type" : "String" }
+        }
+    },
+    "reminder_before" : "{minutes} min until {prayer}",
+    "@reminder_before" : {
+        "placeholders" : {
+            "minutes" : { "type" : "int" },
+            "prayer" : { "type" : "String" }
+        }
+    },
+    "reminder_after" : "{minutes} min since {prayer}",
+    "@reminder_after" : {
+        "placeholders" : {
+            "minutes" : { "type" : "int" },
+            "prayer" : { "type" : "String" }
+        }
+    },
+    "search_adhkar" : "Search adhkar",
+    "search_surah" : "Search surah",
+    "no_results" : "No results",
+    "in_adhkar_text" : "In the adhkar",
+    "reading_progress" : "Reading progress",
+    "pages_read" : "{read} of {total} pages",
+    "@pages_read" : {
+        "placeholders" : {
+            "read" : { "type" : "int" },
+            "total" : { "type" : "int" }
+        }
+    },
+    "reset_progress" : "Reset reading progress",
+    "reset_progress_body" : "This clears the pages marked as read. Your bookmarks are kept.",
+    "calibrate" : "Calibrate",
+    "calibrate_title" : "Calibrate the compass",
+    "calibrate_step_1" : "Move your phone in a slow figure-8 a few times.",
+    "calibrate_step_2" : "Keep away from metal, magnets and speakers.",
+    "calibrate_step_3" : "Hold the phone flat, then check the arrow again."
 
 
 

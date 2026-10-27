@@ -20,10 +20,10 @@ Noor puts a Muslim's daily worship in one calm, offline-friendly app: adhan alar
 - No account, no analytics, no ads.
 
 ## Brand Commitments
-Name: Noor (نور, "light"). Brand mark: a small sunburst beside the serif wordmark. References that are binding: `assets/screens/Noor Islamic App UI Showcase 1-3.png`.
+Name: Noor Imene (نور إيمان, "light of faith"). Brand mark: a small sunburst beside the serif wordmark "Noor Imene". The Dart package name `noor` and the application id `com.sidalidev.noor` stay unchanged. References that are binding: `assets/screens/Noor Islamic App UI Showcase 1-3.png`.
 
 ## Evidence on Hand
-Three reference screens (Adhkar, Qibla, Quran) in `assets/screens/`. Real per-surah reading progress, search and compass calibration do not exist in the app and must not be faked.
+Three reference screens (Adhkar, Qibla, Quran) in `assets/screens/`. Reading progress, search and compass calibration are new features: progress is computed only from pages the user actually dwelled on, search runs over real adhkar and surah data, and the calibration sheet guides the user but never claims to calibrate the sensor. None of these may show invented numbers.
 
 ## Product Principles
 1. Calm over clever: nothing flashes, nothing competes with the text of worship.
