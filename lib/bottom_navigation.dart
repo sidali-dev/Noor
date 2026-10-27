@@ -31,19 +31,28 @@ class SBottomNavigation extends StatelessWidget {
 
     return Scaffold(
       extendBody: true,
+      // Tabs are built on first visit and then kept, so switching is a repaint
+      // (the nav circle animates smoothly) and tabs keep their state. Qibla
+      // is mounted only while shown, so the compass sensor is not left running.
       body: Obx(() {
-        switch (controller.selectedIndex.value) {
-          case 0:
-            return const QuranScreen();
-          case 1:
-            return const AdhanScreen();
-          case 2:
-            return const DuaaScreen();
-          case 3:
-            return const QiblaScreen();
-          default:
-            return const QuranScreen();
-        }
+        final i = controller.selectedIndex.value;
+        controller.visited.add(i);
+        const tabs = [
+          QuranScreen(),
+          AdhanScreen(),
+          DuaaScreen(),
+          QiblaScreen(),
+        ];
+        return IndexedStack(
+          index: i,
+          sizing: StackFit.expand,
+          children: [
+            for (var k = 0; k < tabs.length; k++)
+              controller.visited.contains(k) && (k != 3 || k == i)
+                  ? tabs[k]
+                  : const SizedBox.shrink(),
+          ],
+        );
       }),
       bottomNavigationBar: Obx(
         () => NoorNavBar(
@@ -59,6 +68,7 @@ class SBottomNavigationController extends GetxController {
   static StreamSubscription<AlarmSettings>? _subscription;
 
   final Rx<int> selectedIndex = 0.obs;
+  final Set<int> visited = {};
 
   @override
   void onInit() {
@@ -81,6 +91,8 @@ class SBottomNavigationController extends GetxController {
   }
 
   void changeIndex(int index) {
+    // An offstage tab would otherwise keep the keyboard open.
+    FocusManager.instance.primaryFocus?.unfocus();
     selectedIndex.value = index;
   }
 }

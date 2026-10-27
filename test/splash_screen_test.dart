@@ -13,15 +13,15 @@ void main() {
       theme: NoorTheme.light(),
       home: SplashScreen(ready: ready.future, next: (_) => const Text('shell')),
     ));
-    await tester.runAsync(() => Future<void>.delayed(
-        const Duration(milliseconds: 300)));
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('shell'), findsNothing);
     expect(find.text('NOOR IMENE'), findsOneWidget);
 
     ready.complete();
-    await tester.runAsync(() => Future<void>.delayed(
-        const Duration(milliseconds: 100)));
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('shell'), findsOneWidget);

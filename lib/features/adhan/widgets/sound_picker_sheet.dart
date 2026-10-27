@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/sound_string.dart';
@@ -58,115 +58,112 @@ Future<void> showAdhanSoundPickerSheet(BuildContext context) async {
   await soundController.stopPreview();
 }
 
-class SoundPickerSheet extends StatelessWidget {
+class SoundPickerSheet extends StatefulWidget {
   const SoundPickerSheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final soundController = Get.find<SoundPickerController>();
-    final n = context.noor;
-    final selectedPath = AppPrefs.adhanSoundPath;
+  State<SoundPickerSheet> createState() => _SoundPickerSheetState();
+}
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < kAdhanSoundOptions.length; i++) ...[
-          if (i > 0)
-            Divider(
-              color: n.line,
-              height: 1,
-              thickness: 1,
-              indent: NoorSpace.md,
-              endIndent: NoorSpace.md,
+class _SoundPickerSheetState extends State<SoundPickerSheet> {
+  final _sound = Get.find<SoundPickerController>();
+  String _selected = AppPrefs.adhanSoundPath;
+
+  Future<void> _save() async {
+    final option = kAdhanSoundOptions.firstWhere((o) => o.path == _selected);
+    final title = option.titleBuilder(context);
+    await AppPrefs.setAdhanSoundPath(option.path);
+    await AppPrefs.setAdhanSoundName(title);
+    _sound.updateAdhanName();
+    await _sound.stopPreview();
+    try {
+      await AdhanScheduler.sync();
+    } catch (_) {}
+    if (mounted && Navigator.of(context).canPop()) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RadioGroup<String>(
+      groupValue: _selected,
+      onChanged: (v) {
+        if (v == null || v == _selected) return;
+        _sound.stopPreview();
+        setState(() => _selected = v);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final o in kAdhanSoundOptions)
+            _SoundRow(
+              option: o,
+              selected: o.path == _selected,
+              onTap: () {
+                if (o.path == _selected) return;
+                _sound.stopPreview();
+                setState(() => _selected = o.path);
+              },
             ),
-          _SoundRow(
-            option: kAdhanSoundOptions[i],
-            isSelected: selectedPath == kAdhanSoundOptions[i].path,
-            onSelect: () async {
-              final title = kAdhanSoundOptions[i].titleBuilder(context);
-              await AppPrefs.setAdhanSoundPath(kAdhanSoundOptions[i].path);
-              await AppPrefs.setAdhanSoundName(title);
-              soundController.updateAdhanName();
-              try {
-                await soundController.stopPreview();
-              } catch (_) {}
-              try {
-                await AdhanScheduler.sync();
-              } catch (_) {}
-              if (context.mounted && Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
+          const SizedBox(height: NoorSpace.xl),
+          NoorButton(label: S.of(context).save, onPressed: _save),
         ],
-      ],
+      ),
     );
   }
 }
 
 class _SoundRow extends StatelessWidget {
   final SoundOption option;
-  final bool isSelected;
-  final VoidCallback onSelect;
+  final bool selected;
+  final VoidCallback onTap;
 
   const _SoundRow({
     required this.option,
-    required this.isSelected,
-    required this.onSelect,
+    required this.selected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final soundController = Get.find<SoundPickerController>();
-    final title = option.titleBuilder(context);
+    final sound = Get.find<SoundPickerController>();
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onSelect,
-        borderRadius: BorderRadius.circular(NoorRadius.tile),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: NoorSpace.md,
-            vertical: NoorSpace.sm + 2,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                isSelected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
-                color: isSelected ? n.primary : n.muted,
-                size: 22,
-              ),
-              const SizedBox(width: NoorSpace.md),
-              Expanded(
-                child: Text(
-                  title,
-                  style: NoorText.rowTitle(context).copyWith(
-                    color: isSelected ? n.ink : n.body,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(NoorRadius.tile),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Row(
+          children: [
+            Radio<String>(value: option.path, activeColor: n.primary),
+            Expanded(
+              child: Text(
+                option.titleBuilder(context),
+                style: NoorText.rowTitle(context).copyWith(
+                  color: selected ? n.ink : n.body,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
+            if (selected)
               Obx(() {
-                final isPlayingThis =
-                    soundController.playingPath.value == option.path;
+                final playing = sound.playingPath.value == option.path;
                 return IconButton(
-                  icon: Icon(
-                    isPlayingThis ? Iconsax.pause_circle : Iconsax.play_circle,
-                    color: isPlayingThis ? n.primary : n.muted,
-                    size: 24,
+                  style: IconButton.styleFrom(
+                    backgroundColor: n.tintBg(NoorTint.sage),
+                    minimumSize: const Size(48, 48),
                   ),
-                  tooltip: isPlayingThis ? 'Pause' : 'Play',
-                  onPressed: () => soundController.togglePreview(option.path),
+                  icon: Icon(
+                    playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                    color: n.primary,
+                  ),
+                  onPressed: () => sound.togglePreview(option.path),
                 );
               }),
-            ],
-          ),
+          ],
         ),
       ),
     );

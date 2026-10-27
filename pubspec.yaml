@@ -30,8 +30,6 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^3.0.0
   quran: ^1.3.0
-  sqflite: ^2.3.3+1
-  path: ^1.9.0
   carousel_slider: ^5.1.2
   
 dev_dependencies:
@@ -61,7 +59,7 @@ flutter:
     - assets/logo/noor_imene_emblem.svg
     - assets/logo/noor_imene_emblem_dark.svg
     - assets/sounds/
-    - assets/noor.db
+    - assets/data/adhkar.json
 
   #------------- LOCAL FONTS -------------#
   fonts:

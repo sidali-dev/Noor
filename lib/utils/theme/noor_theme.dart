@@ -246,14 +246,6 @@ abstract final class NoorText {
         color: color ?? c.noor.ink,
       );
 
-  static TextStyle wordmark(BuildContext c) => TextStyle(
-        fontFamily: _spectral,
-        fontFamilyFallback: const [_plex, _amiri],
-        fontSize: 26,
-        fontWeight: FontWeight.w500,
-        color: c.noor.ink,
-      );
-
   static TextStyle dhikr(BuildContext c) => TextStyle(
         fontFamily: _amiri,
         fontSize: 24,

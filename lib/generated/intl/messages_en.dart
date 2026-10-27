@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(count) => "${count} adhkar";
+  static String m0(count) => "${count} athkar";
 
   static String m1(hours, minutes) => "${hours}h ${minutes}m";
 
@@ -44,7 +44,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "Please add your location",
         ),
         "adhan_adhkar": MessageLookupByLibrary.simpleMessage(
-          "Adhkar for Hearing the Adhan",
+          "Athkar for Hearing the Adhan",
         ),
         "adhan_asr": MessageLookupByLibrary.simpleMessage("Adhan el Asr"),
         "adhan_chourouk": MessageLookupByLibrary.simpleMessage(
@@ -55,21 +55,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "adhan_isha": MessageLookupByLibrary.simpleMessage("Adhan el Isha"),
         "adhan_maghrib":
             MessageLookupByLibrary.simpleMessage("Adhan el Maghrib"),
-        "back": MessageLookupByLibrary.simpleMessage("Back"),
-        "info": MessageLookupByLibrary.simpleMessage("Info"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("Bookmark"),
-        "adhkar": MessageLookupByLibrary.simpleMessage("Adhkar"),
+        "adhkar": MessageLookupByLibrary.simpleMessage("Athkar"),
         "adhkar_count": m0,
         "adhkar_subtitle": MessageLookupByLibrary.simpleMessage(
           "Peace for the heart, calm for the soul",
         ),
         "after_adhan": MessageLookupByLibrary.simpleMessage("after adhan"),
         "after_prayer_adhkar": MessageLookupByLibrary.simpleMessage(
-          "After Prayer Adhkar",
+          "After Prayer Athkar",
         ),
         "alarm_set_for": MessageLookupByLibrary.simpleMessage("Alarm set for"),
         "asr": MessageLookupByLibrary.simpleMessage("Asr"),
+        "back": MessageLookupByLibrary.simpleMessage("Back"),
         "before_adhan": MessageLookupByLibrary.simpleMessage("before adhan"),
+        "bookmark": MessageLookupByLibrary.simpleMessage("Bookmark"),
         "bookmarks": MessageLookupByLibrary.simpleMessage("Bookmarks"),
         "calibrate": MessageLookupByLibrary.simpleMessage("Calibrate"),
         "calibrate_step_1": MessageLookupByLibrary.simpleMessage(
@@ -106,6 +105,10 @@ class MessageLookup extends MessageLookupByLibrary {
           "Comprehensive Duaa",
         ),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "confirm_location": MessageLookupByLibrary.simpleMessage(
+          "Confirm Location",
+        ),
         "continue_reading": MessageLookupByLibrary.simpleMessage(
           "Continue Reading",
         ),
@@ -134,7 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "Enter Your Location",
         ),
         "evening_adhkar":
-            MessageLookupByLibrary.simpleMessage("Evening Adhkar"),
+            MessageLookupByLibrary.simpleMessage("Evening Athkar"),
         "fajr": MessageLookupByLibrary.simpleMessage("Fajr"),
         "flat_phone_body": MessageLookupByLibrary.simpleMessage(
           "For the most accurate reading, hold your phone flat in your hand, parallel to the ground. Tilting the phone can affect the compass reading.",
@@ -143,16 +146,20 @@ class MessageLookup extends MessageLookupByLibrary {
           "Hold Your Phone Flat",
         ),
         "general_Adhkar":
-            MessageLookupByLibrary.simpleMessage("General Adhkar"),
+            MessageLookupByLibrary.simpleMessage("General Athkar"),
         "gps": MessageLookupByLibrary.simpleMessage("GPS"),
+        "gps_subtitle": MessageLookupByLibrary.simpleMessage(
+          "Use your current location",
+        ),
         "hajj_adhkar": MessageLookupByLibrary.simpleMessage(
-          "Hajj and Umrah Adhkar",
+          "Hajj and Umrah Athkar",
         ),
         "hizb": MessageLookupByLibrary.simpleMessage("Hizb"),
         "home_adhkar": MessageLookupByLibrary.simpleMessage(
-          "Adhkar for Entering and Leaving the House",
+          "Athkar for Entering and Leaving the House",
         ),
-        "in_adhkar_text": MessageLookupByLibrary.simpleMessage("In the adhkar"),
+        "in_adhkar_text": MessageLookupByLibrary.simpleMessage("In the athkar"),
+        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "isha": MessageLookupByLibrary.simpleMessage("Isha"),
         "its": MessageLookupByLibrary.simpleMessage("it\'s"),
         "keep_from_magnetic_body": MessageLookupByLibrary.simpleMessage(
@@ -166,21 +173,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "location_failed": MessageLookupByLibrary.simpleMessage(
           "Couldn\'t find your location",
         ),
+        "location_subtitle": MessageLookupByLibrary.simpleMessage(
+          "To get accurate prayer times",
+        ),
+        "location_title": MessageLookupByLibrary.simpleMessage(
+          "Enter Your Location",
+        ),
         "maghrib": MessageLookupByLibrary.simpleMessage("Maghrib"),
+        "manual_subtitle": MessageLookupByLibrary.simpleMessage(
+          "Pick your city / wilaya",
+        ),
         "manually": MessageLookupByLibrary.simpleMessage("Manually"),
         "masjid_time": MessageLookupByLibrary.simpleMessage(
           "Time to go to the Masjid",
         ),
         "meal_adhkar": MessageLookupByLibrary.simpleMessage(
-          "Adhkar for Food, Drink, and Guests",
+          "Athkar for Food, Drink, and Guests",
         ),
         "meccan": MessageLookupByLibrary.simpleMessage("Meccan"),
         "medinan": MessageLookupByLibrary.simpleMessage("Medinan"),
         "minute_short": MessageLookupByLibrary.simpleMessage("min"),
         "morning_adhkar":
-            MessageLookupByLibrary.simpleMessage("Morning Adhkar"),
-        "mosque_adhkar": MessageLookupByLibrary.simpleMessage("Mosque Adhkar"),
-        "nav_adhkar": MessageLookupByLibrary.simpleMessage("Adhkar"),
+            MessageLookupByLibrary.simpleMessage("Morning Athkar"),
+        "mosque_adhkar": MessageLookupByLibrary.simpleMessage("Mosque Athkar"),
+        "nav_adhkar": MessageLookupByLibrary.simpleMessage("Athkar"),
         "nav_prayers": MessageLookupByLibrary.simpleMessage("Prayers"),
         "nav_qibla": MessageLookupByLibrary.simpleMessage("Qibla"),
         "nav_quran": MessageLookupByLibrary.simpleMessage("Quran"),
@@ -192,7 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "no_results": MessageLookupByLibrary.simpleMessage("No results"),
         "noor": MessageLookupByLibrary.simpleMessage("Noor Imene"),
-        "open_adhkar": MessageLookupByLibrary.simpleMessage("Open Adhkar"),
+        "open_adhkar": MessageLookupByLibrary.simpleMessage("Open Athkar"),
         "open_settings": MessageLookupByLibrary.simpleMessage("Open settings"),
         "page": MessageLookupByLibrary.simpleMessage("Page"),
         "pages_read": m4,
@@ -203,7 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pick_location":
             MessageLookupByLibrary.simpleMessage("Pick Your Location"),
         "pick_state": MessageLookupByLibrary.simpleMessage("Pick Your State"),
-        "prayer_adhkar": MessageLookupByLibrary.simpleMessage("Prayer Adhkar"),
+        "prayer_adhkar": MessageLookupByLibrary.simpleMessage("Prayer Athkar"),
         "prophet_dua": MessageLookupByLibrary.simpleMessage("Prophet\'s Duaa"),
         "prophets_dua": MessageLookupByLibrary.simpleMessage("Prophets\' Duaa"),
         "qibla_direction":
@@ -231,19 +247,31 @@ class MessageLookup extends MessageLookupByLibrary {
         "reset_progress_body": MessageLookupByLibrary.simpleMessage(
           "This clears the pages marked as read. Your bookmarks are kept.",
         ),
-        "search_adhkar": MessageLookupByLibrary.simpleMessage("Search adhkar"),
+        "search_adhkar": MessageLookupByLibrary.simpleMessage("Search athkar"),
         "search_surah": MessageLookupByLibrary.simpleMessage("Search surah"),
         "sensor_not_supported": MessageLookupByLibrary.simpleMessage(
           "Your Device Does Not Support The Sensor",
         ),
         "set_new_alarm": MessageLookupByLibrary.simpleMessage("set new alarm"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "sleep_adhkar": MessageLookupByLibrary.simpleMessage("Sleeping Adhkar"),
+        "sleep_adhkar": MessageLookupByLibrary.simpleMessage("Sleeping Athkar"),
         "state": MessageLookupByLibrary.simpleMessage("State"),
         "stop_adhan": MessageLookupByLibrary.simpleMessage("Stop Adhan"),
         "sun_rise": MessageLookupByLibrary.simpleMessage("Sunrise"),
         "sun_rising": MessageLookupByLibrary.simpleMessage("Sun is Rising"),
         "surah": MessageLookupByLibrary.simpleMessage("Surah"),
+        "tagline_adhkar": MessageLookupByLibrary.simpleMessage(
+          "Surely in the remembrance of Allah do hearts find rest. — Ar-Ra’d 13:28",
+        ),
+        "tagline_prayers": MessageLookupByLibrary.simpleMessage(
+          "Establish prayer for My remembrance. — Ta-Ha 20:14",
+        ),
+        "tagline_qibla": MessageLookupByLibrary.simpleMessage(
+          "Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144",
+        ),
+        "tagline_quran": MessageLookupByLibrary.simpleMessage(
+          "Indeed, this Quran guides to what is most upright. — Al-Isra 17:9",
+        ),
         "tasbeeh": MessageLookupByLibrary.simpleMessage("Tasbeehs"),
         "tips": MessageLookupByLibrary.simpleMessage("Tips"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
@@ -253,11 +281,11 @@ class MessageLookup extends MessageLookupByLibrary {
           "This might take a moment",
         ),
         "wake_up_adhkar":
-            MessageLookupByLibrary.simpleMessage("Waking Up Adhkar"),
+            MessageLookupByLibrary.simpleMessage("Waking Up Athkar"),
         "wc_adhkar": MessageLookupByLibrary.simpleMessage(
-          "Adhkar for Entering and Leaving the Bathroom",
+          "Athkar for Entering and Leaving the Bathroom",
         ),
-        "wudu_adhkar": MessageLookupByLibrary.simpleMessage("Wudu Adhkar"),
+        "wudu_adhkar": MessageLookupByLibrary.simpleMessage("Wudu Athkar"),
         "year_ended": MessageLookupByLibrary.simpleMessage(
           "The days of the year are over",
         ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
+import 'package:noor/features/quran/widgets/mushaf_frame.dart';
+import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -80,6 +82,12 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     }
   }
 
+  void _goToPage(int index) => _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+      );
+
   void _toggleChrome() {
     setState(() {
       _showChrome = !_showChrome;
@@ -91,6 +99,8 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     final n = context.noor;
     final pageNumber = _currentPage + 1;
     final isBookmarked = AppPrefs.bookmarks.contains(pageNumber);
+    // The page and pager are always RTL; the top bar follows the app language.
+    final appDirection = Directionality.of(context);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -121,7 +131,10 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                   curve: Curves.easeOutCubic,
                   child: IgnorePointer(
                     ignoring: !_showChrome,
-                    child: _buildTopBar(context, pageNumber, isBookmarked),
+                    child: Directionality(
+                      textDirection: appDirection,
+                      child: _buildTopBar(context, pageNumber, isBookmarked),
+                    ),
                   ),
                 ),
               ),
@@ -185,18 +198,13 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
               children: [
                 Text(
                   surahName,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: n.ink,
-                  ),
+                  style: NoorText.rowTitle(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   "${S.of(context).page} $pageNumber",
-                  style: NoorText.meta(context).copyWith(fontSize: 12),
+                  style: NoorText.meta(context),
                   maxLines: 1,
                 ),
               ],
@@ -220,23 +228,19 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context, int pageNumber) {
-    final n = context.noor;
+    final page = S.of(context).page;
+    final hasPrev = _currentPage > 0;
+    final hasNext = _currentPage < quran.totalPagesCount - 1;
+    // The pill sits in the reader's RTL Directionality, so "previous" is at
+    // the start (right) and "next" at the end (left): left = next page (U7).
     return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: NoorSpace.lg,
-          vertical: NoorSpace.xs,
-        ),
-        decoration: BoxDecoration(
-          color: n.card.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: n.line),
-          boxShadow: noorShadow(context),
-        ),
-        child: Text(
-          '$pageNumber',
-          style: NoorText.numeral(context, size: 14, color: n.muted),
-        ),
+      child: NoorPagerPill(
+        split: true,
+        label: '$pageNumber',
+        previousTooltip: '$page ${pageNumber - 1}',
+        nextTooltip: '$page ${pageNumber + 1}',
+        onPrevious: hasPrev ? () => _goToPage(_currentPage - 1) : null,
+        onNext: hasNext ? () => _goToPage(_currentPage + 1) : null,
       ),
     );
   }
@@ -244,34 +248,23 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
   Widget _buildPageContent(BuildContext context, int pageNumber) {
     final n = context.noor;
     final pageData = quran.getPageData(pageNumber);
-    final spans = <InlineSpan>[];
+    final children = <Widget>[];
 
-    for (var i = 0; i < pageData.length; i++) {
-      final data = pageData[i];
+    for (final data in pageData) {
       final surah = data["surah"] as int;
       final start = data["start"] as int;
       final end = data["end"] as int;
 
       if (start == 1) {
-        if (spans.isNotEmpty) {
-          spans.add(const TextSpan(text: '\n\n'));
-        }
-        spans.add(
-          TextSpan(
-            text: 'سورة ${quran.getSurahNameArabic(surah)}\n',
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: n.gold,
-              height: 2.2,
-            ),
-          ),
+        if (children.isNotEmpty) children.add(const SizedBox(height: 44));
+        children.add(
+          SurahCartouche(name: 'سورة ${quran.getSurahNameArabic(surah)}'),
         );
         if (surah != 1 && surah != 9) {
-          spans.add(
-            TextSpan(
-              text: '${quran.basmala}\n',
+          children.add(
+            Text(
+              quran.basmala,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Quran',
                 fontSize: 20,
@@ -289,9 +282,10 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
         if (v < end) buf.write(' ');
       }
 
-      spans.add(
-        TextSpan(
-          text: buf.toString(),
+      children.add(
+        Text(
+          buf.toString(),
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Quran',
             fontSize: 22,
@@ -302,17 +296,30 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
       );
     }
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          NoorSpace.xl,
-          56,
-          NoorSpace.xl,
-          88, // clear the floating page-number pill
-        ),
-        child: Text.rich(
-          TextSpan(children: spans),
-          textAlign: TextAlign.center,
+    // Frame margins + padding add up to the old 20 / 56 / 88, so the text
+    // keeps its width and clears the top bar and the pager pill.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        NoorSpace.sm,
+        NoorSpace.sm,
+        NoorSpace.sm,
+        NoorSpace.sm,
+      ),
+      child: MushafFrame(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              NoorSpace.md,
+              48,
+              NoorSpace.md,
+              72,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
         ),
       ),
     );

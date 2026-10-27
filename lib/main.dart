@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/my_app.dart';
-import 'package:noor/utils/local_storage/services/database_service.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -43,7 +43,7 @@ void main() async {
 
 /// The rest of startup, in its original order. The custom splash waits on it.
 Future<void> _startup() async {
-  await DatabaseService.init();
+  await AdhkarData.init();
 
   await Alarm.init();
 

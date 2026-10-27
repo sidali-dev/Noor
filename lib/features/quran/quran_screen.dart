@@ -7,10 +7,9 @@ import 'package:noor/features/quran/screens/read_quran_screen.dart';
 import 'package:noor/features/quran/widgets/bookmarks_sheet.dart';
 import 'package:noor/features/quran/widgets/surah_line.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_header.dart';
+import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_progress_bar.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
@@ -32,100 +31,68 @@ class QuranScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: n.paper,
-      body: SafeArea(
-        bottom: false,
-        child: Obx(() {
-          // Track progressRevision and query so CustomScrollView rebuilds lazily
-          controller.progressRevision.value;
-          controller.searchQuery.value;
-          final tabIndex = controller.currentIndex.value;
+      body: Obx(() {
+        // Track progressRevision and query so CustomScrollView rebuilds lazily
+        controller.progressRevision.value;
+        controller.searchQuery.value;
+        final tabIndex = controller.currentIndex.value;
 
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const NoorHeader(),
-                    const SizedBox(height: NoorSpace.lg),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  S.of(context).quran_title,
-                                  style: NoorText.display(context),
-                                ),
-                                const SizedBox(height: NoorSpace.xs),
-                                Text(
-                                  S.of(context).quran_subtitle,
-                                  style: NoorText.meta(context)
-                                      .copyWith(fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: NoorSpace.md),
-                          const IconTile(
-                            svg: SImageString.quran,
-                            tint: NoorTint.sage,
-                            size: 56,
-                          ),
-                        ],
-                      ),
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  NoorHero(
+                    art: NoorArt.heroQuran,
+                    title: S.of(context).nav_quran,
+                    subtitle: S.of(context).tagline_quran,
+                    overlap: NoorSearchField(
+                      hint: S.of(context).search_surah,
+                      onChanged: controller.setQuery,
                     ),
-                    const SizedBox(height: NoorSpace.lg),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                      child: NoorSearchField(
-                        hint: S.of(context).search_surah,
-                        onChanged: controller.setQuery,
-                      ),
-                    ),
+                  ),
+                  // Without a last-read page and any dwelled page there is
+                  // nothing to continue from.
+                  if (controller.lastReadPageNumber.value > 1 ||
+                      QuranProgress.readCount > 0) ...[
                     const SizedBox(height: NoorSpace.lg),
                     Padding(
                       padding:
                           const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
                       child: _buildContinueReadingCard(context, controller),
                     ),
-                    const SizedBox(height: NoorSpace.lg),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                      child: NoorSegmented<int>(
-                        items: [
-                          (value: 0, label: S.of(context).surah),
-                          (value: 1, label: S.of(context).hizb),
-                        ],
-                        value: tabIndex,
-                        onChanged: controller.changeIndex,
-                      ),
-                    ),
-                    const SizedBox(height: NoorSpace.md),
                   ],
-                ),
+                  const SizedBox(height: NoorSpace.lg),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
+                    child: NoorSegmented<int>(
+                      items: [
+                        (value: 0, label: S.of(context).surah),
+                        (value: 1, label: S.of(context).hizb),
+                      ],
+                      value: tabIndex,
+                      onChanged: controller.changeIndex,
+                    ),
+                  ),
+                  const SizedBox(height: NoorSpace.md),
+                ],
               ),
-              SliverPadding(
-                padding: const EdgeInsets.only(
-                  left: NoorSpace.xl,
-                  right: NoorSpace.xl,
-                  bottom: 96,
-                ),
-                sliver: tabIndex == 0
-                    ? _buildSurahList(context, controller)
-                    : _buildHizbList(context, controller),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.only(
+                left: NoorSpace.xl,
+                right: NoorSpace.xl,
+                bottom: 96,
               ),
-            ],
-          );
-        }),
-      ),
+              sliver: tabIndex == 0
+                  ? _buildSurahList(context, controller)
+                  : _buildHizbList(context, controller),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -148,47 +115,30 @@ class QuranScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                S.of(context).last_read,
-                style: NoorText.meta(context),
-              ),
+              Text(S.of(context).last_read, style: NoorText.meta(context)),
               const Spacer(),
-              GestureDetector(
-                onTap: () => _showResetProgressSheet(context, controller),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: n.muted,
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: NoorSpace.sm),
+                ),
+                onPressed: () => _showResetProgressSheet(context, controller),
                 child: Text(
                   S.of(context).reset_progress,
-                  style: NoorText.meta(context).copyWith(
-                    color: n.muted,
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: NoorText.meta(context),
                 ),
               ),
             ],
           ),
+          Text(subtitle, style: NoorText.rowTitle(context)),
           const SizedBox(height: NoorSpace.xs),
           Text(
-            subtitle,
-            style: NoorText.rowTitle(context).copyWith(fontSize: 18),
+            S.of(context).pages_read(readCount, 604),
+            style: NoorText.meta(context),
           ),
           const SizedBox(height: NoorSpace.md),
-          Row(
-            children: [
-              Expanded(
-                child: NoorProgressBar(
-                  value: overallFraction,
-                  height: 5,
-                ),
-              ),
-              const SizedBox(width: NoorSpace.md),
-              Text(
-                S.of(context).pages_read(readCount, 604),
-                style: NoorText.meta(context).copyWith(
-                  fontFamily: 'Spectral',
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
+          NoorProgressBar(value: overallFraction, height: 6),
           const SizedBox(height: NoorSpace.lg),
           Row(
             children: [
@@ -203,19 +153,22 @@ class QuranScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: NoorSpace.sm),
-              Material(
-                color: n.tintBg(NoorTint.sage),
-                borderRadius: BorderRadius.circular(NoorRadius.tile),
-                child: InkWell(
+              Tooltip(
+                message: S.of(context).bookmarks,
+                child: Material(
+                  color: n.tintBg(NoorTint.sage),
                   borderRadius: BorderRadius.circular(NoorRadius.tile),
-                  onTap: () => showBookmarksSheet(context),
-                  child: SizedBox(
-                    width: 52,
-                    height: 52,
-                    child: Icon(
-                      Icons.bookmark_rounded,
-                      color: n.primary,
-                      size: 24,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(NoorRadius.tile),
+                    onTap: () => showBookmarksSheet(context),
+                    child: SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: Icon(
+                        Icons.bookmark_rounded,
+                        color: n.isDark ? n.ink : n.primary,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),

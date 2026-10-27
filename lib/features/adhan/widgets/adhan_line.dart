@@ -107,210 +107,239 @@ class _AdhanLineState extends State<AdhanLine> {
     final s = S.of(context);
     final reminders = AdhanScheduler.reminders(widget.prayer);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _isExpanded = !_isExpanded;
-          });
-        },
-        borderRadius: BorderRadius.circular(NoorRadius.tile),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: NoorSpace.lg,
-            vertical: NoorSpace.md,
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  IconTile(
-                    icon: widget.prayer.icon,
-                    tint: widget.prayer.tint,
-                    size: 40,
-                  ),
-                  const SizedBox(width: NoorSpace.md),
-                  if (widget.isNext) ...[
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: n.gold,
-                        shape: BoxShape.circle,
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final next = widget.isNext;
+    final radius = BorderRadius.circular(NoorRadius.tile);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xs),
+      child: Material(
+        color: next ? n.tintBg(NoorTint.sage) : Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              NoorSpace.md,
+              NoorSpace.sm,
+              NoorSpace.xs,
+              NoorSpace.sm,
+            ).resolve(Directionality.of(context)),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    if (next)
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: n.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.prayer.icon,
+                          size: 22,
+                          color: n.onPrimary,
+                        ),
+                      )
+                    else
+                      IconTile(
+                        icon: widget.prayer.icon,
+                        tint: widget.prayer.tint,
+                        size: 44,
+                      ),
+                    const SizedBox(width: NoorSpace.md),
+                    Expanded(
+                      child: Text(
+                        widget.prayer.localizedTitle(context),
+                        style: NoorText.rowTitle(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: NoorSpace.xs),
-                  ],
-                  Text(
-                    widget.prayer.localizedTitle(context),
-                    style: NoorText.rowTitle(context).copyWith(color: n.ink),
-                  ),
-                  const Spacer(),
-                  Text(
-                    widget.time,
-                    style: NoorText.numeral(context, size: 20),
-                  ),
-                  const SizedBox(width: NoorSpace.sm),
-                  Obx(() {
-                    final isEnabled =
-                        controller.enabledFor(widget.prayer.key).value;
-                    return IconButton(
-                      icon: Icon(
-                        isEnabled ? Iconsax.volume_high : Iconsax.volume_cross,
-                        color: isEnabled ? n.primary : n.muted,
+                    Text(widget.time, style: NoorText.numeral(context)),
+                    Obx(() {
+                      final isEnabled =
+                          controller.enabledFor(widget.prayer.key).value;
+                      return IconButton(
+                        icon: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: next
+                                ? n
+                                    .tintFg(NoorTint.sage)
+                                    .withValues(alpha: 0.14)
+                                : null,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isEnabled
+                                ? Iconsax.volume_high
+                                : Iconsax.volume_cross,
+                            color: isEnabled ? n.primary : n.muted,
+                            size: 20,
+                          ),
+                        ),
+                        constraints: const BoxConstraints.tightFor(
+                            width: 48, height: 48),
+                        tooltip: widget.prayer.localizedTitle(context),
+                        onPressed: () => controller.toggle(widget.prayer.key),
+                      );
+                    }),
+                    // Points to the end; turns down when the reminders open.
+                    AnimatedRotation(
+                      turns: _isExpanded ? (rtl ? -0.25 : 0.25) : 0,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutCubic,
+                      child: Icon(
+                        Icons.chevron_right_rounded, // mirrors in RTL
+                        color: n.muted,
                         size: 22,
                       ),
-                      tooltip: widget.prayer.localizedTitle(context),
-                      onPressed: () => controller.toggle(widget.prayer.key),
-                    );
-                  }),
-                  AnimatedRotation(
-                    turns: _isExpanded ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutCubic,
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: n.muted,
-                      size: 20,
                     ),
-                  ),
-                ],
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                child: _isExpanded
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: NoorSpace.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final reminder in reminders) ...[
-                              Container(
-                                margin:
-                                    const EdgeInsets.only(bottom: NoorSpace.sm),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: NoorSpace.md,
-                                  vertical: NoorSpace.xs,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: n.isDark ? n.line : n.paper,
-                                  borderRadius:
-                                      BorderRadius.circular(NoorRadius.input),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.alarm_on_rounded,
-                                      size: 18,
-                                      color: n.primary,
-                                    ),
-                                    const SizedBox(width: NoorSpace.sm),
-                                    Expanded(
-                                      child: Text(
-                                        getAlarmText(context, reminder.minutes),
-                                        style: NoorText.body(context).copyWith(
-                                          fontSize: 13,
-                                          color: n.ink,
+                  ],
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  child: _isExpanded
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: NoorSpace.md),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final reminder in reminders) ...[
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                      bottom: NoorSpace.sm),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: NoorSpace.md,
+                                    vertical: NoorSpace.xs,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: n.isDark ? n.line : n.paper,
+                                    borderRadius:
+                                        BorderRadius.circular(NoorRadius.input),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.alarm_on_rounded,
+                                        size: 18,
+                                        color: n.primary,
+                                      ),
+                                      const SizedBox(width: NoorSpace.sm),
+                                      Expanded(
+                                        child: Text(
+                                          getAlarmText(
+                                              context, reminder.minutes),
+                                          style:
+                                              NoorText.body(context).copyWith(
+                                            fontSize: 13,
+                                            color: n.ink,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        await AdhanScheduler.removeReminder(
-                                          widget.prayer,
-                                          reminder.slot,
-                                        );
-                                        if (mounted) setState(() {});
-                                      },
-                                      child: Text(
-                                        s.remove,
-                                        style: TextStyle(
-                                          color: n.danger,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
+                                      TextButton(
+                                        onPressed: () async {
+                                          await AdhanScheduler.removeReminder(
+                                            widget.prayer,
+                                            reminder.slot,
+                                          );
+                                          if (mounted) setState(() {});
+                                        },
+                                        child: Text(
+                                          s.remove,
+                                          style: TextStyle(
+                                            color: n.danger,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              if (reminders.length < 2) ...[
+                                const SizedBox(height: NoorSpace.xs),
+                                Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: n.isDark ? n.line : n.paper,
+                                        borderRadius: BorderRadius.circular(
+                                            NoorRadius.input),
+                                        border: Border.all(color: n.line),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                                Icons.remove_rounded,
+                                                size: 18),
+                                            onPressed: _decrementMinutes,
+                                            padding: const EdgeInsets.all(6),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 36,
+                                              minHeight: 36,
+                                            ),
+                                            color: n.ink,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 4),
+                                            child: Directionality(
+                                              textDirection: TextDirection.ltr,
+                                              child: Text(
+                                                '${_minutes > 0 ? "+$_minutes" : _minutes} ${s.minute_short}',
+                                                style: NoorText.numeral(context,
+                                                    size: 14),
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.add_rounded,
+                                                size: 18),
+                                            onPressed: _incrementMinutes,
+                                            padding: const EdgeInsets.all(6),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 36,
+                                              minHeight: 36,
+                                            ),
+                                            color: n.ink,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: NoorSpace.md),
+                                    Expanded(
+                                      child: NoorButton(
+                                        label: s.set_new_alarm,
+                                        variant: NoorButtonVariant.tonal,
+                                        onPressed: () async {
+                                          await AdhanScheduler.addReminder(
+                                            widget.prayer,
+                                            _minutes,
+                                          );
+                                          if (mounted) setState(() {});
+                                        },
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
+                              ],
                             ],
-                            if (reminders.length < 2) ...[
-                              const SizedBox(height: NoorSpace.xs),
-                              Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: n.isDark ? n.line : n.paper,
-                                      borderRadius: BorderRadius.circular(
-                                          NoorRadius.input),
-                                      border: Border.all(color: n.line),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove_rounded,
-                                              size: 18),
-                                          onPressed: _decrementMinutes,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 36,
-                                            minHeight: 36,
-                                          ),
-                                          color: n.ink,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 4),
-                                          child: Directionality(
-                                            textDirection: TextDirection.ltr,
-                                            child: Text(
-                                              '${_minutes > 0 ? "+$_minutes" : _minutes} ${s.minute_short}',
-                                              style: NoorText.numeral(context,
-                                                  size: 14),
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.add_rounded,
-                                              size: 18),
-                                          onPressed: _incrementMinutes,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 36,
-                                            minHeight: 36,
-                                          ),
-                                          color: n.ink,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: NoorSpace.md),
-                                  Expanded(
-                                    child: NoorButton(
-                                      label: s.set_new_alarm,
-                                      variant: NoorButtonVariant.tonal,
-                                      onPressed: () async {
-                                        await AdhanScheduler.addReminder(
-                                          widget.prayer,
-                                          _minutes,
-                                        );
-                                        if (mounted) setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         ),
       ),

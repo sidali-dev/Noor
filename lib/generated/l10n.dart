@@ -145,6 +145,11 @@ class S {
     return Intl.message('Confirm', name: 'confirm', desc: '', args: []);
   }
 
+  /// `Save`
+  String get save {
+    return Intl.message('Save', name: 'save', desc: '', args: []);
+  }
+
   /// `Cancel`
   String get cancel {
     return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
@@ -320,9 +325,9 @@ class S {
     return Intl.message('Close', name: 'close', desc: '', args: []);
   }
 
-  /// `Open Adhkar`
+  /// `Open Athkar`
   String get open_adhkar {
-    return Intl.message('Open Adhkar', name: 'open_adhkar', desc: '', args: []);
+    return Intl.message('Open Athkar', name: 'open_adhkar', desc: '', args: []);
   }
 
   /// `Pick Adhan`
@@ -525,9 +530,9 @@ class S {
     return Intl.message('Hizb', name: 'hizb', desc: '', args: []);
   }
 
-  /// `El Adhkar`
+  /// `Athkar`
   String get adhkar {
-    return Intl.message('El Adhkar', name: 'adhkar', desc: '', args: []);
+    return Intl.message('Athkar', name: 'adhkar', desc: '', args: []);
   }
 
   /// `Surah`
@@ -535,70 +540,70 @@ class S {
     return Intl.message('Surah', name: 'surah', desc: '', args: []);
   }
 
-  /// `Morning Adhkar`
+  /// `Morning Athkar`
   String get morning_adhkar {
     return Intl.message(
-      'Morning Adhkar',
+      'Morning Athkar',
       name: 'morning_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Evening Adhkar`
+  /// `Evening Athkar`
   String get evening_adhkar {
     return Intl.message(
-      'Evening Adhkar',
+      'Evening Athkar',
       name: 'evening_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Prayer Adhkar`
+  /// `Prayer Athkar`
   String get prayer_adhkar {
     return Intl.message(
-      'Prayer Adhkar',
+      'Prayer Athkar',
       name: 'prayer_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Mosque Adhkar`
+  /// `Mosque Athkar`
   String get mosque_adhkar {
     return Intl.message(
-      'Mosque Adhkar',
+      'Mosque Athkar',
       name: 'mosque_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Waking Up Adhkar`
+  /// `Waking Up Athkar`
   String get wake_up_adhkar {
     return Intl.message(
-      'Waking Up Adhkar',
+      'Waking Up Athkar',
       name: 'wake_up_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Sleeping Adhkar`
+  /// `Sleeping Athkar`
   String get sleep_adhkar {
     return Intl.message(
-      'Sleeping Adhkar',
+      'Sleeping Athkar',
       name: 'sleep_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `After Prayer Adhkar`
+  /// `After Prayer Athkar`
   String get after_prayer_adhkar {
     return Intl.message(
-      'After Prayer Adhkar',
+      'After Prayer Athkar',
       name: 'after_prayer_adhkar',
       desc: '',
       args: [],
@@ -635,20 +640,20 @@ class S {
     );
   }
 
-  /// `General Adhkar`
+  /// `General Athkar`
   String get general_Adhkar {
     return Intl.message(
-      'General Adhkar',
+      'General Athkar',
       name: 'general_Adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Adhkar for Hearing the Adhan`
+  /// `Athkar for Hearing the Adhan`
   String get adhan_adhkar {
     return Intl.message(
-      'Adhkar for Hearing the Adhan',
+      'Athkar for Hearing the Adhan',
       name: 'adhan_adhkar',
       desc: '',
       args: [],
@@ -665,45 +670,45 @@ class S {
     );
   }
 
-  /// `Wudu Adhkar`
+  /// `Wudu Athkar`
   String get wudu_adhkar {
-    return Intl.message('Wudu Adhkar', name: 'wudu_adhkar', desc: '', args: []);
+    return Intl.message('Wudu Athkar', name: 'wudu_adhkar', desc: '', args: []);
   }
 
-  /// `Adhkar for Entering and Leaving the House`
+  /// `Athkar for Entering and Leaving the House`
   String get home_adhkar {
     return Intl.message(
-      'Adhkar for Entering and Leaving the House',
+      'Athkar for Entering and Leaving the House',
       name: 'home_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Adhkar for Entering and Leaving the Bathroom`
+  /// `Athkar for Entering and Leaving the Bathroom`
   String get wc_adhkar {
     return Intl.message(
-      'Adhkar for Entering and Leaving the Bathroom',
+      'Athkar for Entering and Leaving the Bathroom',
       name: 'wc_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Adhkar for Food, Drink, and Guests`
+  /// `Athkar for Food, Drink, and Guests`
   String get meal_adhkar {
     return Intl.message(
-      'Adhkar for Food, Drink, and Guests',
+      'Athkar for Food, Drink, and Guests',
       name: 'meal_adhkar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Hajj and Umrah Adhkar`
+  /// `Hajj and Umrah Athkar`
   String get hajj_adhkar {
     return Intl.message(
-      'Hajj and Umrah Adhkar',
+      'Hajj and Umrah Athkar',
       name: 'hajj_adhkar',
       desc: '',
       args: [],
@@ -790,9 +795,9 @@ class S {
     return Intl.message('Prayers', name: 'nav_prayers', desc: '', args: []);
   }
 
-  /// `Adhkar`
+  /// `Athkar`
   String get nav_adhkar {
-    return Intl.message('Adhkar', name: 'nav_adhkar', desc: '', args: []);
+    return Intl.message('Athkar', name: 'nav_adhkar', desc: '', args: []);
   }
 
   /// `Qibla`
@@ -840,10 +845,10 @@ class S {
     );
   }
 
-  /// `{count} adhkar`
+  /// `{count} athkar`
   String adhkar_count(int count) {
     return Intl.message(
-      '$count adhkar',
+      '$count athkar',
       name: 'adhkar_count',
       desc: '',
       args: [count],
@@ -985,10 +990,10 @@ class S {
     );
   }
 
-  /// `Search adhkar`
+  /// `Search athkar`
   String get search_adhkar {
     return Intl.message(
-      'Search adhkar',
+      'Search athkar',
       name: 'search_adhkar',
       desc: '',
       args: [],
@@ -1010,10 +1015,10 @@ class S {
     return Intl.message('No results', name: 'no_results', desc: '', args: []);
   }
 
-  /// `In the adhkar`
+  /// `In the athkar`
   String get in_adhkar_text {
     return Intl.message(
-      'In the adhkar',
+      'In the athkar',
       name: 'in_adhkar_text',
       desc: '',
       args: [],
@@ -1055,6 +1060,96 @@ class S {
     return Intl.message(
       'This clears the pages marked as read. Your bookmarks are kept.',
       name: 'reset_progress_body',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Establish prayer for My remembrance. — Ta-Ha 20:14`
+  String get tagline_prayers {
+    return Intl.message(
+      'Establish prayer for My remembrance. — Ta-Ha 20:14',
+      name: 'tagline_prayers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144`
+  String get tagline_qibla {
+    return Intl.message(
+      'Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144',
+      name: 'tagline_qibla',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indeed, this Quran guides to what is most upright. — Al-Isra 17:9`
+  String get tagline_quran {
+    return Intl.message(
+      'Indeed, this Quran guides to what is most upright. — Al-Isra 17:9',
+      name: 'tagline_quran',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Surely in the remembrance of Allah do hearts find rest. — Ar-Ra’d 13:28`
+  String get tagline_adhkar {
+    return Intl.message(
+      'Surely in the remembrance of Allah do hearts find rest. — Ar-Ra’d 13:28',
+      name: 'tagline_adhkar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter Your Location`
+  String get location_title {
+    return Intl.message(
+      'Enter Your Location',
+      name: 'location_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To get accurate prayer times`
+  String get location_subtitle {
+    return Intl.message(
+      'To get accurate prayer times',
+      name: 'location_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use your current location`
+  String get gps_subtitle {
+    return Intl.message(
+      'Use your current location',
+      name: 'gps_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pick your city / wilaya`
+  String get manual_subtitle {
+    return Intl.message(
+      'Pick your city / wilaya',
+      name: 'manual_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm Location`
+  String get confirm_location {
+    return Intl.message(
+      'Confirm Location',
+      name: 'confirm_location',
       desc: '',
       args: [],
     );

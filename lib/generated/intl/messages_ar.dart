@@ -50,9 +50,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "adhan_fajr": MessageLookupByLibrary.simpleMessage("أذان الفجر"),
         "adhan_isha": MessageLookupByLibrary.simpleMessage("أذان العشاء"),
         "adhan_maghrib": MessageLookupByLibrary.simpleMessage("أذان المغرب"),
-        "back": MessageLookupByLibrary.simpleMessage("رجوع"),
-        "info": MessageLookupByLibrary.simpleMessage("معلومات"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("علامة"),
         "adhkar": MessageLookupByLibrary.simpleMessage("الأذكار"),
         "adhkar_count": m0,
         "adhkar_subtitle": MessageLookupByLibrary.simpleMessage(
@@ -65,7 +62,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "alarm_set_for":
             MessageLookupByLibrary.simpleMessage("تم ضبط المنبه لـ"),
         "asr": MessageLookupByLibrary.simpleMessage("العصر"),
+        "back": MessageLookupByLibrary.simpleMessage("رجوع"),
         "before_adhan": MessageLookupByLibrary.simpleMessage("قبل الأذان"),
+        "bookmark": MessageLookupByLibrary.simpleMessage("علامة"),
         "bookmarks": MessageLookupByLibrary.simpleMessage("علامات الحفظ"),
         "calibrate": MessageLookupByLibrary.simpleMessage("معايرة"),
         "calibrate_step_1": MessageLookupByLibrary.simpleMessage(
@@ -100,6 +99,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "comprehensive_duaa":
             MessageLookupByLibrary.simpleMessage("جوامع الدعاء"),
         "confirm": MessageLookupByLibrary.simpleMessage("ثبت"),
+        "save": MessageLookupByLibrary.simpleMessage("حفظ"),
+        "confirm_location":
+            MessageLookupByLibrary.simpleMessage("تأكيد الموقع"),
         "continue_reading":
             MessageLookupByLibrary.simpleMessage("أكمل القراءة"),
         "country": MessageLookupByLibrary.simpleMessage("البلد"),
@@ -134,6 +136,8 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "general_Adhkar": MessageLookupByLibrary.simpleMessage("أذكار متفرقة"),
         "gps": MessageLookupByLibrary.simpleMessage("GPS"),
+        "gps_subtitle":
+            MessageLookupByLibrary.simpleMessage("استخدم موقعك الحالي"),
         "hajj_adhkar":
             MessageLookupByLibrary.simpleMessage("أذكار الحج والعمرة"),
         "hizb": MessageLookupByLibrary.simpleMessage("حزب"),
@@ -142,6 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "in_adhkar_text":
             MessageLookupByLibrary.simpleMessage("في نصوص الأذكار"),
+        "info": MessageLookupByLibrary.simpleMessage("معلومات"),
         "isha": MessageLookupByLibrary.simpleMessage("العشاء"),
         "its": MessageLookupByLibrary.simpleMessage("إنها"),
         "keep_from_magnetic_body": MessageLookupByLibrary.simpleMessage(
@@ -154,7 +159,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "last_read": MessageLookupByLibrary.simpleMessage("آخر قراءة"),
         "location_failed":
             MessageLookupByLibrary.simpleMessage("تعذر تحديد موقعك"),
+        "location_subtitle": MessageLookupByLibrary.simpleMessage(
+          "للحصول على مواقيت صلاة دقيقة",
+        ),
+        "location_title": MessageLookupByLibrary.simpleMessage("حدّد موقعك"),
         "maghrib": MessageLookupByLibrary.simpleMessage("المغرب"),
+        "manual_subtitle": MessageLookupByLibrary.simpleMessage(
+          "اختر مدينتك / ولايتك",
+        ),
         "manually": MessageLookupByLibrary.simpleMessage("يدوياً"),
         "masjid_time": MessageLookupByLibrary.simpleMessage(
           "حان وقت الذهاب إلى المسجد",
@@ -178,7 +190,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "لا يوجد اتصال بالإنترنت",
         ),
         "no_results": MessageLookupByLibrary.simpleMessage("لا نتائج"),
-        "noor": MessageLookupByLibrary.simpleMessage("نور إيمان"),
+        "noor": MessageLookupByLibrary.simpleMessage("نور الإيمان"),
         "open_adhkar": MessageLookupByLibrary.simpleMessage("إفتح الأذكار"),
         "open_settings": MessageLookupByLibrary.simpleMessage("افتح الإعدادات"),
         "page": MessageLookupByLibrary.simpleMessage("الصفحة"),
@@ -227,6 +239,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "sun_rise": MessageLookupByLibrary.simpleMessage("الشروق"),
         "sun_rising": MessageLookupByLibrary.simpleMessage("الشمس تشرق"),
         "surah": MessageLookupByLibrary.simpleMessage("سورة"),
+        "tagline_adhkar": MessageLookupByLibrary.simpleMessage(
+          "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ — الرعد 28",
+        ),
+        "tagline_prayers": MessageLookupByLibrary.simpleMessage(
+          "وَأَقِمِ الصَّلَاةَ لِذِكْرِي — طه 14",
+        ),
+        "tagline_qibla": MessageLookupByLibrary.simpleMessage(
+          "فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ — البقرة 144",
+        ),
+        "tagline_quran": MessageLookupByLibrary.simpleMessage(
+          "إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9",
+        ),
         "tasbeeh": MessageLookupByLibrary.simpleMessage("تسابيح"),
         "tips": MessageLookupByLibrary.simpleMessage("نصائح"),
         "today": MessageLookupByLibrary.simpleMessage("اليوم"),

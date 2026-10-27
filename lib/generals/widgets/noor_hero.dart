@@ -18,8 +18,6 @@ class NoorHero extends StatelessWidget {
   final String title;
   final String? subtitle;
 
-  /// Sets [title] as the LTR wordmark next to [leading].
-  final bool wordmark;
   final Widget? leading;
   final bool settings;
   final double height;
@@ -32,7 +30,6 @@ class NoorHero extends StatelessWidget {
     this.art,
     required this.title,
     this.subtitle,
-    this.wordmark = false,
     this.leading,
     this.settings = false,
     this.height = 240,
@@ -112,11 +109,13 @@ class NoorHero extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerStart,
                             end: AlignmentDirectional.centerEnd,
+                            // Long enough to cover the end of a one-line title.
                             colors: [
                               n.paper.withValues(alpha: 0.85),
+                              n.paper.withValues(alpha: 0.55),
                               clear,
                             ],
-                            stops: const [0, 0.7],
+                            stops: const [0, 0.5, 0.85],
                           ),
                         ),
                       ),
@@ -141,7 +140,7 @@ class NoorHero extends StatelessWidget {
             child: Align(
               alignment: AlignmentDirectional.topStart,
               child: FractionallySizedBox(
-                widthFactor: 0.66,
+                widthFactor: 0.72,
                 child: _titleBlock(context),
               ),
             ),
@@ -152,8 +151,14 @@ class NoorHero extends StatelessWidget {
               end: NoorSpace.sm,
               child: IconButton(
                 icon: Icon(Iconsax.setting_2, color: n.ink, size: 22),
+                // Over art the gear sits on a paper disc, not on the minaret.
+                style: art == null
+                    ? null
+                    : IconButton.styleFrom(
+                        backgroundColor: n.paper.withValues(alpha: 0.72)),
                 onPressed: () => showSettingsSheet(context),
-                constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                constraints:
+                    const BoxConstraints.tightFor(width: 48, height: 48),
                 tooltip: S.of(context).settings,
               ),
             ),
@@ -184,52 +189,31 @@ class NoorHero extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (wordmark)
-            SizedBox(
-              height: 48,
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (leading != null) leading!,
-                    gap,
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          title,
-                          style: NoorText.wordmark(context),
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(top: NoorSpace.lg),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (leading != null) leading!,
-                    gap,
-                    Flexible(
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(top: NoorSpace.lg),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (leading != null) leading!,
+                  gap,
+                  Flexible(
+                    // One line that shrinks (text scale, long names) rather
+                    // than wrapping into the subtitle.
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
                       child: Text(
                         title,
                         style: NoorText.display(context),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+          ),
           if (subtitle != null)
             Flexible(
               child: Padding(

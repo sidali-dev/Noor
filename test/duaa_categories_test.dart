@@ -98,6 +98,8 @@ void main() {
     // Tap last card's single repetition to complete
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    final done = (await S.load(const Locale('ar'))).done;
+    expect(find.text(done), findsOneWidget);
+    expect(find.text('1'), findsNothing);
   });
 }

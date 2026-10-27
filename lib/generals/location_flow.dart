@@ -7,6 +7,7 @@ import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/widgets/location_picker_sheet.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/icon_tile.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generals/widgets/wait_dialog.dart';
@@ -19,77 +20,12 @@ enum LocationSource { gps, manual }
 
 Future<void> pickLocation(BuildContext context) async {
   final s = S.of(context);
-  final n = context.noor;
 
-  // 1. Choose the source first: showNoorSheet with GPS and Manual choices.
+  // 1. Choose the source first: radio cards, then Confirm Location.
   final source = await showNoorSheet<LocationSource>(
     context,
-    title: s.enter_location,
-    builder: (sheetContext) {
-      return Padding(
-        padding: const EdgeInsets.only(top: NoorSpace.sm, bottom: NoorSpace.md),
-        child: Row(
-          children: [
-            Expanded(
-              child: NoorCard(
-                onTap: () => Navigator.of(sheetContext).pop(LocationSource.gps),
-                padding: const EdgeInsets.symmetric(
-                  vertical: NoorSpace.xl,
-                  horizontal: NoorSpace.md,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const IconTile(
-                      icon: Icons.my_location_rounded,
-                      tint: NoorTint.sage,
-                      size: 56,
-                    ),
-                    const SizedBox(height: NoorSpace.md),
-                    Text(
-                      s.gps,
-                      style: NoorText.rowTitle(sheetContext).copyWith(
-                        color: n.ink,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: NoorSpace.md),
-            Expanded(
-              child: NoorCard(
-                onTap: () =>
-                    Navigator.of(sheetContext).pop(LocationSource.manual),
-                padding: const EdgeInsets.symmetric(
-                  vertical: NoorSpace.xl,
-                  horizontal: NoorSpace.md,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const IconTile(
-                      icon: Icons.edit_location_alt_outlined,
-                      tint: NoorTint.mint,
-                      size: 56,
-                    ),
-                    const SizedBox(height: NoorSpace.md),
-                    Text(
-                      s.manually,
-                      style: NoorText.rowTitle(sheetContext).copyWith(
-                        color: n.ink,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
+    title: s.location_title,
+    builder: (_) => const _LocationChoice(),
   );
 
   if (!context.mounted || source == null) return;
@@ -271,4 +207,108 @@ Future<Placemark> _currentPlacemark() async {
   }
   final p = await Geolocator.getCurrentPosition();
   return (await placemarkFromCoordinates(p.latitude, p.longitude)).first;
+}
+
+class _LocationChoice extends StatefulWidget {
+  const _LocationChoice();
+
+  @override
+  State<_LocationChoice> createState() => _LocationChoiceState();
+}
+
+class _LocationChoiceState extends State<_LocationChoice> {
+  LocationSource? _source;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return RadioGroup<LocationSource>(
+      groupValue: _source,
+      onChanged: (v) => setState(() => _source = v),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            s.location_subtitle,
+            style: NoorText.body(context).copyWith(color: context.noor.muted),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: NoorSpace.xl),
+          _SourceCard(
+            value: LocationSource.gps,
+            icon: Icons.my_location_rounded,
+            tint: NoorTint.sage,
+            title: s.gps,
+            subtitle: s.gps_subtitle,
+            onTap: () => setState(() => _source = LocationSource.gps),
+          ),
+          const SizedBox(height: NoorSpace.md),
+          _SourceCard(
+            value: LocationSource.manual,
+            icon: Icons.edit_location_alt_outlined,
+            tint: NoorTint.mint,
+            title: s.manually,
+            subtitle: s.manual_subtitle,
+            onTap: () => setState(() => _source = LocationSource.manual),
+          ),
+          const SizedBox(height: NoorSpace.xxl),
+          NoorButton(
+            label: s.confirm_location,
+            onPressed: _source == null
+                ? null
+                : () => Navigator.of(context).pop(_source),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SourceCard extends StatelessWidget {
+  final LocationSource value;
+  final IconData icon;
+  final NoorTint tint;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _SourceCard({
+    required this.value,
+    required this.icon,
+    required this.tint,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+    return NoorCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: NoorSpace.lg,
+        vertical: NoorSpace.md,
+      ),
+      child: Row(
+        children: [
+          IconTile(icon: icon, tint: tint),
+          const SizedBox(width: NoorSpace.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: NoorText.rowTitle(context).copyWith(color: n.ink)),
+                Text(subtitle,
+                    style: NoorText.meta(context).copyWith(color: n.muted)),
+              ],
+            ),
+          ),
+          Radio<LocationSource>(value: value, activeColor: n.primary),
+        ],
+      ),
+    );
+  }
 }

@@ -67,8 +67,8 @@ class _SplashScreenState extends State<SplashScreen>
     Future<void> warm(String path) async {
       try {
         final loader = SvgAssetLoader(path);
-        await svg.cache.putIfAbsent(
-            loader.cacheKey(null), () => loader.loadBytes(null));
+        await svg.cache
+            .putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
       } catch (_) {}
     }
 

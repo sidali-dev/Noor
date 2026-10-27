@@ -194,6 +194,8 @@ void main() {
     // Tap second option
     await tester.tap(find.text('Adhan Sheikh Alafasy 1'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
 
     expect(AppPrefs.adhanSoundPath, SSoundString.adhanAlafasy1);
   });

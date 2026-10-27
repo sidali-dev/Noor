@@ -14,7 +14,6 @@ class LocationPill extends StatelessWidget {
     final adhanController = Get.find<AdhanController>();
     final locationController = adhanController.locationController;
     final n = context.noor;
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     final radius = BorderRadius.circular(NoorRadius.tile);
 
     return Obx(() {
@@ -63,9 +62,7 @@ class LocationPill extends StatelessWidget {
                     ),
                     const SizedBox(width: NoorSpace.sm),
                     Icon(
-                      rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
+                      Icons.chevron_right_rounded, // mirrors in RTL
                       color: n.muted,
                       size: 22,
                     ),

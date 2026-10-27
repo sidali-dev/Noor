@@ -29,7 +29,6 @@ class NoorPagerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     final onFill = split
         ? Color.lerp(n.gold, n.ink, 0.5)! // gold on its tint is only ~2:1
         : n.onPrimary;
@@ -39,13 +38,13 @@ class NoorPagerPill extends StatelessWidget {
       required VoidCallback? onTap,
       required String tooltip,
     }) {
-      final left = isPrevious != rtl;
       return IconButton(
         onPressed: onTap,
         tooltip: tooltip,
         constraints: const BoxConstraints.tightFor(width: 48, height: 48),
         icon: Icon(
-          left ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+          // Both mirror themselves in RTL (matchTextDirection).
+          isPrevious ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
           size: 26,
         ),
         color: onFill,
@@ -53,8 +52,8 @@ class NoorPagerPill extends StatelessWidget {
       );
     }
 
-    final prev = chevron(
-        isPrevious: true, onTap: onPrevious, tooltip: previousTooltip);
+    final prev =
+        chevron(isPrevious: true, onTap: onPrevious, tooltip: previousTooltip);
     final next =
         chevron(isPrevious: false, onTap: onNext, tooltip: nextTooltip);
 

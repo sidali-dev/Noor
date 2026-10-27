@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
-import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_progress_bar.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -56,42 +56,66 @@ class SurahLine extends StatelessWidget {
       ),
     );
 
-    final trailing = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 72,
-          child: NoorProgressBar(value: fraction, height: 4),
-        ),
-        const SizedBox(width: NoorSpace.sm),
-        SizedBox(
-          width: 36,
-          child: Text(
-            '$pct%',
-            textAlign: TextAlign.end,
-            style: NoorText.numeral(
-              context,
-              size: 13,
-              color: n.muted,
+    return NoorCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: NoorSpace.lg,
+        vertical: NoorSpace.md,
+      ),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: NoorSpace.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  arName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                    color: n.ink,
+                  ),
+                ),
+                Text(
+                  latinName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: NoorText.body(context).copyWith(fontSize: 14),
+                ),
+                Text(
+                  metaText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: NoorText.meta(context),
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(width: NoorSpace.xs),
-        // chevron_right already mirrors in RTL.
-        Icon(
-          Icons.chevron_right_rounded,
-          color: n.muted,
-          size: 20,
-        ),
-      ],
-    );
-
-    return NoorListRow(
-      leading: leading,
-      title: arName,
-      meta: "$latinName\n$metaText",
-      trailing: trailing,
-      onTap: onTap,
+          const SizedBox(width: NoorSpace.md),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 48,
+                child: NoorProgressBar(value: fraction, height: 4),
+              ),
+              const SizedBox(height: NoorSpace.xs),
+              Text('$pct%',
+                  style: NoorText.numeral(context, size: 13, color: n.muted)),
+            ],
+          ),
+          const SizedBox(width: NoorSpace.xs),
+          // chevron_right already mirrors in RTL.
+          Icon(Icons.chevron_right_rounded, color: n.muted, size: 22),
+        ],
+      ),
     );
   }
 }

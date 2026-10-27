@@ -18,11 +18,10 @@ class NoorPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
     final borderRadius = BorderRadius.circular(NoorRadius.tile);
 
     final defaultTrailing = Icon(
-      isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+      Icons.chevron_right_rounded, // mirrors in RTL
       color: n.muted,
       size: 20,
     );

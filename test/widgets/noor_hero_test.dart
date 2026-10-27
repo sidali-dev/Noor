@@ -30,31 +30,27 @@ void main() {
   const missing = 'assets/images/art/does_not_exist';
 
   for (final lang in ['ar', 'en']) {
-    for (final wordmark in [true, false]) {
-      testWidgets('NoorHero, missing art, $lang, wordmark=$wordmark, x1.3',
-          (tester) async {
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
+    testWidgets('NoorHero, missing art, $lang, x1.3', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
 
-        await tester.pumpWidget(_app(
-          Locale(lang),
-          NoorHero(
-            art: missing,
-            title: 'Noor Imene',
-            subtitle: 'Closer to Allah, every day, in every moment',
-            wordmark: wordmark,
-            leading: const NoorMark(size: 28),
-            settings: true,
-            overlap: const SizedBox(height: 56),
-          ),
-        ));
-        await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpWidget(_app(
+        Locale(lang),
+        const NoorHero(
+          art: missing,
+          title: 'Prayers',
+          subtitle: 'Establish prayer for My remembrance, in every moment',
+          leading: NoorMark(size: 28),
+          settings: true,
+          overlap: SizedBox(height: 56),
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 400));
 
-        expect(tester.takeException(), isNull);
-        expect(find.text('Noor Imene'), findsOneWidget);
-      });
-    }
+      expect(tester.takeException(), isNull);
+      expect(find.text('Prayers'), findsOneWidget);
+    });
   }
 
   for (final lang in ['ar', 'en']) {

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
+import 'package:noor/features/qibla/widgets/qibla_compass.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -79,6 +80,24 @@ void main() {
 
       // Assert distance text is not shown
       expect(find.textContaining('km'), findsNothing);
+    });
+
+    testWidgets('compass shrinks to the height it is given',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestApp(
+          child: const SizedBox(
+            width: 360,
+            height: 170,
+            child: QiblaCompass(direction: 30, qiblah: 105),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(QiblaCompass)).height,
+          lessThanOrEqualTo(170));
     });
 
     testWidgets('renders properly in dark mode and English locale',

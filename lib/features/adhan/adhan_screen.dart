@@ -15,9 +15,10 @@ import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/location_pill.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_header.dart';
+import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
 import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -139,231 +140,193 @@ class _AdhanScreenState extends State<AdhanScreen> {
         ? Get.find<SoundPickerController>()
         : Get.put(SoundPickerController());
     final n = context.noor;
-    final isRtl = Localizations.localeOf(context).languageCode == 'ar';
+    // Both icons mirror themselves in RTL (matchTextDirection).
+    const chevron = Icons.chevron_right_rounded;
+    const chevronBack = Icons.chevron_left_rounded;
 
     return Scaffold(
       backgroundColor: n.paper,
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const NoorHeader(), // pads itself
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: NoorSpace.sm),
-                    const LocationPill(),
-                    const SizedBox(height: NoorSpace.sm),
-                    Obx(() {
-                      final soundName = soundController.adhanSoundName.value;
-                      return NoorPill(
-                        icon: Icon(
-                          Iconsax.volume_high,
-                          size: 18,
-                          color: n.primary,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            NoorHero(
+              art: NoorArt.heroPrayers,
+              settings: true,
+              title: S.of(context).nav_prayers,
+              subtitle: S.of(context).tagline_prayers,
+              overlap: const LocationPill(),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: NoorSpace.md),
+                  Obx(() {
+                    if (controller.isLoading.value) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(NoorSpace.xxxl),
+                          child: CircularProgressIndicator(color: n.primary),
                         ),
-                        label: soundName.isNotEmpty
-                            ? soundName
-                            : S.of(context).pick_adhan,
-                        onTap: () => showAdhanSoundPickerSheet(context),
                       );
-                    }),
-                    const SizedBox(height: NoorSpace.lg),
-                    Obx(() {
-                      if (controller.isLoading.value) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(NoorSpace.xxxl),
-                            child: CircularProgressIndicator(color: n.primary),
-                          ),
-                        );
-                      }
+                    }
 
-                      final timings = controller.selectedTimings;
-                      final hasLocation = (controller
-                                  .locationController.country.value
-                                  .trim()
-                                  .isNotEmpty &&
-                              controller.locationController.city.value
-                                  .trim()
-                                  .isNotEmpty) ||
-                          (AppPrefs.country.isNotEmpty &&
-                              AppPrefs.city.isNotEmpty);
+                    final timings = controller.selectedTimings;
+                    final hasLocation = (controller
+                                .locationController.country.value
+                                .trim()
+                                .isNotEmpty &&
+                            controller.locationController.city.value
+                                .trim()
+                                .isNotEmpty) ||
+                        (AppPrefs.country.isNotEmpty &&
+                            AppPrefs.city.isNotEmpty);
 
-                      if (!hasLocation || timings == null) {
-                        return EmptyState(
-                          message: S.of(context).enter_location,
-                          actionLabel: S.of(context).add_location,
-                          onAction: () => pickLocation(context),
-                          icon: Iconsax.location,
-                        );
-                      }
+                    if (!hasLocation || timings == null) {
+                      return EmptyState(
+                        message: S.of(context).enter_location,
+                        actionLabel: S.of(context).add_location,
+                        onAction: () => pickLocation(context),
+                        icon: Iconsax.location,
+                      );
+                    }
 
-                      final isToday =
-                          _isSameDay(controller.date.value, DateTime.now());
-                      final next = isToday ? controller.nextPrayer() : null;
+                    final isToday =
+                        _isSameDay(controller.date.value, DateTime.now());
+                    final next = isToday ? controller.nextPrayer() : null;
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // 1. Next prayer card (when available)
-                          if (next != null) ...[
-                            NoorCard(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: NoorSpace.lg,
-                                vertical: NoorSpace.md,
-                              ),
-                              child: Row(
-                                children: [
-                                  IconTile(
-                                    icon: next.prayer.icon,
-                                    tint: next.prayer.tint,
-                                    size: 44,
-                                  ),
-                                  const SizedBox(width: NoorSpace.md),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              width: 8,
-                                              height: 8,
-                                              decoration: BoxDecoration(
-                                                color: n.gold,
-                                                shape: BoxShape.circle,
-                                              ),
-                                            ),
-                                            const SizedBox(width: NoorSpace.xs),
-                                            Text(
-                                              S.of(context).next_prayer,
-                                              style: NoorText.meta(context)
-                                                  .copyWith(
-                                                color: n.body,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          _formatNextPrayerDuration(
-                                              context, next),
-                                          style: NoorText.rowTitle(context)
-                                              .copyWith(
-                                            color: n.ink,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    _removeTimeZone(
-                                      next.prayer.timeFromTimings(
-                                        controller.timingsFor(next.at) ??
-                                            controller.selectedTimings!,
-                                      ),
-                                    ),
-                                    style: NoorText.numeral(context, size: 20),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: NoorSpace.md),
-                          ],
-
-                          // 2. Day navigator card
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (next != null) ...[
                           NoorCard(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: NoorSpace.sm,
-                              vertical: NoorSpace.xs,
+                              horizontal: NoorSpace.lg,
+                              vertical: NoorSpace.md,
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                IconButton(
-                                  onPressed: () =>
-                                      _onPreviousDay(context, controller),
-                                  icon: Icon(
-                                    isRtl
-                                        ? Iconsax.arrow_right_3
-                                        : Iconsax.arrow_left_2,
-                                    color: n.primary,
+                                const IconTile(
+                                  svg: SImageString.masjid,
+                                  tint: NoorTint.sage,
+                                ),
+                                const SizedBox(width: NoorSpace.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        S.of(context).next_prayer,
+                                        style: NoorText.meta(context),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _formatNextPrayerDuration(
+                                            context, next),
+                                        style: NoorText.rowTitle(context),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Expanded(
-                                  child: Center(
-                                    child: Text(
-                                      _formatDateTitle(context, controller),
-                                      style:
-                                          NoorText.rowTitle(context).copyWith(
-                                        color: n.ink,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                const SizedBox(width: NoorSpace.sm),
+                                Text(
+                                  _removeTimeZone(
+                                    next.prayer.timeFromTimings(
+                                      controller.timingsFor(next.at) ??
+                                          controller.selectedTimings!,
                                     ),
                                   ),
-                                ),
-                                IconButton(
-                                  onPressed: () =>
-                                      _onNextDay(context, controller),
-                                  icon: Icon(
-                                    isRtl
-                                        ? Iconsax.arrow_left_2
-                                        : Iconsax.arrow_right_3,
-                                    color: n.primary,
-                                  ),
+                                  style: NoorText.numeral(context, size: 22),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: NoorSpace.md),
-
-                          // 3. Six prayer rows card
-                          NoorCard(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: NoorSpace.xs),
-                            child: Column(
-                              children: [
-                                for (var i = 0; i < Prayer.all.length; i++) ...[
-                                  if (i > 0)
-                                    Divider(
-                                      color: n.line,
-                                      height: 1,
-                                      thickness: 1,
-                                      indent: NoorSpace.lg,
-                                      endIndent: NoorSpace.lg,
-                                    ),
-                                  AdhanLine(
-                                    prayer: Prayer.all[i],
-                                    time: _removeTimeZone(
-                                      Prayer.all[i].timeFromTimings(timings),
-                                    ),
-                                    isNext: next?.prayer == Prayer.all[i],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
                         ],
-                      );
-                    }),
-                    const SizedBox(height: 96),
-                  ],
-                ),
+                        NoorCard(
+                          padding: const EdgeInsets.all(NoorSpace.xs),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () =>
+                                    _onPreviousDay(context, controller),
+                                icon: Icon(chevronBack, color: n.primary),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  _formatDateTitle(context, controller),
+                                  style: NoorText.rowTitle(context),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () =>
+                                    _onNextDay(context, controller),
+                                icon: Icon(chevron, color: n.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: NoorSpace.md),
+                        NoorCard(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: NoorSpace.xs,
+                          ),
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < Prayer.all.length; i++) ...[
+                                if (i > 0)
+                                  Divider(
+                                    color: n.line,
+                                    height: 1,
+                                    thickness: 1,
+                                    indent: NoorSpace.lg,
+                                    endIndent: NoorSpace.lg,
+                                  ),
+                                AdhanLine(
+                                  prayer: Prayer.all[i],
+                                  time: _removeTimeZone(
+                                    Prayer.all[i].timeFromTimings(timings),
+                                  ),
+                                  isNext: next?.prayer == Prayer.all[i],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: NoorSpace.md),
+                        // Pick Adhan has no other entry point, so it stays.
+                        Obx(() {
+                          final soundName =
+                              soundController.adhanSoundName.value;
+                          return NoorPill(
+                            icon: Icon(
+                              Iconsax.volume_high,
+                              size: 18,
+                              color: n.primary,
+                            ),
+                            label: soundName.isNotEmpty
+                                ? soundName
+                                : S.of(context).pick_adhan,
+                            onTap: () => showAdhanSoundPickerSheet(context),
+                          );
+                        }),
+                      ],
+                    );
+                  }),
+                  const SizedBox(height: 96),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,13 +1,16 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/duaa/model/adhkar_model.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generals/widgets/noor_progress_bar.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 class AdhkarDisplayScreen extends StatefulWidget {
@@ -27,6 +30,8 @@ class AdhkarDisplayScreen extends StatefulWidget {
 }
 
 class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
+  static const _slide = Duration(milliseconds: 300);
+
   late int _currentIndex;
   late int _repetition;
   bool _isCompleted = false;
@@ -67,7 +72,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
       // Repetition drops to 0
       if (_currentIndex < widget.adhkar.length - 1) {
         _carouselController.nextPage(
-          duration: const Duration(milliseconds: 300),
+          duration: _slide,
           curve: Curves.easeOutCubic,
         );
       } else {
@@ -120,8 +125,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
             : Column(
                 children: [
                   _buildHeader(context),
-                  const SizedBox(height: NoorSpace.sm),
-                  _buildProgress(context),
+                  _buildProgress(),
                   const SizedBox(height: NoorSpace.lg),
                   Expanded(
                     // Without an explicit height the carousel falls back to 16:9.
@@ -132,20 +136,20 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
                         options: CarouselOptions(
                           height: box.maxHeight,
                           initialPage: _currentIndex,
-                          viewportFraction: 0.9,
+                          viewportFraction: 1,
                           enableInfiniteScroll: false,
-                          enlargeCenterPage: true,
-                          enlargeFactor: 0.15,
                           onPageChanged: _onPageChanged,
                         ),
-                        itemBuilder: (context, index, realIndex) {
-                          final item = widget.adhkar[index];
-                          return _buildCard(context, item);
-                        },
+                        itemBuilder: (context, index, realIndex) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: NoorSpace.xl,
+                          ),
+                          child: _buildCard(context, widget.adhkar[index]),
+                        ),
                       ),
                     ),
                   ),
-                  _buildCounterButton(context, s),
+                  _buildPager(s),
                 ],
               ),
       ),
@@ -154,6 +158,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
 
   Widget _buildHeader(BuildContext context) {
     final n = context.noor;
+    final total = widget.adhkar.length;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: NoorSpace.lg,
@@ -172,12 +177,26 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
           Expanded(
-            child: Text(
-              widget.title,
-              style: NoorText.section(context),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.title,
+                  style: NoorText.section(context),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (total > 0)
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      '${_currentIndex + 1} / $total',
+                      style:
+                          NoorText.numeral(context, size: 14, color: n.muted),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 48),
@@ -186,29 +205,18 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
     );
   }
 
-  Widget _buildProgress(BuildContext context) {
-    final n = context.noor;
+  Widget _buildProgress() {
     final total = widget.adhkar.length;
-    final current = total == 0 ? 0 : _currentIndex + 1;
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Text(
-              '$current / $total',
-              style: NoorText.numeral(context, size: 14, color: n.muted),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: NoorSpace.xs),
-          NoorProgressBar(
-            value: total == 0 ? 0.0 : current / total,
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(
+        NoorSpace.xl,
+        NoorSpace.sm,
+        NoorSpace.xl,
+        0,
+      ),
+      child: NoorProgressBar(
+        height: 2,
+        value: total == 0 ? 0.0 : (_currentIndex + 1) / total,
       ),
     );
   }
@@ -245,23 +253,27 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: NoorSpace.lg),
+                      const SizedBox(height: NoorSpace.md),
+                      ExcludeSemantics(
+                        child: SvgPicture.asset(
+                          NoorArt.divider,
+                          height: 20,
+                          colorFilter:
+                              ColorFilter.mode(n.gold, BlendMode.srcIn),
+                        ),
+                      ),
+                      const SizedBox(height: NoorSpace.md),
                       Text(
                         lines[1].trim(),
                         textAlign: TextAlign.center,
-                        style: NoorText.dhikr(context).copyWith(
-                          color: n.body,
-                        ),
+                        style: NoorText.dhikr(context),
                       ),
-                    ] else ...[
+                    ] else
                       Text(
                         lines[0].trim(),
                         textAlign: TextAlign.center,
-                        style: NoorText.dhikr(context).copyWith(
-                          color: n.ink,
-                        ),
+                        style: NoorText.dhikr(context).copyWith(color: n.ink),
                       ),
-                    ],
                   ],
                 ),
               ),
@@ -288,67 +300,36 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
     );
   }
 
-  Widget _buildCounterButton(BuildContext context, S s) {
-    final n = context.noor;
+  // ponytail: the ARB files have no previous/next strings, so the chevron
+  // tooltips read "i / total" of the dhikr they go to. Add keys next time the
+  // l10n files are open.
+  Widget _buildPager(S s) {
+    final total = widget.adhkar.length;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: NoorSpace.xl,
-        vertical: NoorSpace.xxl,
+      padding: const EdgeInsets.fromLTRB(
+        NoorSpace.xl,
+        NoorSpace.lg,
+        NoorSpace.xl,
+        NoorSpace.xxl,
       ),
-      child: Center(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          height: 64,
-          constraints: const BoxConstraints(minWidth: 160, maxWidth: 240),
-          decoration: BoxDecoration(
-            color: _isCompleted ? n.card : n.primary,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: noorShadow(context),
-            border: _isCompleted && n.isDark
-                ? Border.all(color: n.line, width: 1)
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(32),
-              onTap: _isCompleted ? null : _onCounterTapped,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xxl),
-                child: Center(
-                  child: _isCompleted
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check_rounded,
-                              color: n.primary,
-                              size: 24,
-                            ),
-                            const SizedBox(width: NoorSpace.sm),
-                            Text(
-                              s.done,
-                              style: NoorText.rowTitle(context).copyWith(
-                                color: n.primary,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Text(
-                          '$_repetition',
-                          style: NoorText.numeral(
-                            context,
-                            size: 32,
-                            color: n.onPrimary,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      child: NoorPagerPill(
+        label: _isCompleted ? s.done : '$_repetition',
+        onCenterTap: _isCompleted ? null : _onCounterTapped,
+        onPrevious: _currentIndex > 0
+            ? () => _carouselController.previousPage(
+                  duration: _slide,
+                  curve: Curves.easeOutCubic,
+                )
+            : null,
+        onNext: _currentIndex < total - 1
+            ? () => _carouselController.nextPage(
+                  duration: _slide,
+                  curve: Curves.easeOutCubic,
+                )
+            : null,
+        previousTooltip: '$_currentIndex / $total',
+        nextTooltip: '${_currentIndex + 2} / $total',
       ),
     );
   }

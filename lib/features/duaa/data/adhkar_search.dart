@@ -1,5 +1,5 @@
 import 'package:noor/features/duaa/model/adhkar_model.dart';
-import 'package:noor/utils/local_storage/services/database_service.dart';
+import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/utils/text_normalize.dart';
 
 class AdhkarHit {
@@ -12,8 +12,7 @@ class AdhkarHit {
   /// `dhikr_type` of the category the hit belongs to.
   final int type;
 
-  /// Position within the category, in the order `DatabaseService.getAdhkar`
-  /// returns.
+  /// Position within the category, in the order `AdhkarData.byType` returns.
   final int indexInType;
 
   /// About 80 characters of the original text around the first match.
@@ -30,13 +29,13 @@ class _Entry {
   final List<int> origins;
 }
 
-/// Search over every dhikr text. The normalised index is built lazily from the
-/// database on first use and kept in memory.
+/// Search over every dhikr text. The normalised index is built lazily from
+/// [AdhkarData] on first use and kept in memory.
 class AdhkarSearch {
   AdhkarSearch({Future<List<AdhkarModel>> Function()? loader})
-      : _loader = loader ?? DatabaseService.getAllAdhkar;
+      : _loader = loader ?? (() async => AdhkarData.all);
 
-  /// Test hook: search over the given rows instead of the database.
+  /// Test hook: search over the given rows instead of [AdhkarData].
   AdhkarSearch.withRows(List<AdhkarModel> rows) : _loader = (() async => rows);
 
   static final AdhkarSearch instance = AdhkarSearch();

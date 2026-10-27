@@ -10,7 +10,6 @@ import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_header.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
@@ -93,18 +92,6 @@ void main() {
                 locale: locale,
                 textScale: textScale,
                 child: const NoorMark(size: 32),
-              ),
-            );
-            expect(tester.takeException(), isNull);
-          });
-
-          testWidgets('NoorHeader pumps without exception', (tester) async {
-            await tester.pumpWidget(
-              _buildWrapper(
-                theme: theme,
-                locale: locale,
-                textScale: textScale,
-                child: const NoorHeader(),
               ),
             );
             expect(tester.takeException(), isNull);

@@ -14,8 +14,9 @@ import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/location_pill.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_header.dart';
+import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -88,138 +89,169 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
     }
   }
 
+  Widget _scroll(Widget child) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: NoorSpace.xl),
+        child: child,
+      );
+
   @override
   Widget build(BuildContext context) {
+    // The shell's Scaffold extends the body under the nav bar and reports its
+    // height as bottom padding; nothing of ours may sit in that band.
+    final navInset = MediaQuery.paddingOf(context).bottom;
+    // The skyline rests just above the nav bar's top edge, and the card stays
+    // clear of the Kaaba.
+    const footerBand = 56.0;
+
     return Scaffold(
       backgroundColor: context.noor.paper,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const NoorHeader(),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
-                NoorSpace.xl,
-                NoorSpace.xs,
-                NoorSpace.xl,
-                NoorSpace.sm,
-              ),
-              child: LocationPill(),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(
-                  left: NoorSpace.xl,
-                  right: NoorSpace.xl,
-                  top: NoorSpace.xs,
-                  bottom: 96,
-                ),
-                child: FutureBuilder<bool?>(
-                  future: _deviceSupport,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return _buildCalmSpinner();
-                    }
-
-                    if (snapshot.hasError) {
-                      return EmptyState(
-                        icon: Icons.error_outline_rounded,
-                        message: '${snapshot.error}',
-                        actionLabel: S.of(context).try_again,
-                        onAction: () => setState(() {}),
-                      );
-                    }
-
-                    // If sensor unsupported
-                    if (snapshot.data == false) {
-                      return EmptyState(
-                        icon: Icons.explore_off_outlined,
-                        message: S.of(context).sensor_not_supported,
-                        actionLabel: S.of(context).try_again,
-                        onAction: () => setState(() {}),
-                      );
-                    }
-
-                    // Sensor supported: stream location status
-                    return StreamBuilder<LocationStatus>(
-                      stream: _controller.stream,
-                      initialData: _controller.last,
-                      builder: (context, locationSnapshot) {
-                        if (locationSnapshot.hasError) {
-                          return EmptyState(
-                            message: '${locationSnapshot.error}',
-                            actionLabel: S.of(context).try_again,
-                            onAction: () =>
-                                _controller.restartCheckLocationStatus(),
-                          );
-                        }
-
-                        final LocationStatus? status = locationSnapshot.data;
-                        if (status == null) {
-                          return _buildCalmSpinner();
-                        }
-
-                        // GPS signal is off
-                        if (!status.enabled) {
-                          return EmptyState(
-                            icon: Icons.location_off_outlined,
-                            message: S.of(context).enable_location_body,
-                            actionLabel: S.of(context).open_settings,
-                            // The resume observer re-checks on return.
-                            onAction: Geolocator.openLocationSettings,
-                          );
-                        }
-
-                        // Permission check
-                        switch (status.status) {
-                          case LocationPermission.always:
-                          case LocationPermission.whileInUse:
-                            return _buildActiveCompass();
-
-                          case LocationPermission.denied:
-                          case LocationPermission.deniedForever:
-                            return EmptyState(
-                              icon: Icons.location_off_outlined,
-                              message: S.of(context).enable_location_permission,
-                              actionLabel: status.status ==
-                                      LocationPermission.deniedForever
-                                  ? S.of(context).open_settings
-                                  : S.of(context).try_again,
-                              onAction: () async {
-                                await _requestPermission();
-                                await _controller.restartCheckLocationStatus();
-                                _fetchDistance();
-                              },
-                            );
-
-                          default:
-                            return _buildCalmSpinner();
-                        }
-                      },
-                    );
-                  },
+      body: Stack(
+        children: [
+          // Footer art, first in the stack so it sits under all content.
+          // Never mirrored (NoorArt.noMirror).
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: navInset - 20,
+            child: IgnorePointer(
+              child: ExcludeSemantics(
+                child: Image.asset(
+                  NoorArt.of(context, NoorArt.qiblaSkyline),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.bottomCenter,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              NoorHero(
+                settings: true,
+                title: S.of(context).nav_qibla,
+                subtitle: S.of(context).tagline_qibla,
+                height: 180,
+                overlap: const LocationPill(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    NoorSpace.xl,
+                    NoorSpace.sm,
+                    NoorSpace.xl,
+                    navInset + footerBand,
+                  ),
+                  child: _buildBody(),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    return FutureBuilder<bool?>(
+      future: _deviceSupport,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildCalmSpinner();
+        }
+
+        if (snapshot.hasError) {
+          return _scroll(EmptyState(
+            icon: Icons.error_outline_rounded,
+            message: '${snapshot.error}',
+            actionLabel: S.of(context).try_again,
+            onAction: () => setState(() {}),
+          ));
+        }
+
+        // If sensor unsupported
+        if (snapshot.data == false) {
+          return _scroll(EmptyState(
+            icon: Icons.explore_off_outlined,
+            message: S.of(context).sensor_not_supported,
+            actionLabel: S.of(context).try_again,
+            onAction: () => setState(() {}),
+          ));
+        }
+
+        // Sensor supported: stream location status
+        return StreamBuilder<LocationStatus>(
+          stream: _controller.stream,
+          initialData: _controller.last,
+          builder: (context, locationSnapshot) {
+            if (locationSnapshot.hasError) {
+              return _scroll(EmptyState(
+                message: '${locationSnapshot.error}',
+                actionLabel: S.of(context).try_again,
+                onAction: () => _controller.restartCheckLocationStatus(),
+              ));
+            }
+
+            final LocationStatus? status = locationSnapshot.data;
+            if (status == null) {
+              return _buildCalmSpinner();
+            }
+
+            // GPS signal is off
+            if (!status.enabled) {
+              return _scroll(EmptyState(
+                icon: Icons.location_off_outlined,
+                message: S.of(context).enable_location_body,
+                actionLabel: S.of(context).open_settings,
+                // The resume observer re-checks on return.
+                onAction: Geolocator.openLocationSettings,
+              ));
+            }
+
+            // Permission check
+            switch (status.status) {
+              case LocationPermission.always:
+              case LocationPermission.whileInUse:
+                return _buildActiveCompass();
+
+              case LocationPermission.denied:
+              case LocationPermission.deniedForever:
+                return _scroll(EmptyState(
+                  icon: Icons.location_off_outlined,
+                  message: S.of(context).enable_location_permission,
+                  actionLabel: status.status == LocationPermission.deniedForever
+                      ? S.of(context).open_settings
+                      : S.of(context).try_again,
+                  onAction: () async {
+                    await _requestPermission();
+                    await _controller.restartCheckLocationStatus();
+                    _fetchDistance();
+                  },
+                ));
+
+              default:
+                return _buildCalmSpinner();
+            }
+          },
+        );
+      },
     );
   }
 
   Widget _buildCalmSpinner() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: NoorSpace.xxxl * 2),
-      child: Center(
-        child: SizedBox(
-          width: 32,
-          height: 32,
-          child: CircularProgressIndicator(strokeWidth: 2.5),
-        ),
+    return const Center(
+      child: SizedBox(
+        width: 32,
+        height: 32,
+        child: CircularProgressIndicator(strokeWidth: 2.5),
       ),
     );
   }
+
+  // Below this the compass can't keep 160 dp beside the card, so scroll.
+  // ponytail: fixed card-height estimate; measure the card if its content grows.
+  static const double _minFit = 160 + NoorSpace.lg + 200;
 
   Widget _buildActiveCompass() {
     return StreamBuilder<QiblahDirection>(
@@ -231,21 +263,39 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
         }
 
         final QiblahDirection qiblahDirection = snapshot.data!;
+        final compass = QiblaCompass(
+          direction: qiblahDirection.direction,
+          qiblah: qiblahDirection.qiblah,
+        );
+        final card = QiblaDirectionCard(
+          offset: qiblahDirection.offset,
+          distanceKm: _distanceKm,
+          onCalibrate: () => showQiblaCalibrationSheet(context),
+        );
 
-        return Column(
-          children: [
-            const SizedBox(height: NoorSpace.md),
-            QiblaCompass(
-              direction: qiblahDirection.direction,
-              qiblah: qiblahDirection.qiblah,
-            ),
-            const SizedBox(height: NoorSpace.xxl),
-            QiblaDirectionCard(
-              offset: qiblahDirection.offset,
-              distanceKm: _distanceKm,
-              onCalibrate: () => showQiblaCalibrationSheet(context),
-            ),
-          ],
+        return LayoutBuilder(
+          builder: (context, box) {
+            if (box.maxHeight < _minFit) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(height: 160, child: compass),
+                    const SizedBox(height: NoorSpace.lg),
+                    card,
+                  ],
+                ),
+              );
+            }
+            // The compass takes what the card leaves, so it shrinks first.
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: Center(child: compass)),
+                const SizedBox(height: NoorSpace.lg),
+                card,
+              ],
+            );
+          },
         );
       },
     );
@@ -269,8 +319,9 @@ class QiblaDirectionCard extends StatelessWidget {
     final n = context.noor;
 
     return NoorCard(
-      padding: const EdgeInsets.all(NoorSpace.xl),
+      padding: const EdgeInsets.all(NoorSpace.lg),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
@@ -282,12 +333,8 @@ class QiblaDirectionCard extends StatelessWidget {
                   children: [
                     Text(
                       S.of(context).qibla_direction,
-                      style: NoorText.rowTitle(context).copyWith(
-                        color: n.muted,
-                        fontSize: 15,
-                      ),
+                      style: NoorText.meta(context),
                     ),
-                    const SizedBox(height: NoorSpace.xs),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: AlignmentDirectional.centerStart,
@@ -295,7 +342,7 @@ class QiblaDirectionCard extends StatelessWidget {
                         '${offset.toStringAsFixed(2)}°',
                         style: NoorText.numeral(
                           context,
-                          size: 56,
+                          size: 48,
                           color: n.ink,
                         ),
                       ),
