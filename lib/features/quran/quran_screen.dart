@@ -33,6 +33,7 @@ class QuranScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: n.paper,
       body: SafeArea(
+        bottom: false,
         child: Obx(() {
           // Track progressRevision and query so CustomScrollView rebuilds lazily
           controller.progressRevision.value;

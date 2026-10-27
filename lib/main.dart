@@ -34,6 +34,7 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: binding);
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   await SharedPrefService.init();
 
