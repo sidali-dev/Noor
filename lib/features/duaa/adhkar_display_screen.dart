@@ -105,15 +105,13 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
   Widget build(BuildContext context) {
     final n = context.noor;
     final s = S.of(context);
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-
     return Scaffold(
       backgroundColor: n.paper,
       body: SafeArea(
         child: widget.adhkar.isEmpty
             ? Column(
                 children: [
-                  _buildHeader(context, isRtl),
+                  _buildHeader(context),
                   Expanded(
                     child: EmptyState(message: s.no_results),
                   ),
@@ -121,26 +119,30 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
               )
             : Column(
                 children: [
-                  _buildHeader(context, isRtl),
+                  _buildHeader(context),
                   const SizedBox(height: NoorSpace.sm),
                   _buildProgress(context),
                   const SizedBox(height: NoorSpace.lg),
                   Expanded(
-                    child: CarouselSlider.builder(
-                      carouselController: _carouselController,
-                      itemCount: widget.adhkar.length,
-                      options: CarouselOptions(
-                        initialPage: _currentIndex,
-                        viewportFraction: 0.9,
-                        enableInfiniteScroll: false,
-                        enlargeCenterPage: true,
-                        enlargeFactor: 0.15,
-                        onPageChanged: _onPageChanged,
+                    // Without an explicit height the carousel falls back to 16:9.
+                    child: LayoutBuilder(
+                      builder: (context, box) => CarouselSlider.builder(
+                        carouselController: _carouselController,
+                        itemCount: widget.adhkar.length,
+                        options: CarouselOptions(
+                          height: box.maxHeight,
+                          initialPage: _currentIndex,
+                          viewportFraction: 0.9,
+                          enableInfiniteScroll: false,
+                          enlargeCenterPage: true,
+                          enlargeFactor: 0.15,
+                          onPageChanged: _onPageChanged,
+                        ),
+                        itemBuilder: (context, index, realIndex) {
+                          final item = widget.adhkar[index];
+                          return _buildCard(context, item);
+                        },
                       ),
-                      itemBuilder: (context, index, realIndex) {
-                        final item = widget.adhkar[index];
-                        return _buildCard(context, item);
-                      },
                     ),
                   ),
                   _buildCounterButton(context, s),
@@ -150,7 +152,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isRtl) {
+  Widget _buildHeader(BuildContext context) {
     final n = context.noor;
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -161,12 +163,12 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
         children: [
           IconButton(
             icon: Icon(
-              isRtl ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded,
+              Icons.arrow_back_rounded, // mirrors itself in RTL
               color: n.ink,
               size: 24,
             ),
             onPressed: () => Navigator.of(context).maybePop(),
-            tooltip: 'Back',
+            tooltip: S.of(context).back,
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
           Expanded(
@@ -194,10 +196,13 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            '$current / $total',
-            style: NoorText.numeral(context, size: 14, color: n.muted),
-            textAlign: TextAlign.center,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              '$current / $total',
+              style: NoorText.numeral(context, size: 14, color: n.muted),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: NoorSpace.xs),
           NoorProgressBar(
@@ -273,9 +278,9 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
                   size: 22,
                 ),
                 onPressed: () => _showInfo(context, item.dhikrInfo!.trim()),
-                tooltip: 'Info',
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                splashRadius: 20,
+                tooltip: S.of(context).info,
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                splashRadius: 24,
               ),
             ),
         ],

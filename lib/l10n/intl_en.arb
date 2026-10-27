@@ -1,4 +1,7 @@
 {
+    "back": "Back",
+    "info": "Info",
+    "bookmark": "Bookmark",
     "settings" : "Settings",
     "dark_mode" : "Dark Mode",
     "language" : "Language",
@@ -58,7 +61,7 @@
     "continue_reading" : "Continue Reading",
     "last_read" : "Last Read",
     "hizb" : "Hizb",
-    "adhkar" : "El Adhkar",
+    "adhkar" : "Adhkar",
     "surah" : "Surah",
     "morning_adhkar" : "Morning Adhkar",
     "evening_adhkar" : "Evening Adhkar",

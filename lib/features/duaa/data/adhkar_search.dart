@@ -21,7 +21,8 @@ class AdhkarHit {
 }
 
 class _Entry {
-  _Entry(this.type, this.indexInType, this.original, this.normalized, this.origins);
+  _Entry(this.type, this.indexInType, this.original, this.normalized,
+      this.origins);
   final int type;
   final int indexInType;
   final String original;
@@ -36,8 +37,7 @@ class AdhkarSearch {
       : _loader = loader ?? DatabaseService.getAllAdhkar;
 
   /// Test hook: search over the given rows instead of the database.
-  AdhkarSearch.withRows(List<AdhkarModel> rows)
-      : _loader = (() async => rows);
+  AdhkarSearch.withRows(List<AdhkarModel> rows) : _loader = (() async => rows);
 
   static final AdhkarSearch instance = AdhkarSearch();
 
@@ -55,7 +55,8 @@ class AdhkarSearch {
     for (final row in rows) {
       final i = perType.update(row.dhikrType, (v) => v + 1, ifAbsent: () => 0);
       final n = normalizeWithMap(row.dhikrContent);
-      entries.add(_Entry(row.dhikrType, i, row.dhikrContent, n.text, n.origins));
+      entries
+          .add(_Entry(row.dhikrType, i, row.dhikrContent, n.text, n.origins));
     }
     return entries;
   }

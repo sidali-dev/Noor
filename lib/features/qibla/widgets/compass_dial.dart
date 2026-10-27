@@ -53,10 +53,8 @@ class CompassDialPainter extends CustomPainter {
       final double tickLength = isMajor ? 12.0 : 6.0;
       final Paint tickPaint = isMajor ? tickMajorPaint : tickMinorPaint;
 
-      final double outerX =
-          center.dx + primaryRingRadius * math.cos(angleRad);
-      final double outerY =
-          center.dy + primaryRingRadius * math.sin(angleRad);
+      final double outerX = center.dx + primaryRingRadius * math.cos(angleRad);
+      final double outerY = center.dy + primaryRingRadius * math.sin(angleRad);
 
       final double innerX =
           center.dx + (primaryRingRadius - tickLength) * math.cos(angleRad);

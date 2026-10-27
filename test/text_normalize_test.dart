@@ -45,8 +45,10 @@ void main() {
   });
 
   group('matchesQuery', () {
-    test('matches Arabic text regardless of diacritics and letter variants', () {
-      expect(matchesQuery('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'الله'), isTrue);
+    test('matches Arabic text regardless of diacritics and letter variants',
+        () {
+      expect(matchesQuery('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'الله'),
+          isTrue);
       expect(matchesQuery('أَسْتَغْفِرُ اللَّهَ', 'استغفر'), isTrue);
       expect(matchesQuery('الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ', 'صلاه'), isTrue);
       expect(matchesQuery('عَلَى النَّبِيِّ', 'علي'), isTrue);
@@ -72,7 +74,8 @@ void main() {
       AdhkarModel(
         id: 1,
         dhikrType: 1,
-        dhikrContent: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ',
+        dhikrContent:
+            'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ',
         dhikrRepetition: 1,
       ),
       AdhkarModel(
@@ -84,13 +87,15 @@ void main() {
       AdhkarModel(
         id: 3,
         dhikrType: 2,
-        dhikrContent: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+        dhikrContent:
+            'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ',
         dhikrRepetition: 1,
       ),
       AdhkarModel(
         id: 4,
         dhikrType: 2,
-        dhikrContent: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ وَرِضَا نَفْسِهِ',
+        dhikrContent:
+            'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ وَرِضَا نَفْسِهِ',
         dhikrRepetition: 3,
       ),
     ];

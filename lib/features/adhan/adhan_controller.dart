@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
-import 'package:noor/features/adhan/models/sub_models.dart/timings.dart';
+import 'package:noor/features/adhan/models/sub_models/timings.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
 import 'package:noor/utils/http/http_client.dart';
@@ -140,11 +140,6 @@ class AdhanController extends GetxController {
       return null;
     }
   }
-
-  // ---- Deprecated delegates for backward compatibility ---------------------
-
-  @Deprecated('Use AdhanScheduler.sync()')
-  static Future<void> scheduleAdhans() => AdhanScheduler.sync();
 
   Future<void> initController(int year) async {
     locationController.getLocation();

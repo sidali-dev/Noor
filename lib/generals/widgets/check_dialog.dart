@@ -1,16 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+/// Brief notice that dismisses itself.
 class CheckDialog extends StatefulWidget {
   final String title;
-  final String imagePath;
+  final IconData icon;
   final Color color;
 
   const CheckDialog({
     super.key,
     required this.title,
-    required this.imagePath,
+    required this.icon,
     required this.color,
   });
 
@@ -18,24 +20,20 @@ class CheckDialog extends StatefulWidget {
   State<CheckDialog> createState() => _CheckDialogState();
 }
 
-class _CheckDialogState extends State<CheckDialog>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _lottieController;
+class _CheckDialogState extends State<CheckDialog> {
+  late final Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _lottieController = AnimationController(vsync: this);
-    _lottieController.addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
+    _timer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
     });
   }
 
   @override
   void dispose() {
-    _lottieController.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -54,27 +52,12 @@ class _CheckDialogState extends State<CheckDialog>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: 120,
-              child: Lottie.asset(
-                widget.imagePath,
-                fit: BoxFit.contain,
-                repeat: false,
-                controller: _lottieController,
-                onLoaded: (comp) {
-                  _lottieController.duration = comp.duration;
-                  _lottieController.forward();
-                },
-              ),
-            ),
+            Icon(widget.icon, size: 40, color: widget.color),
             const SizedBox(height: 16),
             Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: NoorText.rowTitle(context).copyWith(
-                color:
-                    widget.color == Colors.transparent ? n.ink : widget.color,
-              ),
+              style: NoorText.rowTitle(context).copyWith(color: n.ink),
             ),
           ],
         ),

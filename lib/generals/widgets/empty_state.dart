@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -7,7 +6,6 @@ class EmptyState extends StatelessWidget {
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
-  final String? lottie;
   final dynamic icon;
 
   const EmptyState({
@@ -15,7 +13,6 @@ class EmptyState extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
-    this.lottie,
     this.icon,
   });
 
@@ -24,16 +21,7 @@ class EmptyState extends StatelessWidget {
     final n = context.noor;
 
     Widget? visual;
-    if (lottie != null) {
-      visual = SizedBox(
-        height: 160,
-        child: Lottie.asset(
-          lottie!,
-          fit: BoxFit.contain,
-          repeat: true,
-        ),
-      );
-    } else if (icon != null) {
+    if (icon != null) {
       if (icon is Widget) {
         visual = icon as Widget;
       } else if (icon is IconData) {

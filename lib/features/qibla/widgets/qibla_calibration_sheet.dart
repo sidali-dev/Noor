@@ -65,8 +65,7 @@ class _QiblaCalibrationContentState extends State<QiblaCalibrationContent>
                   return CustomPaint(
                     size: const Size(180, 80),
                     painter: LemniscatePainter(
-                      progress:
-                          isReducedMotion ? 0.0 : _animController.value,
+                      progress: isReducedMotion ? 0.0 : _animController.value,
                       isReducedMotion: isReducedMotion,
                       primaryColor: n.primary,
                       lineColor: n.line,

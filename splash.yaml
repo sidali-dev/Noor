@@ -1,19 +1,15 @@
 flutter_native_splash:
   color: "#F6F3EB"
   color_dark: "#0E1512"
-  image: assets/logo/logo.png
-  image_dark: assets/logo/logo.png
-  branding: assets/logo/brand-light.png
-  branding_dark: assets/logo/brand-dark.png
-  branding_mode: bottom
+  image: assets/logo/splash.png
+  image_dark: assets/logo/splash_dark.png
 
-android_12:
-  color: "#F6F3EB"
-  color_dark: "#0E1512"
-  image: assets/logo/logo.png
-  image_dark: assets/logo/logo.png
-  branding: assets/logo/brand-light.png
-  branding_dark: assets/logo/brand-dark.png
-  branding_mode: bottom
+  android_12:
+    color: "#F6F3EB"
+    color_dark: "#0E1512"
+    image: assets/logo/splash_icon.png
+    image_dark: assets/logo/splash_icon.png
+    icon_background_color: "#F6F3EB"
+    icon_background_color_dark: "#F6F3EB"
 
-web: false
+  web: false

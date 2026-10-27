@@ -295,7 +295,7 @@ void main() {
                 theme: theme,
                 locale: locale,
                 textScale: textScale,
-                child: const WaitDialog(isDark: false, isRtl: false),
+                child: const WaitDialog(),
               ),
             );
             expect(tester.takeException(), isNull);
@@ -309,7 +309,7 @@ void main() {
                 textScale: textScale,
                 child: const CheckDialog(
                   title: 'Saved',
-                  imagePath: SImageString.lottieQuran,
+                  icon: Icons.check_rounded,
                   color: Colors.green,
                 ),
               ),

@@ -132,13 +132,11 @@ class QuranScreen extends StatelessWidget {
   Widget _buildContinueReadingCard(
       BuildContext context, QuranScreenController controller) {
     final n = context.noor;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
     final page = controller.lastReadPageNumber.value;
     final surahId = quran.getPageData(page).first["surah"] as int;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final surahName = isAr
-        ? quran.getSurahNameArabic(surahId)
-        : quran.getSurahName(surahId);
+    final surahName =
+        isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
     final subtitle = "$surahName \u00B7 ${S.of(context).page} $page";
     final readCount = QuranProgress.readCount;
     final overallFraction = QuranProgress.overallFraction;
@@ -197,10 +195,8 @@ class QuranScreen extends StatelessWidget {
               Expanded(
                 child: NoorButton(
                   label: S.of(context).continue_reading,
-                  icon: Transform.flip(
-                    flipX: isRtl,
-                    child: const Icon(Icons.arrow_forward_rounded, size: 20),
-                  ),
+                  // arrow_forward already mirrors in RTL.
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 20),
                   onPressed: () {
                     Get.to(() => ReadQuranScreen(pageIndex: page - 1));
                   },
@@ -253,7 +249,7 @@ class QuranScreen extends StatelessWidget {
               await QuranProgress.reset();
               controller.refreshProgress();
             },
-            variant: NoorButtonVariant.primary,
+            variant: NoorButtonVariant.danger,
           ),
           const SizedBox(height: NoorSpace.sm),
           NoorButton(

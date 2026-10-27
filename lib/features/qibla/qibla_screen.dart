@@ -16,7 +16,6 @@ import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_header.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -27,7 +26,7 @@ class QiblaScreen extends StatefulWidget {
   State<QiblaScreen> createState() => _QiblaScreenState();
 }
 
-class _QiblaScreenState extends State<QiblaScreen> {
+class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
   late final QiblaController _controller;
   late final Future<bool?> _deviceSupport;
   double? _distanceKm;
@@ -37,6 +36,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
     super.initState();
     // Create controller once
     _controller = Get.put(QiblaController());
+    WidgetsBinding.instance.addObserver(this);
 
     // Ensure AdhanController is registered for LocationPill
     if (!Get.isRegistered<AdhanController>()) {
@@ -58,8 +58,18 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     Get.delete<QiblaController>();
     super.dispose();
+  }
+
+  // Back from system settings after enabling GPS or the permission.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _controller.restartCheckLocationStatus();
+      _fetchDistance();
+    }
   }
 
   Future<void> _fetchDistance() async {
@@ -84,6 +94,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
       backgroundColor: context.noor.paper,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const NoorHeader(),
             const Padding(
@@ -113,7 +124,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
                     if (snapshot.hasError) {
                       return EmptyState(
-                        lottie: SImageString.lottieError,
+                        icon: Icons.error_outline_rounded,
                         message: '${snapshot.error}',
                         actionLabel: S.of(context).try_again,
                         onAction: () => setState(() {}),
@@ -123,7 +134,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     // If sensor unsupported
                     if (snapshot.data == false) {
                       return EmptyState(
-                        lottie: SImageString.lottieError,
+                        icon: Icons.explore_off_outlined,
                         message: S.of(context).sensor_not_supported,
                         actionLabel: S.of(context).try_again,
                         onAction: () => setState(() {}),
@@ -133,12 +144,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     // Sensor supported: stream location status
                     return StreamBuilder<LocationStatus>(
                       stream: _controller.stream,
+                      initialData: _controller.last,
                       builder: (context, locationSnapshot) {
-                        if (locationSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return _buildCalmSpinner();
-                        }
-
                         if (locationSnapshot.hasError) {
                           return EmptyState(
                             message: '${locationSnapshot.error}',
@@ -156,17 +163,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
                         // GPS signal is off
                         if (!status.enabled) {
                           return EmptyState(
-                            lottie: SImageString.lottieAddLocation,
-                            message: S.of(context).enable_location,
-                            actionLabel: S.of(context).enable_location,
-                            onAction: () async {
-                              await _requestPermission();
-                              try {
-                                await Geolocator.getCurrentPosition();
-                                await _controller.restartCheckLocationStatus();
-                                _fetchDistance();
-                              } catch (_) {}
-                            },
+                            icon: Icons.location_off_outlined,
+                            message: S.of(context).enable_location_body,
+                            actionLabel: S.of(context).open_settings,
+                            // The resume observer re-checks on return.
+                            onAction: Geolocator.openLocationSettings,
                           );
                         }
 
@@ -179,10 +180,12 @@ class _QiblaScreenState extends State<QiblaScreen> {
                           case LocationPermission.denied:
                           case LocationPermission.deniedForever:
                             return EmptyState(
-                              lottie: SImageString.lottieAddLocation,
+                              icon: Icons.location_off_outlined,
                               message: S.of(context).enable_location_permission,
-                              actionLabel:
-                                  S.of(context).enable_location_permission,
+                              actionLabel: status.status ==
+                                      LocationPermission.deniedForever
+                                  ? S.of(context).open_settings
+                                  : S.of(context).try_again,
                               onAction: () async {
                                 await _requestPermission();
                                 await _controller.restartCheckLocationStatus();
@@ -331,12 +334,15 @@ class QiblaDirectionCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  '~ ${distanceKm!.toInt()} km',
-                  style: NoorText.numeral(
-                    context,
-                    size: 15,
-                    color: n.muted,
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    '~ ${distanceKm!.toInt()} km',
+                    style: NoorText.numeral(
+                      context,
+                      size: 15,
+                      color: n.muted,
+                    ),
                   ),
                 ),
               ],

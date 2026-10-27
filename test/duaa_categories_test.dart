@@ -9,7 +9,8 @@ import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 void main() {
-  test('adhkarCategories has exactly 19 categories with unique type IDs 1..19', () {
+  test('adhkarCategories has exactly 19 categories with unique type IDs 1..19',
+      () {
     expect(adhkarCategories.length, 19);
     final ids = adhkarCategories.map((c) => c.id).toList();
     expect(ids.toSet().length, 19, reason: 'Type ids must be unique');
@@ -36,12 +37,15 @@ void main() {
       expect(
         file.existsSync(),
         isTrue,
-        reason: 'Asset ${cat.svgAsset} for category ${cat.id} must exist on disk',
+        reason:
+            'Asset ${cat.svgAsset} for category ${cat.id} must exist on disk',
       );
     }
   });
 
-  testWidgets('AdhkarDisplayScreen pumps, decrements repetitions, and completes', (tester) async {
+  testWidgets(
+      'AdhkarDisplayScreen pumps, decrements repetitions, and completes',
+      (tester) async {
     final fakeAdhkar = [
       AdhkarModel(
         id: 1,

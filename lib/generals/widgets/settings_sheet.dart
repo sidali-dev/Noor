@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:noor/features/adhan/adhan_controller.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/generals/controllers/localization_controller.dart';
 import 'package:noor/generals/controllers/theme_controller.dart';
@@ -12,7 +12,7 @@ import 'package:noor/utils/theme/noor_theme.dart';
 Future<void> showSettingsSheet(BuildContext context) {
   return showNoorSheet(
     context,
-    title: S.of(context).settings,
+    titleOf: (c) => S.of(c).settings,
     builder: (sheetContext) => const _SettingsSheetContent(),
   );
 }
@@ -85,7 +85,7 @@ class _SettingsSheetContentState extends State<_SettingsSheetContent> {
             setState(() => _currentLang = val);
             await _localizationController.setLanguage(val);
             try {
-              await AdhanController.scheduleAdhans();
+              await AdhanScheduler.sync();
             } catch (_) {}
             try {
               if (Get.isRegistered<SoundPickerController>()) {

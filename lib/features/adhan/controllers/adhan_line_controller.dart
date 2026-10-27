@@ -11,10 +11,3 @@ String getAlarmText(BuildContext context, int minutes) {
     return '${s.alarm_set_for} $minStr ${s.before_adhan}';
   }
 }
-
-class AdhanLineController {
-  AdhanLineController._();
-
-  static String getAlarmText(BuildContext context, int duration) =>
-      getAlarmText(context, duration);
-}

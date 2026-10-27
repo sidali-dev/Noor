@@ -55,6 +55,21 @@ class S {
     return Localizations.of<S>(context, S);
   }
 
+  /// `Back`
+  String get back {
+    return Intl.message('Back', name: 'back', desc: '', args: []);
+  }
+
+  /// `Info`
+  String get info {
+    return Intl.message('Info', name: 'info', desc: '', args: []);
+  }
+
+  /// `Bookmark`
+  String get bookmark {
+    return Intl.message('Bookmark', name: 'bookmark', desc: '', args: []);
+  }
+
   /// `Settings`
   String get settings {
     return Intl.message('Settings', name: 'settings', desc: '', args: []);

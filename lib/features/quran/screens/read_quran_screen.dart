@@ -146,14 +146,12 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     );
   }
 
-  Widget _buildTopBar(
-      BuildContext context, int pageNumber, bool isBookmarked) {
+  Widget _buildTopBar(BuildContext context, int pageNumber, bool isBookmarked) {
     final n = context.noor;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final surahId = quran.getPageData(pageNumber).first["surah"] as int;
-    final surahName = isAr
-        ? quran.getSurahNameArabic(surahId)
-        : quran.getSurahName(surahId);
+    final surahName =
+        isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
 
     return Container(
       decoration: BoxDecoration(
@@ -173,10 +171,11 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
         children: [
           IconButton(
             icon: Icon(
-              Icons.arrow_forward_rounded, // Mirrored back arrow in RTL
+              Icons.arrow_back_rounded, // mirrors itself in RTL
               color: n.ink,
               size: 24,
             ),
+            tooltip: S.of(context).back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: NoorSpace.sm),
@@ -212,6 +211,7 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
               color: isBookmarked ? n.gold : n.muted,
               size: 24,
             ),
+            tooltip: S.of(context).bookmark,
             onPressed: _toggleBookmark,
           ),
         ],
@@ -304,9 +304,11 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: NoorSpace.xl,
-          vertical: 56,
+        padding: const EdgeInsets.fromLTRB(
+          NoorSpace.xl,
+          56,
+          NoorSpace.xl,
+          88, // clear the floating page-number pill
         ),
         child: Text.rich(
           TextSpan(children: spans),

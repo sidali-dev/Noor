@@ -20,12 +20,13 @@ void main() {
     });
 
     test('hizbStartPage helper maps hizb indices correctly', () {
-      expect(hizbStartPage(1), 2);
-      expect(hizbStartPage(2), 12);
-      expect(hizbStartPage(60), 592);
+      expect(hizbStartPage(1), 1);
+      expect(hizbStartPage(2), 11);
+      expect(hizbStartPage(60), 591);
+      expect(hizbStartPage(3), 22); // Baqarah 2:142
       // Boundary safety
-      expect(hizbStartPage(0), 2);
-      expect(hizbStartPage(61), 592);
+      expect(hizbStartPage(0), 1);
+      expect(hizbStartPage(61), 591);
     });
   });
 }

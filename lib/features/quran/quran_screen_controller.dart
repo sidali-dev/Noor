@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-import 'package:noor/features/quran/screens/list_by_hizb.dart';
-import 'package:noor/features/quran/screens/list_by_surah.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 import 'package:noor/utils/text_normalize.dart';
 import 'package:quran/quran.dart' as quran;
@@ -11,8 +9,6 @@ class QuranScreenController extends GetxController {
   final RxInt lastReadPageNumber = 1.obs;
   final RxInt progressRevision = 0.obs;
 
-  final screens = const [ListBySurah(), ListByHizb()];
-
   late final RxString lastReadSurah;
   late final RxString lastReadSurahArabic;
 
@@ -22,8 +18,7 @@ class QuranScreenController extends GetxController {
     final page = AppPrefs.lastReadPage;
     lastReadPageNumber.value = page;
 
-    final initialSurah =
-        quran.getPageData(page).first["surah"] as int;
+    final initialSurah = quran.getPageData(page).first["surah"] as int;
     lastReadSurah = quran.getSurahName(initialSurah).obs;
     lastReadSurahArabic = quran.getSurahNameArabic(initialSurah).obs;
   }
@@ -71,8 +66,7 @@ class QuranScreenController extends GetxController {
     }
     return [
       for (var h = 1; h <= 60; h++)
-        if (matchesQuery(h.toString(), q))
-          h,
+        if (matchesQuery(h.toString(), q)) h,
     ];
   }
 }

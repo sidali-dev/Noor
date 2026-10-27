@@ -1,4 +1,7 @@
 {
+    "back": "Retour",
+    "info": "Informations",
+    "bookmark": "Marque-page",
     "settings" : "Paramètres",
     "dark_mode" : "Mode Sombre",
     "language" : "Langue",
@@ -58,7 +61,7 @@
     "continue_reading" : "Continuer la lecture",
     "last_read" : "Dernière lecture",
     "hizb" : "Hizb",
-    "adhkar" : "El Adhkar",
+    "adhkar" : "Adhkar",
     "surah" : "Sourate",
     "morning_adhkar" : "Adhkar du matin",
     "evening_adhkar" : "Adhkar du soir",

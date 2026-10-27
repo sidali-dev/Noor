@@ -4,14 +4,7 @@ import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 class WaitDialog extends StatelessWidget {
-  const WaitDialog({
-    super.key,
-    required this.isDark,
-    required this.isRtl,
-  });
-
-  final bool isDark;
-  final bool isRtl;
+  const WaitDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

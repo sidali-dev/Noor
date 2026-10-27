@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
-import 'package:noor/utils/helpers/helper_functions.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 
 class SoundPickerController extends GetxController {
@@ -21,12 +20,7 @@ class SoundPickerController extends GetxController {
   }
 
   void updateAdhanName() {
-    final name = AppPrefs.adhanSoundName;
-    if (name.isNotEmpty) {
-      adhanSoundName.value = name;
-    } else {
-      adhanSoundName.value = SHelperFunctions.getAdhanChikhName();
-    }
+    adhanSoundName.value = AppPrefs.adhanSoundName;
   }
 
   Future<void> togglePreview(String path) async {
@@ -35,9 +29,8 @@ class SoundPickerController extends GetxController {
     } else {
       await player.stop();
       playingPath.value = path;
-      final cleanPath = path.startsWith('assets/')
-          ? path.replaceFirst('assets/', '')
-          : path;
+      final cleanPath =
+          path.startsWith('assets/') ? path.replaceFirst('assets/', '') : path;
       await player.play(AssetSource(cleanPath));
     }
   }

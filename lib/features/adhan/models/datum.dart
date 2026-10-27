@@ -1,5 +1,5 @@
-import 'sub_models.dart/date.dart';
-import 'sub_models.dart/timings.dart';
+import 'sub_models/date.dart';
+import 'sub_models/timings.dart';
 
 class Datum {
   Timings timings;

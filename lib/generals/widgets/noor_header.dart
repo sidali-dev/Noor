@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/generals/widgets/settings_sheet.dart';
+import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/app_name.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -41,7 +42,7 @@ class NoorHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
             IconButton(
               icon: Icon(
-                Iconsax.setting_4,
+                Iconsax.setting_2,
                 color: n.ink,
                 size: 22,
               ),
@@ -51,7 +52,7 @@ class NoorHeader extends StatelessWidget implements PreferredSizeWidget {
                 minWidth: 48,
                 minHeight: 48,
               ),
-              tooltip: 'Settings',
+              tooltip: S.of(context).settings,
             ),
           ],
         ),

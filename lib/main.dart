@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/my_app.dart';
-import 'package:noor/utils/helpers/helper_functions.dart';
 import 'package:noor/utils/local_storage/services/database_service.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:workmanager/workmanager.dart';
@@ -41,8 +40,6 @@ void main() async {
   await DatabaseService.init();
 
   await Alarm.init();
-
-  await SHelperFunctions.saveInitialValues();
 
   await Workmanager().initialize(callbackDispatcher);
 

@@ -1,4 +1,4 @@
-import 'sub_models.dart/timings.dart';
+import 'sub_models/timings.dart';
 
 enum Prayer {
   fajr(

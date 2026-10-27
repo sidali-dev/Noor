@@ -14,7 +14,8 @@ class IconTile extends StatelessWidget {
     this.svg,
     required this.tint,
     this.size = 48,
-  }) : assert(icon != null || svg != null, 'Either icon or svg must be provided');
+  }) : assert(
+            icon != null || svg != null, 'Either icon or svg must be provided');
 
   @override
   Widget build(BuildContext context) {

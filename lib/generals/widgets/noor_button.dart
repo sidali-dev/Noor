@@ -5,6 +5,7 @@ enum NoorButtonVariant {
   primary,
   tonal,
   outline,
+  danger,
 }
 
 class NoorButton extends StatelessWidget {
@@ -38,7 +39,12 @@ class NoorButton extends StatelessWidget {
         break;
       case NoorButtonVariant.tonal:
         bg = n.tintBg(NoorTint.sage);
-        fg = n.primary;
+        fg = n.isDark ? n.ink : n.primary;
+        border = null;
+        break;
+      case NoorButtonVariant.danger:
+        bg = n.danger;
+        fg = Colors.white;
         border = null;
         break;
       case NoorButtonVariant.outline:

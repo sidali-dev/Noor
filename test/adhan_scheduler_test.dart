@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
-import 'package:noor/features/adhan/models/sub_models.dart/timings.dart';
+import 'package:noor/features/adhan/models/sub_models/timings.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 
 PrayerTime createTestPrayerTime({
@@ -213,9 +213,12 @@ void main() {
 
       expect(plan.alarmsToSet.length, 18);
 
-      final jan31 = plan.alarmsToSet.where((a) => a.time.month == 1 && a.time.day == 31);
-      final feb1 = plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 1);
-      final feb2 = plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 2);
+      final jan31 =
+          plan.alarmsToSet.where((a) => a.time.month == 1 && a.time.day == 31);
+      final feb1 =
+          plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 1);
+      final feb2 =
+          plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 2);
 
       expect(jan31.length, 6);
       expect(feb1.length, 6);
@@ -226,7 +229,8 @@ void main() {
       final now = DateTime(2026, 12, 31, 3, 0);
       final plan = AdhanScheduler.planAlarms(
         now: now,
-        getCalendar: (y) => y == 2026 ? calendar2026 : null, // 2027 returns null
+        getCalendar: (y) =>
+            y == 2026 ? calendar2026 : null, // 2027 returns null
         isPrayerEnabled: (_) => true,
         reminders: (_) => [],
         windowDays: 3,
@@ -234,7 +238,10 @@ void main() {
 
       // Dec 31 has 6 alarms; Jan 1 and Jan 2 of 2027 are safely skipped
       expect(plan.alarmsToSet.length, 6);
-      expect(plan.alarmsToSet.every((a) => a.time.year == 2026 && a.time.month == 12 && a.time.day == 31), isTrue);
+      expect(
+          plan.alarmsToSet.every((a) =>
+              a.time.year == 2026 && a.time.month == 12 && a.time.day == 31),
+          isTrue);
     });
 
     test('leap day rollover (2024-02-28 -> 2024-02-29 -> 2024-03-01)', () {
@@ -248,9 +255,12 @@ void main() {
       );
 
       expect(plan.alarmsToSet.length, 18);
-      final feb28 = plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 28);
-      final feb29 = plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 29);
-      final mar1 = plan.alarmsToSet.where((a) => a.time.month == 3 && a.time.day == 1);
+      final feb28 =
+          plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 28);
+      final feb29 =
+          plan.alarmsToSet.where((a) => a.time.month == 2 && a.time.day == 29);
+      final mar1 =
+          plan.alarmsToSet.where((a) => a.time.month == 3 && a.time.day == 1);
 
       expect(feb28.length, 6);
       expect(feb29.length, 6);
@@ -325,7 +335,10 @@ void main() {
       // Slot 1 (-10): 04:50, id 101, 10101, 20101
       // Slot 2 (+15): 05:15, id 102, 10102, 20102
       final fajrRemindersDay0 = plan.alarmsToSet
-          .where((a) => a.prayer == Prayer.fajr && a.kind == AlarmKind.reminder && a.time.day == 15)
+          .where((a) =>
+              a.prayer == Prayer.fajr &&
+              a.kind == AlarmKind.reminder &&
+              a.time.day == 15)
           .toList();
 
       expect(fajrRemindersDay0.length, 2);
@@ -339,7 +352,10 @@ void main() {
       expect(r2.time, DateTime(2026, 4, 15, 5, 15));
 
       final fajrRemindersDay1 = plan.alarmsToSet
-          .where((a) => a.prayer == Prayer.fajr && a.kind == AlarmKind.reminder && a.time.day == 16)
+          .where((a) =>
+              a.prayer == Prayer.fajr &&
+              a.kind == AlarmKind.reminder &&
+              a.time.day == 16)
           .toList();
       expect(fajrRemindersDay1.firstWhere((a) => a.minutes == -10).id, 10101);
       expect(fajrRemindersDay1.firstWhere((a) => a.minutes == 15).id, 10102);

@@ -64,8 +64,7 @@ void main() {
 
     test('location, sound, quran, settings, calendar', () async {
       await AppPrefs.setLocation('Algeria', 'Algiers', 'Bab Ezzouar');
-      expect(
-          [AppPrefs.country, AppPrefs.state, AppPrefs.city],
+      expect([AppPrefs.country, AppPrefs.state, AppPrefs.city],
           ['Algeria', 'Algiers', 'Bab Ezzouar']);
 
       await AppPrefs.setAdhanSoundPath('assets/sounds/x.mp3');
@@ -212,7 +211,8 @@ void main() {
       expect(SharedPrefKeys.adhanYear(2026), 'Adhan2026');
       expect(SharedPrefKeys.quranReadPages, 'quran_read_pages');
       expect(SharedPrefKeys.reminder602, '602');
-      expect(SharedPrefKeys.chouroukAlarm2Duration, 'chourouk_alarm_2_duration');
+      expect(
+          SharedPrefKeys.chouroukAlarm2Duration, 'chourouk_alarm_2_duration');
     });
   });
 }

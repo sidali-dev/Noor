@@ -27,15 +27,12 @@ class SurahLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-
     final arName = arabicName ?? quran.getSurahNameArabic(number);
     final latinName = englishName ?? quran.getSurahName(number);
     final verseCount = verses ?? quran.getVerseCount(number);
     final rawPlace = revelationPlace ?? quran.getPlaceOfRevelation(number);
-    final place = rawPlace == 'Makkah'
-        ? S.of(context).meccan
-        : S.of(context).medinan;
+    final place =
+        rawPlace == 'Makkah' ? S.of(context).meccan : S.of(context).medinan;
     final metaText = "${S.of(context).verse_count(verseCount)} \u00B7 $place";
 
     final fraction = QuranProgress.surahFraction(number);
@@ -80,8 +77,9 @@ class SurahLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: NoorSpace.xs),
+        // chevron_right already mirrors in RTL.
         Icon(
-          isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+          Icons.chevron_right_rounded,
           color: n.muted,
           size: 20,
         ),
@@ -90,8 +88,8 @@ class SurahLine extends StatelessWidget {
 
     return NoorListRow(
       leading: leading,
-      title: "$arName  $latinName",
-      meta: metaText,
+      title: arName,
+      meta: "$latinName\n$metaText",
       trailing: trailing,
       onTap: onTap,
     );

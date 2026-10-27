@@ -4,21 +4,25 @@ import 'package:noor/utils/theme/noor_theme.dart';
 Future<T?> showNoorSheet<T>(
   BuildContext context, {
   String? title,
+  String Function(BuildContext)? titleOf, // re-evaluated on locale change
   required WidgetBuilder builder,
 }) {
-  final n = context.noor;
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: n.card,
+    backgroundColor: Colors.transparent,
     shape: const RoundedRectangleBorder(
       borderRadius:
           BorderRadius.vertical(top: Radius.circular(NoorRadius.sheet)),
     ),
     builder: (sheetContext) {
+      final n = sheetContext.noor;
       final mq = MediaQuery.of(sheetContext);
-      final bottomInset = mq.viewInsets.bottom + mq.padding.bottom + NoorSpace.xl;
+      final bottomInset =
+          mq.viewInsets.bottom + mq.padding.bottom + NoorSpace.xl;
+
+      final sheetTitle = titleOf?.call(sheetContext) ?? title;
 
       return Container(
         decoration: BoxDecoration(
@@ -45,14 +49,14 @@ Future<T?> showNoorSheet<T>(
               ),
             ),
             const SizedBox(height: NoorSpace.sm),
-            if (title != null) ...[
+            if (sheetTitle != null) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: NoorSpace.xl,
                   vertical: NoorSpace.sm,
                 ),
                 child: Text(
-                  title,
+                  sheetTitle,
                   style: NoorText.section(sheetContext),
                   textAlign: TextAlign.center,
                 ),

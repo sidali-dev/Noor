@@ -7,7 +7,8 @@ import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart
 class AppPrefs {
   AppPrefs._();
 
-  static const String defaultAdhanSoundPath = 'assets/sounds/ahmad_alnafees.mp3';
+  static const String defaultAdhanSoundPath =
+      'assets/sounds/ahmad_alnafees.mp3';
   static const String defaultAdhanSoundName = 'أذان الشيخ النفيس';
   static const String defaultLanguage = 'ar';
 
@@ -61,8 +62,7 @@ class AppPrefs {
 
   // ---- reminders ----------------------------------------------------------
 
-  static bool reminderActive(int alarmId) =>
-      _bool(alarmId.toString(), false);
+  static bool reminderActive(int alarmId) => _bool(alarmId.toString(), false);
 
   /// Minutes relative to the prayer (negative = before). Missing or
   /// non-numeric values read as 0.

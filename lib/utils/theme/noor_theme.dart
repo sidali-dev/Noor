@@ -236,8 +236,7 @@ abstract final class NoorText {
         color: c.noor.muted,
       );
 
-  static TextStyle numeral(BuildContext c,
-          {double size = 22, Color? color}) =>
+  static TextStyle numeral(BuildContext c, {double size = 22, Color? color}) =>
       TextStyle(
         fontFamily: _spectral,
         fontFamilyFallback: const [_plex, _amiri],
@@ -350,9 +349,8 @@ abstract final class NoorTheme {
 
 /// Transparent system bars with icons matching the active theme.
 SystemUiOverlayStyle noorSystemOverlay(Brightness themeBrightness) {
-  final iconBrightness = themeBrightness == Brightness.dark
-      ? Brightness.light
-      : Brightness.dark;
+  final iconBrightness =
+      themeBrightness == Brightness.dark ? Brightness.light : Brightness.dark;
   return SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: iconBrightness,

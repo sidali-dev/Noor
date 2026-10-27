@@ -10,6 +10,10 @@ class QiblaController extends GetxController {
 
   Stream<LocationStatus> get stream => _locationStreamController.stream;
 
+  /// Latest status, so a late listener (the broadcast stream drops events
+  /// nobody listened to) doesn't wait on a spinner forever.
+  LocationStatus? last;
+
   static const double kaabaLatitude = 21.4225;
   static const double kaabaLongitude = 39.8262;
 
@@ -32,14 +36,9 @@ class QiblaController extends GetxController {
       if (locationStatus.enabled &&
           locationStatus.status == LocationPermission.denied) {
         await FlutterQiblah.requestPermissions();
-        final s = await FlutterQiblah.checkLocationStatus();
-        if (!_locationStreamController.isClosed) {
-          _locationStreamController.sink.add(s);
-        }
+        _emit(await FlutterQiblah.checkLocationStatus());
       } else {
-        if (!_locationStreamController.isClosed) {
-          _locationStreamController.sink.add(locationStatus);
-        }
+        _emit(locationStatus);
       }
     } catch (e) {
       if (!_locationStreamController.isClosed) {
@@ -50,10 +49,7 @@ class QiblaController extends GetxController {
 
   Future<void> restartCheckLocationStatus() async {
     try {
-      final locationStatus = await FlutterQiblah.checkLocationStatus();
-      if (!_locationStreamController.isClosed) {
-        _locationStreamController.sink.add(locationStatus);
-      }
+      _emit(await FlutterQiblah.checkLocationStatus());
     } catch (e) {
       if (!_locationStreamController.isClosed) {
         _locationStreamController.sink.addError(e);
@@ -61,8 +57,17 @@ class QiblaController extends GetxController {
     }
   }
 
+  void _emit(LocationStatus s) {
+    last = s;
+    if (!_locationStreamController.isClosed) {
+      _locationStreamController.sink.add(s);
+    }
+  }
+
   Future<double?> distanceToKaabaKm() async {
     try {
+      // With GPS off, getCurrentPosition pops a Play Services dialog on every call.
+      if (!await Geolocator.isLocationServiceEnabled()) return null;
       Position? position = await Geolocator.getLastKnownPosition();
       position ??= await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(

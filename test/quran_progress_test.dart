@@ -115,7 +115,8 @@ void main() {
       expect(AppPrefs.quranReadPages[0], '1');
       expect(AppPrefs.quranReadPages[49], '1');
       // All other characters should be '0'
-      final ones = AppPrefs.quranReadPages.codeUnits.where((c) => c == 0x31).length;
+      final ones =
+          AppPrefs.quranReadPages.codeUnits.where((c) => c == 0x31).length;
       expect(ones, 2);
     });
 
