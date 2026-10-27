@@ -55,6 +55,11 @@ flutter:
   #------------- LOCAL ASSETS -------------#
   assets:
     - assets/images/svg/
+    - assets/images/art/
+    - assets/images/ornaments/
+    - assets/images/splash/
+    - assets/logo/noor_imene_emblem.svg
+    - assets/logo/noor_imene_emblem_dark.svg
     - assets/sounds/
     - assets/noor.db
 

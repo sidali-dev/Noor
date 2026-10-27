@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 class SImageString {
   SImageString._();
 
@@ -19,4 +21,37 @@ class SImageString {
   static const String tasbih = "assets/images/svg/tasbih.svg";
   static const String wc = "assets/images/svg/wc.svg";
   static const String wudu = "assets/images/svg/wudu.svg";
+}
+
+/// Illustrated art. Load only through [of]; never by raw path.
+abstract final class NoorArt {
+  static const String heroPrayers = 'assets/images/art/hero_prayers';
+  static const String heroQuran = 'assets/images/art/hero_quran';
+  static const String heroAthkar = 'assets/images/art/hero_athkar';
+  static const String qiblaSkyline = 'assets/images/art/qibla_skyline';
+  static const String splashTop = 'assets/images/splash/splash_top';
+  static const String splashBottom = 'assets/images/splash/splash_bottom';
+
+  static const String emblem = 'assets/logo/noor_imene_emblem.svg';
+  static const String emblemDark = 'assets/logo/noor_imene_emblem_dark.svg';
+  static const String surahCartouche =
+      'assets/images/ornaments/surah_cartouche.svg';
+  static const String pageCorner = 'assets/images/ornaments/page_corner.svg';
+  static const String divider = 'assets/images/ornaments/divider.svg';
+
+  /// Pieces that contain writing or must keep their orientation: never
+  /// mirrored in RTL (U2). No hero has writing; the skyline is never mirrored.
+  static const Set<String> noMirror = {qiblaSkyline};
+
+  /// Bases precached by the custom splash.
+  static const List<String> heroes = [
+    heroPrayers,
+    heroQuran,
+    heroAthkar,
+    qiblaSkyline,
+  ];
+
+  // ponytail: always light until the _dark.webp files exist; then return
+  // c.noor.isDark ? '${base}_dark.webp' : '${base}_light.webp'.
+  static String of(BuildContext c, String base) => '${base}_light.webp';
 }

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/generals/controllers/localization_controller.dart';
+import 'package:noor/generals/splash_screen.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 import 'generals/controllers/theme_controller.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  /// App startup still running; the splash holds the shell back until it ends.
+  final Future<void> startup;
+
+  const MyApp({super.key, required this.startup});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +22,6 @@ class MyApp extends StatelessWidget {
 
     LocalizationController localizationController =
         Get.put(LocalizationController());
-
-    FlutterNativeSplash.remove();
 
     return GetMaterialApp(
       title: 'Noor Imene',
@@ -41,7 +42,10 @@ class MyApp extends StatelessWidget {
         value: noorSystemOverlay(Theme.of(context).brightness),
         child: child ?? const SizedBox.shrink(),
       ),
-      home: const SBottomNavigation(),
+      home: SplashScreen(
+        ready: startup,
+        next: (_) => const SBottomNavigation(),
+      ),
     );
   }
 }

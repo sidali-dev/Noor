@@ -35,8 +35,14 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+  // Theme and language are read from prefs on the first frame.
   await SharedPrefService.init();
 
+  runApp(MyApp(startup: _startup()));
+}
+
+/// The rest of startup, in its original order. The custom splash waits on it.
+Future<void> _startup() async {
   await DatabaseService.init();
 
   await Alarm.init();
@@ -47,6 +53,4 @@ void main() async {
       frequency: const Duration(hours: 12));
 
   unawaited(AdhanScheduler.sync());
-
-  runApp(const MyApp());
 }
