@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
     FlutterNativeSplash.remove();
 
     return GetMaterialApp(
+      title: 'Noor Imene',
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,

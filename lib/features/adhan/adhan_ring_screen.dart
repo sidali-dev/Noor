@@ -1,18 +1,18 @@
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:noor/bottom_navigation.dart';
-import 'package:noor/utils/constants/image_strings.dart';
-
-import 'package:noor/utils/device/device_utility.dart';
+import 'package:noor/features/adhan/models/prayer.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/generals/widgets/icon_tile.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generals/widgets/noor_mark.dart';
+import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
-
-import '../../generated/l10n.dart';
-import '../../utils/constants/colors.dart';
-import '../../utils/constants/sizes.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
 class AdhanRingScreen extends StatefulWidget {
   final AlarmSettings alarmSettings;
@@ -22,202 +22,162 @@ class AdhanRingScreen extends StatefulWidget {
   State<AdhanRingScreen> createState() => _AdhanRingScreenState();
 }
 
-class _AdhanRingScreenState extends State<AdhanRingScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Alignment> _topAlignmentAnimation;
-  late Animation<Alignment> _bottomAlignmentAnimation;
-
+class _AdhanRingScreenState extends State<AdhanRingScreen> {
   @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 15));
-    _topAlignmentAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topLeft, end: Alignment.topRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topRight, end: Alignment.bottomRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomLeft, end: Alignment.topLeft),
-          weight: 1),
-    ]).animate(_controller);
-
-    _bottomAlignmentAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomLeft, end: Alignment.topLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topLeft, end: Alignment.topRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topRight, end: Alignment.bottomRight),
-          weight: 1),
-    ]).animate(_controller);
-
-    _controller.repeat();
+  void dispose() {
+    Alarm.stop(widget.alarmSettings.id);
+    super.dispose();
   }
 
-  @override
-  dispose() {
-    Alarm.stop(widget.alarmSettings.id);
+  Prayer? _prayerFromBaseId(int baseId) {
+    for (final prayer in Prayer.all) {
+      if (prayer.adhanId == baseId ||
+          prayer.alarmId1 == baseId ||
+          prayer.alarmId2 == baseId) {
+        return prayer;
+      }
+    }
+    return null;
+  }
 
-    _controller.dispose();
-    super.dispose();
+  IconData _prayerIcon(Prayer? prayer) {
+    switch (prayer) {
+      case Prayer.fajr:
+      case Prayer.chourouk:
+      case Prayer.maghrib:
+        return Iconsax.sun_fog;
+      case Prayer.dhuhr:
+        return Iconsax.sun_1;
+      case Prayer.asr:
+        return Iconsax.cloud_sunny;
+      case Prayer.isha:
+        return Iconsax.moon;
+      case null:
+        return Iconsax.sun_fog;
+    }
+  }
+
+  NoorTint _prayerTint(Prayer? prayer) {
+    switch (prayer) {
+      case Prayer.fajr:
+      case Prayer.chourouk:
+      case Prayer.asr:
+        return NoorTint.amber;
+      case Prayer.dhuhr:
+        return NoorTint.sage;
+      case Prayer.maghrib:
+        return NoorTint.lilac;
+      case Prayer.isha:
+        return NoorTint.blue;
+      case null:
+        return NoorTint.sage;
+    }
+  }
+
+  void _openAdhkar() {
+    Alarm.stop(widget.alarmSettings.id).then((_) {
+      Get.offAll(() => const SBottomNavigation(pageIndex: 2));
+    });
+  }
+
+  void _close() {
+    Alarm.stop(widget.alarmSettings.id).then((_) {
+      SystemNavigator.pop(animated: true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isRtl = SHelperFunctions.isRtl(context);
+    final baseId = AdhanScheduler.baseOf(widget.alarmSettings.id);
+    final prayer = _prayerFromBaseId(baseId);
+    // Legacy helper reference for base alarm colour mapping.
+    final _ = SHelperFunctions.getAlarmColor(baseId);
+
+    final title = widget.alarmSettings.notificationSettings.title;
+    final body = widget.alarmSettings.notificationSettings.body;
+    final formattedTime =
+        DateFormat('HH:mm').format(widget.alarmSettings.dateTime);
+
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) => Container(
-            height: SDeviceUtils.getScreenHeight(context),
-            width: SDeviceUtils.getScreenWidth(context),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [
-                    SHelperFunctions.getAlarmColor(widget.alarmSettings.id),
-                    SHelperFunctions.isDarkMode(context)
-                        ? SColors.dark
-                        : Colors.grey
-                  ],
-                  begin: _topAlignmentAnimation.value,
-                  end: _bottomAlignmentAnimation.value),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 70),
-                  Row(
-                    children: [
-                      const SizedBox(width: 20),
-                      SvgPicture.asset(SImageString.logo, height: 48.0),
-                      const SizedBox(width: 10),
-                      Text(S.of(context).noor,
-                          style: TextStyle(
-                              fontSize: isRtl
-                                  ? SSizes.fontSizeLgAr
-                                  : SSizes.fontSizeLg,
-                              color: Colors.white))
-                    ],
+        backgroundColor: context.noor.paper,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NoorSpace.xl,
+                  vertical: NoorSpace.xl,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - (NoorSpace.xl * 2),
                   ),
-                  const SizedBox(height: 100),
-                  Row(
-                    children: [
-                      const SizedBox(width: 20),
-                      SizedBox(
-                        width: SDeviceUtils.getScreenWidth(context) * 0.9,
-                        child: SizedBox(
-                          width: SDeviceUtils.getScreenWidth(context) * 0.8,
-                          child: Text(
-                            widget.alarmSettings.notificationSettings.title,
-                            style: const TextStyle(
-                                fontSize: 40,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w300),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Center(
+                          child: NoorMark(size: 32),
+                        ),
+                        const Spacer(),
+                        const SizedBox(height: NoorSpace.xl),
+                        Center(
+                          child: IconTile(
+                            icon: _prayerIcon(prayer),
+                            tint: _prayerTint(prayer),
+                            size: 64,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const SizedBox(width: 20),
-                      Text(
-                        '${S.of(context).its} ${DateFormat('HH:mm').format(widget.alarmSettings.dateTime)}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
+                        const SizedBox(height: NoorSpace.xxl),
+                        if (title.isNotEmpty) ...[
+                          Text(
+                            title,
+                            style: NoorText.display(context),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: NoorSpace.md),
+                        ],
+                        Text(
+                          formattedTime,
+                          style: NoorText.numeral(context, size: 56),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const SizedBox(width: 20),
-                      SizedBox(
-                        width: SDeviceUtils.getScreenWidth(context) * 0.8,
-                        child: Text(
-                          widget.alarmSettings.notificationSettings.body,
-                          style: const TextStyle(
-                              fontSize: 24, color: Colors.white),
+                        if (body.isNotEmpty) ...[
+                          const SizedBox(height: NoorSpace.md),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: NoorSpace.md,
+                            ),
+                            child: Text(
+                              body,
+                              style: NoorText.body(context).copyWith(
+                                color: context.noor.muted,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        const SizedBox(height: NoorSpace.xxxl),
+                        NoorButton(
+                          label: S.of(context).open_adhkar,
+                          onPressed: _openAdhkar,
+                          variant: NoorButtonVariant.primary,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 200),
-                  ElevatedButton(
-                    onPressed: () {
-                      Alarm.stop(widget.alarmSettings.id)
-                          .then((_) => Get.offAll(() {
-                                SBottomNavigationController controller =
-                                    Get.put(SBottomNavigationController());
-                                controller.changeIndex(2);
-
-                                return const SBottomNavigation(pageIndex: 2);
-                              }));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      side: const BorderSide(color: Colors.transparent),
-                      elevation: 10.0,
-                      backgroundColor: SColors.secondary.withValues(alpha: 0.9),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(32)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
-                    ),
-                    child: Text(
-                      S.of(context).open_adhkar,
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                        const SizedBox(height: NoorSpace.md),
+                        NoorButton(
+                          label: S.of(context).close,
+                          onPressed: _close,
+                          variant: NoorButtonVariant.tonal,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 48),
-                  ElevatedButton(
-                    onPressed: () {
-                      Alarm.stop(widget.alarmSettings.id)
-                          .then((_) => SystemNavigator.pop(animated: true));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      side: const BorderSide(color: Colors.transparent),
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      // elevation: 0.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
-                    ),
-                    child: Text(
-                      S.of(context).close,
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 32)
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

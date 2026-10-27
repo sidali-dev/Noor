@@ -1,55 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
-
-import '../../../utils/constants/colors.dart';
-import '../../../utils/helpers/helper_functions.dart';
-import '../../../utils/local_storage/services/sharedpreferences_service.dart';
-import '../mini screens/read_quran_screen.dart';
-import '../mini screens/read_quran_screen_controller.dart';
+import 'package:noor/features/quran/screens/read_quran_screen.dart';
+import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/local_storage/app_prefs.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
 class BookmarkLine extends StatelessWidget {
   final String title;
   final int pageNumber;
-  const BookmarkLine(
-      {super.key, required this.title, required this.pageNumber});
+
+  const BookmarkLine({
+    super.key,
+    required this.title,
+    required this.pageNumber,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = SHelperFunctions.isDarkMode(context);
-    final isRtl = SHelperFunctions.isRtl(context);
-    ReadQuranScreenController controller = Get.put(ReadQuranScreenController());
-    QuranScreenController quranScreenController =
-        Get.put(QuranScreenController());
-    return Row(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18.0),
+    final n = context.noor;
+    return NoorListRow(
+      title: title,
+      trailing: IconButton(
+        tooltip: S.of(context).remove,
+        icon: Icon(
+          Icons.delete_outline_rounded,
+          color: n.danger,
+          size: 22,
         ),
-        const Spacer(),
-        GestureDetector(
-            onTap: () {
-              controller.removeBookMark(pageNumber);
-            },
-            child: const Icon(Icons.bookmark_remove, color: Colors.red)),
-        const SizedBox(width: 16),
-        GestureDetector(
-            onTap: () {
-              SharedPrefService.setInt("last_read_quran", (pageNumber));
-              quranScreenController.updateLastSurahRead();
-              quranScreenController.updateLastPageRead();
-              Get.to(() => ReadQuranScreen(surahIndex: (pageNumber - 1)));
-            },
-            child: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()..scaleByDouble(isRtl ? -1.0 : 1.0, 1.0, 1.0, 1.0),
-              child: Icon(Iconsax.play,
-                  color: isDark ? SColors.secondary : SColors.primary),
-            )),
-        const SizedBox(width: 8)
-      ],
+        onPressed: () async {
+          final list = List<int>.from(AppPrefs.bookmarks);
+          list.remove(pageNumber);
+          await AppPrefs.setBookmarks(list);
+          if (Get.isRegistered<QuranScreenController>()) {
+            Get.find<QuranScreenController>().refreshProgress();
+          }
+        },
+      ),
+      onTap: () {
+        AppPrefs.setLastReadPage(pageNumber);
+        if (Get.isRegistered<QuranScreenController>()) {
+          Get.find<QuranScreenController>().refreshProgress();
+        }
+        Get.to(() => ReadQuranScreen(pageIndex: pageNumber - 1));
+      },
     );
   }
 }

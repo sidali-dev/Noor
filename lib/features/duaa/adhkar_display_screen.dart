@@ -1,127 +1,87 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:noor/utils/constants/colors.dart';
-import 'package:noor/utils/helpers/helper_functions.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:noor/features/duaa/model/adhkar_model.dart';
+import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_progress_bar.dart';
+import 'package:noor/generals/widgets/noor_sheet.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
-import 'package:noor/features/duaa/adhkar_display_controller.dart';
-import 'package:noor/utils/constants/image_strings.dart';
-import 'package:noor/utils/device/device_utility.dart';
-
-import '../../generated/l10n.dart';
-import 'model/adhkar_model.dart';
-
-class AdhkarDisplayScreen extends StatelessWidget {
+class AdhkarDisplayScreen extends StatefulWidget {
   final String title;
   final List<AdhkarModel> adhkar;
-  AdhkarDisplayScreen({super.key, required this.title, required this.adhkar});
+  final int initialIndex;
 
-  final CarouselSliderController carouselController = CarouselSliderController();
-  final List<CarouselCards> cards = [];
+  const AdhkarDisplayScreen({
+    super.key,
+    required this.title,
+    required this.adhkar,
+    this.initialIndex = 0,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final AdhkarDisplayController controller =
-        Get.put(AdhkarDisplayController());
+  State<AdhkarDisplayScreen> createState() => _AdhkarDisplayScreenState();
+}
 
-    int cardIndex = 0;
+class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
+  late int _currentIndex;
+  late int _repetition;
+  bool _isCompleted = false;
+  late final CarouselSliderController _carouselController;
 
-    for (AdhkarModel adhkarModel in adhkar) {
-      cardIndex++;
-      cards.add(CarouselCards(
-          splitText: splitAtFirstNewLine(adhkarModel.dhikrContent),
-          hasTwoLine: hasTwoLines(adhkarModel.dhikrContent),
-          controller: controller,
-          index: cardIndex,
-          info: adhkarModel.dhikrInfo,
-          hasNotice: adhkarModel.dhikrInfo != null));
-    }
-    final bool isDark = SHelperFunctions.isDarkMode(context);
-
-    return Scaffold(
-      body: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Image.asset(
-            isDark
-                ? SImageString.duaaBackgroundImage2
-                : SImageString.duaaBackgroundImage1,
-            height: SDeviceUtils.getScreenHeight(context),
-            width: SDeviceUtils.getScreenWidth(context),
-            fit: BoxFit.fitHeight,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: isDark ? Colors.black : Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600)),
-              CarouselSlider(
-                  carouselController: carouselController,
-                  items: cards,
-                  options: CarouselOptions(
-                      onPageChanged: (index, reason) {
-                        controller.updatePageIndex(index);
-                        controller
-                            .updateRepetition(adhkar[index].dhikrRepetition);
-                      },
-                      height: SDeviceUtils.getScreenHeight(context) * 0.55,
-                      enableInfiniteScroll: false,
-                      enlargeFactor: 0.15,
-                      enlargeCenterPage: true)),
-              const SizedBox(height: 24),
-              Obx(
-                () => AnimatedSmoothIndicator(
-                  activeIndex: controller.pageIndex.value - 1,
-                  count: adhkar.length,
-                  effect: ScrollingDotsEffect(
-                      dotColor: isDark ? SColors.dark : Colors.white,
-                      activeDotColor:
-                          isDark ? SColors.secondary : Colors.lightBlue,
-                      spacing: 12.0),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Obx(() => GestureDetector(
-                    onTap: () {
-                      controller.decrementRepetition();
-
-                      if (controller.repetition.value == 0) {
-                        carouselController.nextPage();
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                          color: isDark ? SColors.black : Colors.lightBlue,
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Text(
-                        "${S.of(context).repetition} ${controller.repetition.value.toString()}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 24,
-                            color: isDark ? SColors.secondary : Colors.white),
-                      ),
-                    ),
-                  ))
-            ],
-          ),
-        ],
-      ),
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex.clamp(
+      0,
+      widget.adhkar.isEmpty ? 0 : widget.adhkar.length - 1,
     );
+    if (widget.adhkar.isNotEmpty) {
+      _repetition = widget.adhkar[_currentIndex].dhikrRepetition;
+    } else {
+      _repetition = 0;
+    }
+    _carouselController = CarouselSliderController();
   }
 
-  List<String> splitAtFirstNewLine(String text) {
-    RegExp regex = RegExp(r'(.+?)\n(.+)', dotAll: true);
-    Match? match = regex.firstMatch(text);
+  void _onPageChanged(int index, CarouselPageChangedReason reason) {
+    setState(() {
+      _currentIndex = index;
+      _repetition = widget.adhkar[index].dhikrRepetition;
+      _isCompleted = false;
+    });
+  }
 
+  void _onCounterTapped() {
+    if (_isCompleted || widget.adhkar.isEmpty) return;
+    HapticFeedback.selectionClick();
+
+    if (_repetition > 1) {
+      setState(() {
+        _repetition--;
+      });
+    } else {
+      // Repetition drops to 0
+      if (_currentIndex < widget.adhkar.length - 1) {
+        _carouselController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        setState(() {
+          _repetition = 0;
+          _isCompleted = true;
+        });
+      }
+    }
+  }
+
+  List<String> _splitAtFirstNewLine(String text) {
+    final regex = RegExp(r'(.+?)\n(.+)', dotAll: true);
+    final match = regex.firstMatch(text);
     if (match != null) {
       return [match.group(1)!, match.group(2)!];
     } else {
@@ -129,163 +89,261 @@ class AdhkarDisplayScreen extends StatelessWidget {
     }
   }
 
-  bool hasTwoLines(String text) {
-    RegExp regex = RegExp(r'(.+?)\n(.+)', dotAll: true);
-    Match? match = regex.firstMatch(text);
-
-    if (match != null) {
-      return true;
-    } else {
-      return false;
-    }
+  void _showInfo(BuildContext context, String info) {
+    showNoorSheet(
+      context,
+      title: widget.title,
+      builder: (sheetContext) => Text(
+        info,
+        style: NoorText.body(sheetContext),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
-}
-
-class CarouselCards extends StatelessWidget {
-  const CarouselCards({
-    super.key,
-    required this.splitText,
-    required this.hasTwoLine,
-    required this.controller,
-    required this.hasNotice,
-    required this.index,
-    required this.info,
-  });
-
-  final List<String> splitText;
-  final bool hasTwoLine;
-  final AdhkarDisplayController controller;
-  final bool hasNotice;
-  final int index;
-  final String? info;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = SHelperFunctions.isDarkMode(context);
+    final n = context.noor;
+    final s = S.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return Scaffold(
+      backgroundColor: n.paper,
+      body: SafeArea(
+        child: widget.adhkar.isEmpty
+            ? Column(
+                children: [
+                  _buildHeader(context, isRtl),
+                  Expanded(
+                    child: EmptyState(message: s.no_results),
+                  ),
+                ],
+              )
+            : Column(
+                children: [
+                  _buildHeader(context, isRtl),
+                  const SizedBox(height: NoorSpace.sm),
+                  _buildProgress(context),
+                  const SizedBox(height: NoorSpace.lg),
+                  Expanded(
+                    child: CarouselSlider.builder(
+                      carouselController: _carouselController,
+                      itemCount: widget.adhkar.length,
+                      options: CarouselOptions(
+                        initialPage: _currentIndex,
+                        viewportFraction: 0.9,
+                        enableInfiniteScroll: false,
+                        enlargeCenterPage: true,
+                        enlargeFactor: 0.15,
+                        onPageChanged: _onPageChanged,
+                      ),
+                      itemBuilder: (context, index, realIndex) {
+                        final item = widget.adhkar[index];
+                        return _buildCard(context, item);
+                      },
+                    ),
+                  ),
+                  _buildCounterButton(context, s),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, bool isRtl) {
+    final n = context.noor;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: NoorSpace.lg,
+        vertical: NoorSpace.xs,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              isRtl ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded,
+              color: n.ink,
+              size: 24,
+            ),
+            onPressed: () => Navigator.of(context).maybePop(),
+            tooltip: 'Back',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          ),
+          Expanded(
+            child: Text(
+              widget.title,
+              style: NoorText.section(context),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgress(BuildContext context) {
+    final n = context.noor;
+    final total = widget.adhkar.length;
+    final current = total == 0 ? 0 : _currentIndex + 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '$current / $total',
+            style: NoorText.numeral(context, size: 14, color: n.muted),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: NoorSpace.xs),
+          NoorProgressBar(
+            value: total == 0 ? 0.0 : current / total,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, AdhkarModel item) {
+    final n = context.noor;
+    final lines = _splitAtFirstNewLine(item.dhikrContent);
+    final hasTwoLines = lines[1].trim().isNotEmpty;
+    final hasInfo = item.dhikrInfo != null && item.dhikrInfo!.trim().isNotEmpty;
+
+    return NoorCard(
+      padding: const EdgeInsets.all(NoorSpace.xl),
       child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32.0),
-            child: Card(
-              elevation: 20,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Center(
-                    child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 12),
-                            Text(splitText[0].trim().replaceAll(".", ".\n"),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: hasTwoLine ? 26 : 24,
-                                    fontWeight: hasTwoLine
-                                        ? FontWeight.w600
-                                        : FontWeight.w500,
-                                    fontFamily: "Poppins",
-                                    color: hasTwoLine
-                                        ? isDark
-                                            ? SColors.secondary
-                                            : Colors.lightBlue
-                                        : isDark
-                                            ? SColors.white
-                                            : Colors.black)),
-                            Visibility(
-                              visible: hasTwoLine,
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 16),
-                                  Text(
-                                      splitText[1]
-                                          .trim()
-                                          .replaceAll(".", ".\n"),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark
-                                              ? SColors.white
-                                              : Colors.black)),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              index.toString(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: "Poppins",
-                                  fontSize: 20.0,
-                                  color: isDark
-                                      ? SColors.secondary
-                                      : Colors.lightBlue),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ))),
+          Positioned.fill(
+            child: Center(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.only(
+                  top: hasInfo ? NoorSpace.xxl : NoorSpace.xs,
+                  bottom: NoorSpace.xs,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (hasTwoLines) ...[
+                      Text(
+                        lines[0].trim(),
+                        textAlign: TextAlign.center,
+                        style: NoorText.dhikr(context).copyWith(
+                          color: n.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: NoorSpace.lg),
+                      Text(
+                        lines[1].trim(),
+                        textAlign: TextAlign.center,
+                        style: NoorText.dhikr(context).copyWith(
+                          color: n.body,
+                        ),
+                      ),
+                    ] else ...[
+                      Text(
+                        lines[0].trim(),
+                        textAlign: TextAlign.center,
+                        style: NoorText.dhikr(context).copyWith(
+                          color: n.ink,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
-          Visibility(
-            visible: hasNotice,
-            child: Positioned(
-                left: 20,
-                bottom: 10,
-                child: GestureDetector(
-                  onTap: () {
-                    Get.bottomSheet(BottomSheet(
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(24.0))),
-                      enableDrag: false,
-                      showDragHandle: false,
-                      onClosing: () {},
-                      builder: (context) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Icon(Iconsax.information,
-                                color: isDark
-                                    ? SColors.secondary
-                                    : Colors.lightBlue,
-                                size: 56),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 16.0, right: 16.0, bottom: 32.0),
-                            child: SingleChildScrollView(
-                                child: Text(
-                              info!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24.0,
-                                fontFamily: "Poppins",
-                              ),
-                            )),
-                          )
-                        ],
-                      ),
-                    ));
-                  },
-                  child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: isDark ? SColors.secondary : Colors.lightBlue),
-                      child: Icon(Iconsax.information,
-                          color: isDark ? SColors.black : Colors.white)),
-                )),
-          ),
+          if (hasInfo)
+            PositionedDirectional(
+              top: 0,
+              end: 0,
+              child: IconButton(
+                icon: Icon(
+                  Iconsax.info_circle,
+                  color: n.muted,
+                  size: 22,
+                ),
+                onPressed: () => _showInfo(context, item.dhikrInfo!.trim()),
+                tooltip: 'Info',
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                splashRadius: 20,
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCounterButton(BuildContext context, S s) {
+    final n = context.noor;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: NoorSpace.xl,
+        vertical: NoorSpace.xxl,
+      ),
+      child: Center(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          height: 64,
+          constraints: const BoxConstraints(minWidth: 160, maxWidth: 240),
+          decoration: BoxDecoration(
+            color: _isCompleted ? n.card : n.primary,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: noorShadow(context),
+            border: _isCompleted && n.isDark
+                ? Border.all(color: n.line, width: 1)
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(32),
+              onTap: _isCompleted ? null : _onCounterTapped,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xxl),
+                child: Center(
+                  child: _isCompleted
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_rounded,
+                              color: n.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: NoorSpace.sm),
+                            Text(
+                              s.done,
+                              style: NoorText.rowTitle(context).copyWith(
+                                color: n.primary,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          '$_repetition',
+                          style: NoorText.numeral(
+                            context,
+                            size: 32,
+                            color: n.onPrimary,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -38,7 +38,7 @@ class SBottomNavigation extends StatelessWidget {
           case 1:
             return const AdhanScreen();
           case 2:
-            return DuaaScreen();
+            return const DuaaScreen();
           case 3:
             return QiblaScreen();
           default:

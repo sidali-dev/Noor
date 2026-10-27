@@ -1,46 +1,78 @@
 import 'package:get/get.dart';
-import 'package:noor/features/quran/mini%20screens/list_by_hizb.dart';
-import 'package:noor/features/quran/mini%20screens/list_by_surah.dart';
+import 'package:noor/features/quran/screens/list_by_hizb.dart';
+import 'package:noor/features/quran/screens/list_by_surah.dart';
+import 'package:noor/utils/local_storage/app_prefs.dart';
+import 'package:noor/utils/text_normalize.dart';
 import 'package:quran/quran.dart' as quran;
 
-import '../../utils/local_storage/services/sharedpreferences_service.dart';
-
 class QuranScreenController extends GetxController {
-  Rx<int> currentIndex = 0.obs;
+  final RxInt currentIndex = 0.obs;
+  final RxString searchQuery = ''.obs;
+  final RxInt lastReadPageNumber = 1.obs;
+  final RxInt progressRevision = 0.obs;
 
   final screens = const [ListBySurah(), ListByHizb()];
 
-  Rx<String> lastReadSurah = quran
-      .getSurahName(quran
-          .getPageData(SharedPrefService.getInt("last_read_quran")!)
-          .first["surah"])
-      .obs;
+  late final RxString lastReadSurah;
+  late final RxString lastReadSurahArabic;
 
-  Rx<String> lastReadSurahArabic = quran
-      .getSurahNameArabic(quran
-          .getPageData(SharedPrefService.getInt("last_read_quran")!)
-          .first["surah"])
-      .obs;
+  @override
+  void onInit() {
+    super.onInit();
+    final page = AppPrefs.lastReadPage;
+    lastReadPageNumber.value = page;
 
-  Rx<int> lastReadPageNumber = SharedPrefService.getInt("last_read_quran")!.obs;
+    final initialSurah =
+        quran.getPageData(page).first["surah"] as int;
+    lastReadSurah = quran.getSurahName(initialSurah).obs;
+    lastReadSurahArabic = quran.getSurahNameArabic(initialSurah).obs;
+  }
 
-/////////////////////////////---FUNCTIONS---\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-  changeIndex(int index) {
+  void changeIndex(int index) {
     currentIndex.value = index;
   }
 
-  updateLastSurahRead() {
-    lastReadSurah.value = quran.getSurahName(quran
-        .getPageData(SharedPrefService.getInt("last_read_quran")!)
-        .first["surah"]);
-
-    lastReadSurahArabic.value = quran.getSurahNameArabic(quran
-        .getPageData(SharedPrefService.getInt("last_read_quran")!)
-        .first["surah"]);
+  void setQuery(String q) {
+    searchQuery.value = q;
   }
 
-  updateLastPageRead() {
-    lastReadPageNumber.value = SharedPrefService.getInt("last_read_quran")!;
+  void refreshProgress() {
+    final page = AppPrefs.lastReadPage;
+    lastReadPageNumber.value = page;
+
+    final surah = quran.getPageData(page).first["surah"] as int;
+    lastReadSurah.value = quran.getSurahName(surah);
+    lastReadSurahArabic.value = quran.getSurahNameArabic(surah);
+
+    progressRevision.value++;
+  }
+
+  void updateLastSurahRead() => refreshProgress();
+  void updateLastPageRead() => refreshProgress();
+
+  List<int> get filteredSurahs {
+    final q = searchQuery.value.trim();
+    if (q.isEmpty) {
+      return List<int>.generate(114, (i) => i + 1);
+    }
+    return [
+      for (var s = 1; s <= 114; s++)
+        if (matchesQuery(quran.getSurahNameArabic(s), q) ||
+            matchesQuery(quran.getSurahName(s), q) ||
+            matchesQuery(s.toString(), q))
+          s,
+    ];
+  }
+
+  List<int> get filteredHizbs {
+    final q = searchQuery.value.trim();
+    if (q.isEmpty) {
+      return List<int>.generate(60, (i) => i + 1);
+    }
+    return [
+      for (var h = 1; h <= 60; h++)
+        if (matchesQuery(h.toString(), q))
+          h,
+    ];
   }
 }

@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/controllers/adhan_line_controller.dart';
-import 'package:noor/features/adhan/widgets/location_picker_dialog.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_dialog.dart';
 import 'package:noor/generals/widgets/check_dialog.dart';
 import 'package:noor/utils/constants/colors.dart';
 import 'package:noor/utils/device/device_utility.dart';
 import 'package:noor/utils/helpers/helper_functions.dart';
+import 'package:noor/generals/location_flow.dart';
 
 import '../../generals/widgets/get_locatiol_widget.dart';
-import '../../generals/widgets/pick_search_option.dart';
 import '../../generals/widgets/wait_dialog.dart';
 import '../../generated/l10n.dart';
 import '../../utils/constants/image_strings.dart';
@@ -142,131 +139,7 @@ class AdhanScreen extends StatelessWidget {
                               const SizedBox(height: 24),
                               GestureDetector(
                                 onTap: () async {
-                                  showDialog(
-                                      barrierDismissible: false,
-                                      context: Get.context!,
-                                      builder: (context) => WaitDialog(
-                                          isDark: true, isRtl: isRtl));
-                                  if (await SHelperFunctions
-                                      .isInternetConnected()) {
-                                    Get.back();
-                                    Map response;
-
-                                    try {
-                                      response = await showDialog(
-                                          barrierDismissible: false,
-                                          context: Get.context!,
-                                          builder: (context) =>
-                                              PickSearchOptionDialog(
-                                                onManualCallBack: () async {
-                                                  Map response = await showDialog(
-                                                      barrierDismissible: false,
-                                                      context: Get.context!,
-                                                      builder: (context) =>
-                                                          const LocationPicker());
-                                                  if (response.isNotEmpty) {
-                                                    showDialog(
-                                                        barrierDismissible:
-                                                            false,
-                                                        context: Get.context!,
-                                                        builder: (context) =>
-                                                            WaitDialog(
-                                                                isDark: true,
-                                                                isRtl: isRtl));
-                                                    await controller
-                                                        .refreshAdhanData(
-                                                            response["country"],
-                                                            response["state"],
-                                                            response["city"],
-                                                            DateTime.now()
-                                                                .year);
-                                                    await AdhanController
-                                                        .scheduleAdhans();
-                                                    Get.back();
-                                                  }
-                                                },
-                                                onGPSCallBack: () async {
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          WaitDialog(
-                                                              isDark: true,
-                                                              isRtl: isRtl));
-
-                                                  Placemark placemark =
-                                                      await SHelperFunctions
-                                                          .getLocation();
-
-                                                  if (placemark.country !=
-                                                      null) {
-                                                    await controller
-                                                        .refreshAdhanData(
-                                                            placemark.country!,
-                                                            placemark
-                                                                .administrativeArea!,
-                                                            placemark.locality!,
-                                                            DateTime.now()
-                                                                .year);
-                                                    await AdhanController
-                                                        .scheduleAdhans();
-                                                    Get.back();
-                                                  } else {
-                                                    Get.back();
-                                                  }
-                                                },
-                                              ));
-                                    } catch (_) {
-                                      response = {};
-                                    }
-
-                                    if (response.isNotEmpty) {
-                                      showDialog(
-                                        barrierDismissible: false,
-                                        context: Get.context!,
-                                        builder: (context) => Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const SpinKitThreeBounce(
-                                                color: SColors.secondary),
-                                            const SizedBox(height: 32),
-                                            Material(
-                                              color: Colors.transparent,
-                                              child: Text(
-                                                S.of(context).wait_please,
-                                                style: TextStyle(
-                                                    color: isDark
-                                                        ? SColors.white
-                                                        : SColors.white,
-                                                    fontSize: isRtl
-                                                        ? SSizes.fontSizeMdAr
-                                                        : SSizes.fontSizeMd),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      );
-                                      await controller.refreshAdhanData(
-                                          response["country"],
-                                          response["state"],
-                                          response["city"],
-                                          DateTime.now().year);
-                                      await AdhanController.scheduleAdhans();
-
-                                      Get.back();
-                                    }
-                                  } else {
-                                    Get.back();
-                                    await showDialog(
-                                      context: Get.context!,
-                                      builder: (context) => CheckDialog(
-                                          title: S.of(context).no_internet,
-                                          imagePath:
-                                              SImageString.lottieNoInternet,
-                                          color: Colors.lightBlue),
-                                    );
-                                    Get.back();
-                                  }
+                                  await pickLocation(context);
                                 },
                                 child: Material(
                                   borderRadius: BorderRadius.circular(24),
