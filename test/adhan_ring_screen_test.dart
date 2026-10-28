@@ -13,7 +13,7 @@ void main() {
       (tester) async {
     // dispose() calls Alarm.stop, which needs the plugin's storage.
     SharedPreferences.setMockInitialValues({});
-    await tester.runAsync(() => Alarm.init(showDebugLogs: false));
+    await tester.runAsync(() => Alarm.init());
     tester.view.physicalSize = const Size(840, 1870);
     tester.view.devicePixelRatio = 2.1;
     addTearDown(tester.view.reset);
@@ -24,8 +24,7 @@ void main() {
       assetAudioPath: 'a.mp3',
       loopAudio: false,
       vibrate: false,
-      volume: 0.5,
-      fadeDuration: 0,
+      volumeSettings: const VolumeSettings.fixed(volume: 0.5),
       warningNotificationOnKill: false,
       androidFullScreenIntent: false,
       notificationSettings: const NotificationSettings(

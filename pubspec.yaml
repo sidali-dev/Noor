@@ -23,7 +23,7 @@ dependencies:
   csc_picker_plus: ^0.0.3
   http: ^1.2.0
   workmanager: ^0.10.10
-  alarm: ^4.0.0-dev.3
+  alarm: ^5.15.0
   permission_handler: ^11.3.1
   audioplayers: ^6.0.0
   flutter_qiblah: ^3.2.0
