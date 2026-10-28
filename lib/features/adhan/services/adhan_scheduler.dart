@@ -52,10 +52,17 @@ int baseOf(int id) => id % 10000;
 class AdhanScheduler {
   AdhanScheduler._();
 
-  static const int windowDays = 3;
+  static const int windowDays = 7;
 
   static int idFor(int baseId, int dayOffset) => baseId + dayOffset * 10000;
   static int baseOf(int id) => id % 10000;
+
+  /// Rotating day slot, so a date keeps the same alarm ids from one launch to
+  /// the next and an unchanged alarm is never re-set.
+  static int slotOf(DateTime day, int windowDays) =>
+      (DateTime.utc(day.year, day.month, day.day).millisecondsSinceEpoch ~/
+          Duration.millisecondsPerDay) %
+      windowDays;
 
   /// Pure planning function.
   /// Inputs:
@@ -99,6 +106,7 @@ class AdhanScheduler {
 
       for (var offset = 0; offset < windowDays; offset++) {
         final targetDate = DateTime(now.year, now.month, now.day + offset);
+        final slot = slotOf(targetDate, windowDays);
         final calendar = getCalendar(targetDate.year);
         if (calendar == null) {
           // Missing day data (e.g. next year not cached) -> skip, never throw
@@ -119,7 +127,7 @@ class AdhanScheduler {
 
         if (enabled && prayerTime.isAfter(now)) {
           alarmsToSet.add(PlannedAlarm(
-            id: idFor(prayer.adhanId, offset),
+            id: idFor(prayer.adhanId, slot),
             time: prayerTime,
             kind: AlarmKind.adhan,
             prayer: prayer,
@@ -133,7 +141,7 @@ class AdhanScheduler {
                 prayerTime.add(Duration(minutes: slot1.minutes));
             if (reminderTime.isAfter(now)) {
               alarmsToSet.add(PlannedAlarm(
-                id: idFor(prayer.alarmId1, offset),
+                id: idFor(prayer.alarmId1, slot),
                 time: reminderTime,
                 kind: AlarmKind.reminder,
                 prayer: prayer,
@@ -147,7 +155,7 @@ class AdhanScheduler {
                 prayerTime.add(Duration(minutes: slot2.minutes));
             if (reminderTime.isAfter(now)) {
               alarmsToSet.add(PlannedAlarm(
-                id: idFor(prayer.alarmId2, offset),
+                id: idFor(prayer.alarmId2, slot),
                 time: reminderTime,
                 kind: AlarmKind.reminder,
                 prayer: prayer,
@@ -218,8 +226,25 @@ class AdhanScheduler {
     await sync();
   }
 
+  // ponytail: serializes within one isolate only; the Workmanager isolate can still overlap, add a prefs lock if that bites
+  static Future<void> _tail = Future.value();
+
   /// Single entry point to synchronize adhans and reminders for the rolling window.
-  static Future<void> sync() async {
+  /// Runs are chained so overlapping callers never interleave cancels and sets.
+  static Future<void> sync() {
+    final run = _tail.then((_) => _sync());
+    _tail = run.catchError((_) {});
+    return run;
+  }
+
+  /// Starts the alarm plugin, then syncs. Alarm.init re-arms every stored
+  /// alarm, so it goes on the same chain and later syncs wait for it.
+  static Future<void> init() {
+    _tail = _tail.then((_) => Alarm.init());
+    return sync();
+  }
+
+  static Future<void> _sync() async {
     if (!await Permission.notification.isGranted) {
       return;
     }
@@ -281,12 +306,19 @@ class AdhanScheduler {
       windowDays: windowDays,
     );
 
-    // Apply cancellations
-    for (final id in plan.idsToCancel) {
-      await Alarm.stop(id);
+    // Diff against what is stored: every Alarm call is several platform round
+    // trips and log lines, and on a normal launch nothing has changed.
+    final stored = {for (final a in await Alarm.getAlarms()) a.id: a};
+    final plannedIds = {for (final p in plan.alarmsToSet) p.id};
+    final toCancel = plan.idsToCancel.toSet();
+    for (final a in stored.values) {
+      // Past alarms not asked for may be ringing; leave them to the plugin.
+      if (plannedIds.contains(a.id)) continue;
+      if (toCancel.contains(a.id) || a.dateTime.isAfter(now)) {
+        await Alarm.stop(a.id);
+      }
     }
 
-    // Apply scheduled alarms
     for (final planned in plan.alarmsToSet) {
       final String title;
       final String body;
@@ -304,8 +336,10 @@ class AdhanScheduler {
         assetAudioPath: AppPrefs.adhanSoundPath,
         loopAudio: false,
         vibrate: false,
-        volume: 0.5,
-        fadeDuration: 3.0,
+        volumeSettings: VolumeSettings.fade(
+          fadeDuration: const Duration(seconds: 3),
+          volume: 0.5,
+        ),
         warningNotificationOnKill: false,
         androidFullScreenIntent: true,
         notificationSettings: NotificationSettings(
@@ -315,6 +349,7 @@ class AdhanScheduler {
         ),
       );
 
+      if (stored[planned.id] == settings) continue;
       await Alarm.set(alarmSettings: settings);
     }
   }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:alarm/alarm.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
@@ -194,11 +197,12 @@ void main() {
       expect(day1Alarms.length, 6);
       expect(day2Alarms.length, 6);
 
-      expect(day0Alarms.map((a) => a.id).toList(), [1, 2, 3, 4, 5, 6]);
-      expect(day1Alarms.map((a) => a.id).toList(),
-          [10001, 10002, 10003, 10004, 10005, 10006]);
-      expect(day2Alarms.map((a) => a.id).toList(),
+      // Ids follow the date's slot (Apr 15 2026 -> 2, 16 -> 0, 17 -> 1).
+      expect(day0Alarms.map((a) => a.id).toList(),
           [20001, 20002, 20003, 20004, 20005, 20006]);
+      expect(day1Alarms.map((a) => a.id).toList(), [1, 2, 3, 4, 5, 6]);
+      expect(day2Alarms.map((a) => a.id).toList(),
+          [10001, 10002, 10003, 10004, 10005, 10006]);
     });
 
     test('Jan 31 -> Feb 1 rollover', () {
@@ -332,8 +336,7 @@ void main() {
       );
 
       // Fajr adhan is at 05:00
-      // Slot 1 (-10): 04:50, id 101, 10101, 20101
-      // Slot 2 (+15): 05:15, id 102, 10102, 20102
+      // Slot 1 (-10): 04:50, Slot 2 (+15): 05:15; Apr 15 is day slot 2
       final fajrRemindersDay0 = plan.alarmsToSet
           .where((a) =>
               a.prayer == Prayer.fajr &&
@@ -344,11 +347,11 @@ void main() {
       expect(fajrRemindersDay0.length, 2);
 
       final r1 = fajrRemindersDay0.firstWhere((a) => a.minutes == -10);
-      expect(r1.id, 101);
+      expect(r1.id, 20101);
       expect(r1.time, DateTime(2026, 4, 15, 4, 50));
 
       final r2 = fajrRemindersDay0.firstWhere((a) => a.minutes == 15);
-      expect(r2.id, 102);
+      expect(r2.id, 20102);
       expect(r2.time, DateTime(2026, 4, 15, 5, 15));
 
       final fajrRemindersDay1 = plan.alarmsToSet
@@ -357,8 +360,54 @@ void main() {
               a.kind == AlarmKind.reminder &&
               a.time.day == 16)
           .toList();
-      expect(fajrRemindersDay1.firstWhere((a) => a.minutes == -10).id, 10101);
-      expect(fajrRemindersDay1.firstWhere((a) => a.minutes == 15).id, 10102);
+      expect(fajrRemindersDay1.firstWhere((a) => a.minutes == -10).id, 101);
+      expect(fajrRemindersDay1.firstWhere((a) => a.minutes == 15).id, 102);
     });
+
+    test('a date keeps its alarm ids on later launches', () {
+      AlarmPlan planAt(DateTime now) => AdhanScheduler.planAlarms(
+            now: now,
+            getCalendar: (y) => y == 2026 ? calendar2026 : null,
+            isPrayerEnabled: (_) => true,
+            reminders: (_) => [],
+            windowDays: 7,
+          );
+      Map<DateTime, int> ids(AlarmPlan p) =>
+          {for (final a in p.alarmsToSet) a.time: a.id};
+
+      final today = ids(planAt(DateTime(2026, 3, 28, 3, 0)));
+      final tomorrow = ids(planAt(DateTime(2026, 3, 29, 3, 0)));
+      // Spans the late-March DST change in many zones.
+      for (final e in tomorrow.entries) {
+        if (today.containsKey(e.key)) expect(e.value, today[e.key]);
+      }
+      expect(tomorrow.values.toSet().length, tomorrow.length);
+    });
+  });
+
+  // sync() skips Alarm.set when the stored copy equals the new one; that only
+  // works if settings built like sync() builds them survive storage unchanged.
+  test('alarm settings round-trip through storage JSON unchanged', () {
+    final settings = AlarmSettings(
+      id: idFor(1, 2),
+      dateTime: DateTime(2026, 4, 15, 5, 0),
+      assetAudioPath: 'assets/audio/adhan.mp3',
+      loopAudio: false,
+      vibrate: false,
+      volumeSettings: VolumeSettings.fade(
+        fadeDuration: const Duration(seconds: 3),
+        volume: 0.5,
+      ),
+      warningNotificationOnKill: false,
+      androidFullScreenIntent: true,
+      notificationSettings: const NotificationSettings(
+        title: 'Fajr',
+        body: 'Time for Fajr',
+        stopButton: 'Stop',
+      ),
+    );
+    final stored = AlarmSettings.fromJson(
+        jsonDecode(jsonEncode(settings.toJson())) as Map<String, dynamic>);
+    expect(stored, settings);
   });
 }

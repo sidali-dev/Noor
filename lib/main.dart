@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -19,8 +18,7 @@ void callbackDispatcher() {
       case scheduleAdhan:
         try {
           await SharedPrefService.init();
-          await Alarm.init();
-          await AdhanScheduler.sync();
+          await AdhanScheduler.init();
         } catch (_) {}
       default:
     }
@@ -41,16 +39,17 @@ void main() async {
   runApp(MyApp(startup: _startup()));
 }
 
-/// The rest of startup, in its original order. The custom splash waits on it.
+/// The rest of startup. The custom splash waits on it, so alarm and background
+/// work setup run alongside instead: Alarm.init re-arms every stored alarm.
 Future<void> _startup() async {
+  unawaited(AdhanScheduler.init());
+  unawaited(_registerBackgroundSync());
+
   await AdhkarData.init();
+}
 
-  await Alarm.init();
-
+Future<void> _registerBackgroundSync() async {
   await Workmanager().initialize(callbackDispatcher);
-
   await Workmanager().registerPeriodicTask("adhan scheduler", scheduleAdhan,
       frequency: const Duration(hours: 12));
-
-  unawaited(AdhanScheduler.sync());
 }
