@@ -21,8 +21,12 @@ class SBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SBottomNavigationController());
-    if (pageIndex != null) {
-      controller.selectedIndex.value = pageIndex!;
+    // Not in build: the Obx below may already be mounted (Get.offAll from the
+    // ring screen reuses this controller) and cannot be dirtied mid-build.
+    if (pageIndex != null && !controller.initialIndexApplied) {
+      controller.initialIndexApplied = true;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => controller.changeIndex(pageIndex!));
     }
 
     Get.lazyPut(() => SoundPickerController());
@@ -69,6 +73,7 @@ class SBottomNavigationController extends GetxController {
 
   final Rx<int> selectedIndex = 0.obs;
   final Set<int> visited = {};
+  bool initialIndexApplied = false;
 
   @override
   void onInit() {
