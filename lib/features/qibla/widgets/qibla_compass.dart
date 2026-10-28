@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 // Sizes below are drawn for a 300 dp dial (radius 150) and scaled by
@@ -9,12 +11,12 @@ const double _designRadius = 150;
 
 /// A compass with a green pointer on the qibla. The dial turns with the phone
 /// so N stays north; the pointer is the one signal. Turn until it meets the
-/// gold tick at the top.
+/// gold tick at the top: the ring then glows gold and the phone vibrates once.
 ///
 /// [direction] is the phone's heading and [qiblah] is heading minus the qibla
 /// bearing, both in degrees (`flutter_qiblah`), so `-qiblah` is where the
 /// qibla lies on screen.
-class QiblaCompass extends StatelessWidget {
+class QiblaCompass extends StatefulWidget {
   final double direction;
   final double qiblah;
 
@@ -24,11 +26,52 @@ class QiblaCompass extends StatelessWidget {
     required this.qiblah,
   });
 
+  // Hysteresis so magnetometer jitter can't flicker the glow or re-buzz.
+  // ponytail: fixed thresholds; tune on hardware if the sensor is noisier.
+  static const double alignOnDeg = 3;
+  static const double alignOffDeg = 6;
+
+  /// Degrees between the qibla and the top of the phone, 0..180.
+  static double angleError(double qiblah) {
+    final d = qiblah % 360;
+    return math.min(d, 360 - d);
+  }
+
+  static bool nextAligned(bool was, double qiblah) =>
+      angleError(qiblah) <= (was ? alignOffDeg : alignOnDeg);
+
+  @override
+  State<QiblaCompass> createState() => _QiblaCompassState();
+}
+
+class _QiblaCompassState extends State<QiblaCompass> {
+  bool _aligned = false;
+
   static double _rad(double deg) => deg * math.pi / 180.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _track();
+  }
+
+  @override
+  void didUpdateWidget(QiblaCompass old) {
+    super.didUpdateWidget(old);
+    _track();
+  }
+
+  void _track() {
+    final next = QiblaCompass.nextAligned(_aligned, widget.qiblah);
+    if (next && !_aligned) HapticFeedback.vibrate();
+    _aligned = next;
+  }
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
+    final direction = widget.direction;
+    final qiblah = widget.qiblah;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -39,50 +82,70 @@ class QiblaCompass extends StatelessWidget {
         );
         final double s = size / 2 / _designRadius;
 
-        return RepaintBoundary(
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // The dial is painted once; turning it only moves the layer.
-                Transform.rotate(
-                  angle: -_rad(direction),
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      size: Size(size, size),
-                      painter: _DialPainter(
-                        noor: n,
-                        letters: NoorText.numeral(
-                          context,
-                          size: math.max(12.0, 16.0 * s),
-                          color: n.ink,
+        return Semantics(
+          container: true,
+          liveRegion: true,
+          label: _aligned ? S.of(context).facing_qibla : null,
+          child: RepaintBoundary(
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // The dial is painted once; turning it only moves the layer.
+                  Transform.rotate(
+                    angle: -_rad(direction),
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        size: Size(size, size),
+                        painter: _DialPainter(
+                          noor: n,
+                          letters: NoorText.numeral(
+                            context,
+                            size: math.max(12.0, 16.0 * s),
+                            color: n.ink,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Transform.rotate(
-                  angle: -_rad(qiblah),
-                  child: CustomPaint(
-                    size: Size(size, size),
-                    painter: _PointerPainter(noor: n),
+                  // Gold glow on the ring while aligned. Circles look the same
+                  // at any heading, so this layer never rotates.
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: _aligned ? 1.0 : 0.0),
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, t, _) => t == 0
+                        ? const SizedBox.shrink()
+                        : CustomPaint(
+                            size: Size(size, size),
+                            painter: _GlowPainter(color: n.gold, t: t),
+                          ),
                   ),
-                ),
-                // Fixed gold tick: the top of the phone.
-                Positioned(
-                  top: 0,
-                  child: Container(
-                    width: 2.5,
-                    height: 16 * s + 4,
-                    decoration: BoxDecoration(
-                      color: n.gold,
-                      borderRadius: BorderRadius.circular(1.25),
+                  Transform.rotate(
+                    angle: -_rad(qiblah),
+                    child: CustomPaint(
+                      size: Size(size, size),
+                      painter: _PointerPainter(noor: n),
                     ),
                   ),
-                ),
-              ],
+                  // Fixed gold tick: the top of the phone.
+                  Positioned(
+                    top: 0,
+                    child: Container(
+                      width: 2.5,
+                      height: 16 * s + 4,
+                      decoration: BoxDecoration(
+                        color: n.gold,
+                        borderRadius: BorderRadius.circular(1.25),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -201,6 +264,45 @@ class _DialPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DialPainter old) =>
       old.noor != noor || old.letters != letters;
+}
+
+/// The ring turned gold, with a soft blurred halo on both sides of it. Stays
+/// inside the dial face, so a clipping parent can't cut it.
+class _GlowPainter extends CustomPainter {
+  final Color color;
+  final double t;
+
+  const _GlowPainter({required this.color, required this.t});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset c = size.center(Offset.zero);
+    final double radius = size.width / 2;
+    final double s = radius / _designRadius;
+    final double ring = radius * 0.88;
+
+    canvas.drawCircle(
+      c,
+      ring,
+      Paint()
+        ..color = color.withValues(alpha: 0.55 * t)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8 * s
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * s),
+    );
+    canvas.drawCircle(
+      c,
+      ring,
+      Paint()
+        ..color = color.withValues(alpha: t)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlowPainter old) =>
+      old.t != t || old.color != color;
 }
 
 /// Two-tone kite pointer and hub, drawn pointing at 12.

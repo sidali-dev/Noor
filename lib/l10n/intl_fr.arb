@@ -140,11 +140,13 @@
     "calibrate_title" : "Calibrer la boussole",
     "calibrate_step_1" : "Déplacez lentement votre téléphone en forme de 8 plusieurs fois.",
     "calibrate_step_2" : "Éloignez-vous des métaux, aimants et haut-parleurs.",
-    "calibrate_step_3" : "Tenez le téléphone à plat puis vérifiez à nouveau la flèche."
-
-
-
-
-
-
+    "calibrate_step_3" : "Tenez le téléphone à plat puis vérifiez à nouveau la flèche.",
+    "facing_qibla" : "Face à la qibla",
+    "relocate_title" : "Avez-vous changé de lieu ?",
+    "relocate_body" : "Votre réseau indique que vous êtes près de {city}. Les heures de prière y diffèrent d'environ {shift} de celles de {saved}.",
+    "@relocate_body" : { "placeholders" : { "city" : { "type" : "String" }, "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_body_unknown" : "Votre réseau indique que vous êtes ailleurs. Les heures de prière y diffèrent d'environ {shift} de celles de {saved}.",
+    "@relocate_body_unknown" : { "placeholders" : { "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_auto" : "Détecter automatiquement",
+    "relocate_manual" : "Choisir manuellement"
 }

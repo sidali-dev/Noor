@@ -18,11 +18,13 @@ import 'package:permission_handler/permission_handler.dart';
 
 enum LocationSource { gps, manual }
 
-Future<void> pickLocation(BuildContext context) async {
+/// Picks and saves a location. With [source], skips the choice sheet.
+Future<void> pickLocation(BuildContext context,
+    {LocationSource? source}) async {
   final s = S.of(context);
 
   // 1. Choose the source first: radio cards, then Confirm Location.
-  final source = await showNoorSheet<LocationSource>(
+  source ??= await showNoorSheet<LocationSource>(
     context,
     title: s.location_title,
     builder: (_) => const _LocationChoice(),

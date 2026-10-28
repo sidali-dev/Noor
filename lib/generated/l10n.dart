@@ -1075,21 +1075,21 @@ class S {
     );
   }
 
-  /// `Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144`
-  String get tagline_qibla {
-    return Intl.message(
-      'Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144',
-      name: 'tagline_qibla',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Indeed, this Quran guides to what is most upright. — Al-Isra 17:9`
   String get tagline_quran {
     return Intl.message(
       'Indeed, this Quran guides to what is most upright. — Al-Isra 17:9',
       name: 'tagline_quran',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144`
+  String get tagline_qibla {
+    return Intl.message(
+      'Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144',
+      name: 'tagline_qibla',
       desc: '',
       args: [],
     );
@@ -1195,6 +1195,66 @@ class S {
     return Intl.message(
       'Hold the phone flat, then check the arrow again.',
       name: 'calibrate_step_3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Facing the qibla`
+  String get facing_qibla {
+    return Intl.message(
+      'Facing the qibla',
+      name: 'facing_qibla',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Have you moved?`
+  String get relocate_title {
+    return Intl.message(
+      'Have you moved?',
+      name: 'relocate_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your network suggests you're near {city}. Prayer times there differ by about {shift} from {saved}.`
+  String relocate_body(String city, String shift, String saved) {
+    return Intl.message(
+      'Your network suggests you\'re near $city. Prayer times there differ by about $shift from $saved.',
+      name: 'relocate_body',
+      desc: '',
+      args: [city, shift, saved],
+    );
+  }
+
+  /// `Your network suggests you're somewhere else. Prayer times there differ by about {shift} from {saved}.`
+  String relocate_body_unknown(String shift, String saved) {
+    return Intl.message(
+      'Your network suggests you\'re somewhere else. Prayer times there differ by about $shift from $saved.',
+      name: 'relocate_body_unknown',
+      desc: '',
+      args: [shift, saved],
+    );
+  }
+
+  /// `Detect automatically`
+  String get relocate_auto {
+    return Intl.message(
+      'Detect automatically',
+      name: 'relocate_auto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose manually`
+  String get relocate_manual {
+    return Intl.message(
+      'Choose manually',
+      name: 'relocate_manual',
       desc: '',
       args: [],
     );

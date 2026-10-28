@@ -62,6 +62,7 @@ Derived from `assets/screens/screens.png` (ten panels) and the custom splash in 
 - **NoorPagerPill**: primary pill with chevrons inside and a centre label (dhikr counter); `split` = primary centre pill between two gold-tint circles (Mushaf page). Chevrons follow `Directionality`; in the Mushaf, left = next page.
 - **Mushaf frame**: thin gold hairline, radius 16, on the mushaf colour; gold corner flourish mirrored to all four corners, divider at the foot, and a gold cartouche with the surah name where a surah starts.
 - **Location and adhan sheets**: still `NoorSheet`, no art. Location: title, subtitle, GPS / Manually radio cards (IconTile, whole card selects), primary Confirm Location. Adhan: radio rows, play button on the selected row, primary Save.
+- **Relocate sheet**: `NoorSheet` shown once per launch when the network (IP) location's times differ from the saved city's by 5 min or more. Title, one honest muted sentence ("your network suggests you're near X"), primary "Detect automatically" (GPS flow), outline "Choose manually". Swipe down to dismiss.
 - **Custom splash**: after the native one, while startup and art precache run. Paper (light) or deep-green gradient (dark) with a faint ray gradient, arch frame top and mosque skyline bottom, emblem, Arabic name in Amiri Bold, letter-spaced "NOOR IMENE" between gold rules, thin ring spinner. Fades out in 300 ms; no fixed delay.
 - **Next-prayer row**: sage row fill, icon tile filled `primary` with `onPrimary` icon, speaker button on a sage-tint circle.
 - **NoorSearchField**: `card` fill, radius 14, 48dp, search icon at the start, clear button when non-empty. Overlaps the hero's bottom edge on Athkar and Quran.
@@ -69,7 +70,7 @@ Derived from `assets/screens/screens.png` (ten panels) and the custom splash in 
 - **Calibration sheet**: animated figure-8 guide (a `primary` dot tracing a lemniscate over a faint `line` path), three short steps, then the usual tips.
 - **Tab labels**: Quran, Prayers, Athkar, Qibla (ar: القرآن، الصلاة، الأذكار، القبلة). English and French display text spells it "Athkar".
 - **EmptyState**: Lottie or icon tile, one sentence, one `NoorButton`.
-- **Compass dial**: 1.5dp green ring, 60 ticks (major at 15°), N/E/S/W in Spectral, gold fixed heading tick on top, hub centre, green arrow to the qibla.
+- **Compass dial**: 1.5dp green ring, 60 ticks (major at 15°), N/E/S/W in Spectral, gold fixed heading tick on top, hub centre, green arrow to the qibla. Aligned (within 3°, released past 6°): the ring turns gold with a soft blurred halo inside the dial, fading in over 250 ms, one vibration, and a "Facing the qibla" live-region label.
 
 ## Do / don't
 - Do keep one primary button per screen.

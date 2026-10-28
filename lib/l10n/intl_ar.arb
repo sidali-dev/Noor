@@ -140,15 +140,13 @@
     "calibrate_title" : "معايرة البوصلة",
     "calibrate_step_1" : "حرّك هاتفك ببطء على شكل الرقم 8 عدة مرات.",
     "calibrate_step_2" : "ابتعد عن المعادن والمغناطيس ومكبرات الصوت.",
-    "calibrate_step_3" : "أمسك الهاتف أفقيًا ثم تحقق من السهم مجددًا."
-
-
-
-
-
-
-    
-
-
-
+    "calibrate_step_3" : "أمسك الهاتف أفقيًا ثم تحقق من السهم مجددًا.",
+    "facing_qibla" : "أنت متجه نحو القبلة",
+    "relocate_title" : "هل غيّرت مكانك؟",
+    "relocate_body" : "تشير شبكتك إلى أنك قرب {city}. تختلف أوقات الصلاة هناك بنحو {shift} عن {saved}.",
+    "@relocate_body" : { "placeholders" : { "city" : { "type" : "String" }, "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_body_unknown" : "تشير شبكتك إلى أنك في مكان آخر. تختلف أوقات الصلاة هناك بنحو {shift} عن {saved}.",
+    "@relocate_body_unknown" : { "placeholders" : { "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_auto" : "تحديد تلقائي",
+    "relocate_manual" : "اختيار يدوي"
 }

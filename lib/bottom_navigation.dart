@@ -11,6 +11,7 @@ import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
 import 'package:noor/features/quran/quran_screen.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
+import 'package:noor/generals/location_drift.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -32,6 +33,9 @@ class SBottomNavigation extends StatelessWidget {
     Get.lazyPut(() => SoundPickerController());
     Get.lazyPut(() => AdhanController());
     Get.lazyPut(() => LocationController());
+    // Once per launch; returns at once on later builds.
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => checkLocationDrift(context));
 
     return Scaffold(
       extendBody: true,
@@ -82,6 +86,7 @@ class SBottomNavigationController extends GetxController {
       Permission.notification.request();
       Permission.scheduleExactAlarm.request();
     }
+    // ignore: deprecated_member_use
     _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
   }
 

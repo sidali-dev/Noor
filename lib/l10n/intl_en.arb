@@ -190,11 +190,13 @@
     "calibrate_title" : "Calibrate the compass",
     "calibrate_step_1" : "Move your phone in a slow figure-8 a few times.",
     "calibrate_step_2" : "Keep away from metal, magnets and speakers.",
-    "calibrate_step_3" : "Hold the phone flat, then check the arrow again."
-
-
-
-    
-
-
+    "calibrate_step_3" : "Hold the phone flat, then check the arrow again.",
+    "facing_qibla" : "Facing the qibla",
+    "relocate_title" : "Have you moved?",
+    "relocate_body" : "Your network suggests you're near {city}. Prayer times there differ by about {shift} from {saved}.",
+    "@relocate_body" : { "placeholders" : { "city" : { "type" : "String" }, "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_body_unknown" : "Your network suggests you're somewhere else. Prayer times there differ by about {shift} from {saved}.",
+    "@relocate_body_unknown" : { "placeholders" : { "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
+    "relocate_auto" : "Detect automatically",
+    "relocate_manual" : "Choose manually"
 }
