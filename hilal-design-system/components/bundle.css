@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap");
+
+/* Hilal components — every value comes from tokens.css custom properties */
+body { margin: 0; font-family: var(--font-sans); background: var(--surface); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.hl-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; padding: var(--space-5); }
+.hl-stack { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+
+/* focus: 2px page-colour gap, then a solid 2px brass ring */
+.hl-focus:focus-visible, .hl-btn:focus-visible, .hl-toggle input:focus-visible + .hl-toggle-track, .hl-tab:focus-visible {
+  outline: 2px solid var(--brass); outline-offset: 2px;
+}
+
+/* ---------- Button ---------- */
+.hl-btn { font: inherit; font-family: var(--font-sans); font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: .2px;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: 44px; padding: 0 var(--space-5); border-radius: var(--radius-md); border: 0; cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease; }
+.hl-btn svg { width: 18px; height: 18px; flex: none; }
+.hl-btn:active { transform: translateY(1px); box-shadow: var(--shadow-1); }
+.hl-btn-primary { background: var(--window); color: var(--on-window); box-shadow: var(--shadow-2); }
+[data-theme="night"] .hl-btn-primary { background: var(--on-window); color: var(--window); }
+.hl-btn-secondary { background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-2); }
+.hl-btn-ghost { background: transparent; color: var(--ink); }
+.hl-btn-ghost:hover { background: var(--surface-sunken); }
+.hl-btn-sm { height: 36px; padding: 0 var(--space-4); font-size: 14px; border-radius: var(--radius-sm); }
+.hl-btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+/* ---------- PaperCard ---------- */
+.hl-card { background: var(--surface-raised); color: var(--ink); border-radius: var(--radius-lg); padding: var(--space-5); }
+.hl-card-e1 { box-shadow: var(--shadow-1); }
+.hl-card-e2 { box-shadow: var(--shadow-2); }
+.hl-card-e3 { box-shadow: var(--shadow-3); }
+.hl-card-night { background: var(--window); color: var(--on-window); }
+[data-theme="night"] .hl-card-night { box-shadow: var(--shadow-3), inset 0 0 0 1px var(--line); }
+.hl-card-eyebrow { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 1.6px; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 var(--space-1); }
+.hl-card-night .hl-card-eyebrow { color: var(--on-window-muted); }
+.hl-card-title { font-family: var(--font-display); font-size: 28px; line-height: 34px; font-weight: 600; margin: 0 0 var(--space-3); }
+.hl-card-body { font-size: 16px; line-height: 24px; }
+
+/* ---------- ArchFrame (layered shadow box) ---------- */
+.hl-arch { position: relative; margin: 0; }
+.hl-arch-svg { display: block; width: 100%; height: auto; overflow: visible;
+  filter: drop-shadow(0 6px 8px rgba(23,26,33,.10)) drop-shadow(0 18px 30px rgba(23,26,33,.14)); }
+[data-theme="night"] .hl-arch-svg { filter: drop-shadow(0 6px 8px rgba(0,0,0,.55)) drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+.hl-arch .window { fill: var(--window); }
+.hl-arch .moon { fill: var(--on-window); }
+.hl-arch .star { fill: var(--on-window); opacity: .85; }
+.hl-arch .paper { fill: var(--surface-raised); }
+.hl-arch .paper-back { fill: var(--paper-shade); }
+.hl-arch .swirl { fill: none; stroke: var(--line); stroke-width: 1.1; stroke-linecap: round; }
+.hl-arch .w-top { stop-color: var(--surface-raised); }
+.hl-arch .w-bot { stop-color: var(--paper-shade); }
+.hl-arch .g-in { stop-color: var(--sky-glow); }
+.hl-arch .g-out { stop-color: var(--sky-glow); stop-opacity: 0; }
+.hl-arch .hl-cast { flood-color: var(--depth-shadow); }
+.hl-arch-content { position: absolute; left: 19%; right: 19%; top: 42%; display: flex; flex-direction: column; align-items: center; text-align: center; z-index: 2; }
+@media (prefers-reduced-motion: no-preference) {
+  .hl-arch .star { animation: hl-twinkle 4s ease-in-out infinite alternate; }
+  .hl-arch .star:nth-child(3n) { animation-delay: -1.3s; }
+  .hl-arch .star:nth-child(3n+1) { animation-delay: -2.6s; }
+}
+@keyframes hl-twinkle { from { opacity: .85; } to { opacity: 1; } }
+
+/* ---------- Badge ---------- */
+.hl-badge { display: inline-flex; align-items: center; gap: var(--space-1); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .4px;
+  padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--surface-sunken); color: var(--ink); }
+.hl-badge svg { width: 12px; height: 12px; }
+.hl-badge-night { background: var(--window); color: var(--on-window); }
+.hl-badge-brass { background: var(--brass-soft); color: var(--brass); }
+.hl-badge-success { background: var(--success-soft); color: var(--success); }
+.hl-badge-danger { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- TextField ---------- */
+.hl-field { display: flex; flex-direction: column; gap: var(--space-2); min-width: 240px; }
+.hl-field-label { font-size: 15px; line-height: 20px; font-weight: 500; color: var(--ink); }
+.hl-field-input { font: inherit; font-family: var(--font-sans); font-size: 16px; line-height: 24px; color: var(--ink);
+  background: var(--surface-sunken); box-shadow: var(--shadow-inset); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm); padding: 10px var(--space-3); }
+.hl-field-input::placeholder { color: var(--ink-muted); }
+.hl-field-input:focus { outline: 2px solid var(--brass); outline-offset: 2px; }
+.hl-field-hint { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.hl-field-error .hl-field-input { border-color: var(--danger); }
+.hl-field-error .hl-field-hint { color: var(--danger); }
+
+/* ---------- Toggle ---------- */
+.hl-toggle { display: inline-flex; align-items: center; gap: var(--space-3); cursor: pointer; font-size: 16px; line-height: 24px; color: var(--ink); }
+.hl-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.hl-toggle-track { position: relative; width: 52px; height: 30px; border-radius: var(--radius-pill); background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset); border: 1px solid var(--line-strong); transition: background .18s ease; flex: none; }
+.hl-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: var(--radius-pill);
+  background: var(--surface-raised); box-shadow: var(--shadow-2); transition: transform .18s ease; }
+.hl-toggle input:checked + .hl-toggle-track { background: var(--window); border-color: var(--window); }
+.hl-toggle input:checked + .hl-toggle-track .hl-toggle-thumb { transform: translateX(22px); background: var(--on-window); }
+[data-theme="night"] .hl-toggle input:checked + .hl-toggle-track { background: var(--on-window); border-color: var(--on-window); }
+[data-theme="night"] .hl-toggle input:checked + .hl-toggle-track .hl-toggle-thumb { background: var(--window); }
+
+/* ---------- TabBar ---------- */
+.hl-tabbar { display: flex; justify-content: space-around; gap: var(--space-1); padding: var(--space-2); background: var(--surface-raised);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-1); }
+.hl-tab { font: inherit; font-family: var(--font-sans); flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: var(--space-2) var(--space-1); border: 0; background: transparent; color: var(--ink-muted); border-radius: var(--radius-md);
+  font-size: 12px; line-height: 16px; cursor: pointer; }
+.hl-tab svg { width: 22px; height: 22px; }
+.hl-tab[aria-current="page"] { background: var(--window); color: var(--on-window); box-shadow: var(--shadow-1); }
+[data-theme="night"] .hl-tab[aria-current="page"] { background: var(--on-window); color: var(--window); }
+
+/* ---------- Ornament divider ---------- */
+.hl-ornament { display: flex; align-items: center; gap: var(--space-3); color: var(--brass); }
+.hl-ornament::before, .hl-ornament::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.hl-ornament svg { width: 14px; height: 14px; flex: none; }
+.hl-ornament-label { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 1.6px; text-transform: uppercase; color: var(--ink-muted); }
+
+/* ---------- Icon ---------- */
+.hl-icon { display: inline-block; vertical-align: middle; flex: none; }

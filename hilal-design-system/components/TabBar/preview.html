@@ -1,0 +1,20 @@
+<!-- @dsCard group="Navigation" height=120 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>TabBar — preview</title></head>
+<body>
+<div id="root" style="padding:var(--space-5);max-width:420px;margin:0 auto"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(H.TabBar, { defaultActive: 'today', items: [
+      { id: 'today', label: 'Today', icon: 'home' },
+      { id: 'qibla', label: 'Qibla', icon: 'compass' },
+      { id: 'calendar', label: 'Calendar', icon: 'calendar' },
+      { id: 'saved', label: 'Saved', icon: 'bookmark' },
+      { id: 'settings', label: 'Settings', icon: 'settings' }
+    ] })
+  );
+</script>
+</body>
+</html>

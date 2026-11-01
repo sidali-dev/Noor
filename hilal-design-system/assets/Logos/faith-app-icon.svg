@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Faith"><title>Faith</title><rect x="0" y="0" width="1024" height="1024" rx="228" fill="#eef0f4"/><g transform="translate(512 512) scale(1.3) translate(-349.5 -368)"><defs>
+  <linearGradient id="fiw" gradientUnits="userSpaceOnUse" x1="0" y1="500" x2="0" y2="670"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8eaef"/></linearGradient>
+  <filter id="fic" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#171a21" flood-opacity="0.3"/></filter>
+  <filter id="fid" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="9" stdDeviation="9" flood-color="#171a21" flood-opacity="0.3"/></filter>
+  <filter id="fit" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="2.5" stdDeviation="2" flood-color="#171a21" flood-opacity="0.18"/></filter>
+  <mask id="fim" maskUnits="userSpaceOnUse" x="300" y="55" width="110" height="110"><rect x="300" y="55" width="110" height="110" fill="#fff"/><circle cx="370" cy="96" r="31" fill="#000"/></mask>
+  <clipPath id="fik"><path d="M349 142C322 185 282 202 222 240C172 272 147 312 147 367V487C232 502 312 535 349 600C387 535 467 502 552 487V367C552 312 527 272 477 240C417 202 377 185 349 142Z"/></clipPath>
+</defs>
+  <!-- night window: the dome, with stars and an inner paper frame set further back -->
+  <path d="M349 142C322 185 282 202 222 240C172 272 147 312 147 367V487C232 502 312 535 349 600C387 535 467 502 552 487V367C552 312 527 272 477 240C417 202 377 185 349 142Z" fill="#171a21"/>
+  <g clip-path="url(#fik)">
+    <g fill="#f7f7f4" opacity="0.85"><path d="M205 321.6L207.31 327.69L213.4 330L207.31 332.31L205 338.4L202.69 332.31L196.6 330L202.69 327.69Z"/><path d="M494 314.8L495.98 320.02L501.2 322L495.98 323.98L494 329.2L492.02 323.98L486.8 322L492.02 320.02Z"/><path d="M250 440L251.65 444.35L256 446L251.65 447.65L250 452L248.35 447.65L244 446L248.35 444.35Z"/><path d="M452 439.2L453.87 444.13L458.8 446L453.87 447.87L452 452.8L450.13 447.87L445.2 446L450.13 444.13Z"/><path d="M196 405.2L197.32 408.68L200.8 410L197.32 411.32L196 414.8L194.68 411.32L191.2 410L194.68 408.68Z"/><path d="M505 397.2L506.32 400.68L509.8 402L506.32 403.32L505 406.8L503.68 403.32L500.2 402L503.68 400.68Z"/></g>
+    <g fill="none" stroke="#ffffff" stroke-width="10" filter="url(#fic)" opacity="0.92"><path d="M349 142C322 185 282 202 222 240C172 272 147 312 147 367V487C232 502 312 535 349 600C387 535 467 502 552 487V367C552 312 527 272 477 240C417 202 377 185 349 142Z" transform="translate(349.5 375) scale(0.86) translate(-349.5 -375)"/></g>
+  </g>
+  <!-- outer paper frame casts onto the window and the ground -->
+  <path d="M349 142C322 185 282 202 222 240C172 272 147 312 147 367V487C232 502 312 535 349 600C387 535 467 502 552 487V367C552 312 527 272 477 240C417 202 377 185 349 142Z" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round" filter="url(#fid)"/>
+  <!-- the bolt: white paper lifted in front of the night -->
+  <path d="M392 245L264 407L323 409L303 510L417 358L363 356L392 245Z" fill="#ffffff" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" filter="url(#fic)"/>
+  <!-- brass crescent -->
+  <circle cx="351" cy="108" r="34" fill="#7a6436" mask="url(#fim)" filter="url(#fic)"/>
+  <!-- wings: lit paper layers, front-most -->
+  <g fill="url(#fiw)" filter="url(#fid)"><path d="M115 513C202 522 302 550 349 663C312 645 242 620 152 592C127 585 115 570 115 545V513Z"/><path d="M584 513C497 522 397 550 349 663C387 645 457 620 547 592C572 585 584 570 584 545V513Z"/></g>
+  <g fill="none" stroke="#cfd3dc" stroke-width="2.4" stroke-linecap="round">
+    <path d="M150 548a16 16 0 1 1 16 9.6"/><path d="M549 548a16 16 0 1 0 -16 9.6"/>
+  </g></g>
+</svg>

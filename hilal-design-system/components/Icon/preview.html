@@ -1,0 +1,19 @@
+<!-- @dsCard group="Foundations" height=150 subtitle="24px stroke set, 1.6 stroke, inherits color" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Icon — preview</title>
+<style>
+  .cell { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 64px; color: var(--ink); }
+  .cell span { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div id="root" class="hl-row" style="gap:var(--space-2)"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    H.Icon.names.map(function (n) { return h('div', { key: n, className: 'cell' }, h(H.Icon, { name: n }), h('span', null, n)); })
+  ));
+</script>
+</body>
+</html>

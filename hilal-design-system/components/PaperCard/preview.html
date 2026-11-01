@@ -1,0 +1,24 @@
+<!-- @dsCard group="Surfaces" height=344 subtitle="elevation 1 · 2 · 3 and the night tone" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>PaperCard — preview</title>
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-5); padding: var(--space-5); }
+  .big { font-family: var(--font-display); font-size: 40px; line-height: 44px; font-weight: 600; margin: 0; }
+  .muted { color: var(--ink-muted); font-size: 14px; line-height: 20px; margin: var(--space-1) 0 0; }
+  .hl-card-night .muted { color: var(--on-window-muted); }
+</style>
+</head>
+<body>
+<div id="root" class="grid"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.PaperCard, { elevation: 1, eyebrow: 'Elevation 1' }, h('p', { className: 'big' }, '05:12'), h('p', { className: 'muted' }, 'Fajr')),
+    h(H.PaperCard, { elevation: 2, eyebrow: 'Next prayer' }, h('p', { className: 'big' }, '18:42'), h('p', { className: 'muted' }, 'Maghrib · in 1 h 20 min')),
+    h(H.PaperCard, { elevation: 3, eyebrow: 'Elevation 3' }, h('p', { className: 'big' }, '20:05'), h('p', { className: 'muted' }, 'Isha')),
+    h(H.PaperCard, { elevation: 3, tone: 'night', eyebrow: 'Tonight' }, h('p', { className: 'big' }, '12 days'), h('p', { className: 'muted' }, 'until Eid al-Adha'))
+  ));
+</script>
+</body>
+</html>

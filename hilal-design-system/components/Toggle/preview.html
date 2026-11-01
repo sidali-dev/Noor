@@ -1,0 +1,15 @@
+<!-- @dsCard group="Inputs" height=80 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Toggle — preview</title></head>
+<body>
+<div id="root" class="hl-row" style="gap:var(--space-6)"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Toggle, { defaultChecked: true, label: 'Adhan notifications' }),
+    h(H.Toggle, { label: 'Show Hijri date' })
+  ));
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!-- @dsCard group="Surfaces" height=110 subtitle="star · labelled" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Ornament — preview</title></head>
+<body>
+<div id="root" class="hl-stack" style="max-width:480px;margin:0 auto"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Ornament),
+    h(H.Ornament, { label: 'This week' })
+  ));
+</script>
+</body>
+</html>

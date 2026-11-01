@@ -1,0 +1,25 @@
+<!-- @dsCard group="Surfaces" height=500 subtitle="layered shadow box: 3-layer hero with greeting · 1-layer compact" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ArchFrame — preview</title>
+<style>
+  .wrap { display: flex; flex-wrap: wrap; gap: var(--space-7); justify-content: center; align-items: flex-end; padding: var(--space-6) var(--space-5) var(--space-7); }
+  .eyebrow { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 1.6px; text-transform: uppercase; color: var(--on-window-muted); margin: 0 0 var(--space-1); }
+  .greet { font-family: var(--font-display); font-size: 34px; line-height: 38px; font-weight: 600; margin: 0; color: var(--on-window); }
+  .ar { font-family: var(--font-arabic); font-size: 26px; line-height: 40px; font-weight: 700; margin: 0; color: var(--on-window); }
+</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.ArchFrame, { width: 340, label: 'Eid Mubarak greeting', contentTop: '29%' },
+      h('p', { className: 'eyebrow' }, '10 Dhul Hijjah'),
+      h('h2', { className: 'greet' }, 'Eid Mubarak'),
+      h('p', { className: 'ar', dir: 'rtl', lang: 'ar' }, 'عيد مبارك')),
+    h(H.ArchFrame, { width: 190, layers: 1, skyline: false, lace: false })
+  ));
+</script>
+</body>
+</html>

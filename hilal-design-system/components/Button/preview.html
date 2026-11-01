@@ -1,0 +1,18 @@
+<!-- @dsCard group="Actions" height=96 subtitle="primary · secondary · ghost · small · disabled" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button — preview</title></head>
+<body>
+<div id="root" class="hl-row"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Button, { variant: 'primary', icon: 'bell' }, 'Set reminder'),
+    h(H.Button, { variant: 'secondary' }, 'View calendar'),
+    h(H.Button, { variant: 'ghost' }, 'Not now'),
+    h(H.Button, { variant: 'secondary', size: 'sm', icon: 'plus' }, 'Add'),
+    h(H.Button, { variant: 'primary', disabled: true }, 'Sent')
+  ));
+</script>
+</body>
+</html>

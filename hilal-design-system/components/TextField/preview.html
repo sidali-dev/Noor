@@ -1,0 +1,15 @@
+<!-- @dsCard group="Inputs" height=150 subtitle="rest · error" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>TextField — preview</title></head>
+<body>
+<div id="root" class="hl-row" style="align-items:flex-start"></div>
+<script>
+  var H = window.Hilal, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.TextField, { label: 'City', placeholder: 'Search a city', hint: 'Used to calculate prayer times.' }),
+    h(H.TextField, { label: 'Reminder (minutes before)', defaultValue: '-5', error: 'Enter a number from 0 to 60.' })
+  ));
+</script>
+</body>
+</html>

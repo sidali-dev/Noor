@@ -1,0 +1,56 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hilal</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--surface); color: var(--ink); font-family: var(--font-sans); overflow: hidden; }
+  .cover { position: relative; height: 288px; overflow: hidden; }
+  .art { position: absolute; top: 0; left: 480px; width: 480px; height: 288px; overflow: hidden; }
+  .art svg { display: block; width: 480px; height: 288px; }
+  .arch { fill: var(--ink); }
+  .sky { fill: var(--surface); }
+  .brass { fill: var(--brass); }
+  .pewter { fill: var(--line-strong); }
+  .blk { rx: var(--radius-md); }
+  .pill { rx: 12px; }
+  .words { position: absolute; left: var(--space-6); bottom: var(--space-6); max-width: 440px; }
+  .name { margin: 0; font-family: var(--font-display); font-size: 120px; line-height: .92; font-weight: 600; letter-spacing: -1px; color: var(--ink); }
+  .tag { margin: var(--space-2) 0 0 4px; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      ink arch 192 wide, crown at y 48, bleeding off the bottom (the night window — largest, the identity) · brass 120×148 bled off the top-right · line-strong 128×96 slab · line-strong pill 80×24
+  arrangement one tall scalloped slab with satellites: pewter low-left, brass high-right off the edge, pill tucked under the brass
+  pattern     literal motif, from "Scallops, not squares" + "Night through paper": the multifoil arch outline (radii 30/32/34 lobes, scaled to 192 wide), a crescent cut from two discs and eight star-dots in the ground colour inside the arch
+  scales      gutters space-4; slab and brass corners radius-md; pill rx 12 = half its 24 height; crescent from two discs r24/r21
+-->
+<rect class="pewter blk" x="24" y="168" width="128" height="96" rx="14"/>
+<path class="arch" transform="translate(168 34) scale(0.96)" d="M0 280V130A30 30 0 0 1 22 88A32 32 0 0 1 52 48A34 34 0 0 1 100 14A34 34 0 0 1 148 48A32 32 0 0 1 178 88A30 30 0 0 1 200 130V280Z"/>
+<circle class="sky" cx="264" cy="168" r="24"/>
+<circle class="arch" cx="274" cy="161" r="21"/>
+<circle class="sky" cx="212" cy="204" r="2.5"/>
+<circle class="sky" cx="232" cy="146" r="2"/>
+<circle class="sky" cx="304" cy="136" r="2.5"/>
+<circle class="sky" cx="320" cy="198" r="3"/>
+<circle class="sky" cx="242" cy="236" r="2"/>
+<circle class="sky" cx="298" cy="252" r="2.5"/>
+<circle class="sky" cx="214" cy="262" r="2"/>
+<circle class="sky" cx="334" cy="236" r="2"/>
+<rect class="brass blk" x="376" y="-12" width="120" height="148" rx="14"/>
+<rect class="pewter pill" x="376" y="152" width="80" height="24" rx="12"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Hilal</h1>
+<p class="tag">Cut paper, night sky, one brass star.</p>
+</div>
+</div>
+</body>
+</html>
