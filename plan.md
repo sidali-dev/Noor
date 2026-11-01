@@ -8,11 +8,20 @@ Unchanged: package `noor`, app id `com.sidalidev.noor`, alarm IDs, preference ke
 
 ## Status
 
+Checked against the working tree (not on a device): `flutter analyze` clean, `flutter test` 486 passed.
+
 | Phase | State |
 |---|---|
-| 0 Checkpoint and baseline | **Not done.** Still on `rebrand` with an uncommitted working tree; no `hilal` branch yet; the `adhan_ring_screen_test` failure is not investigated. |
-| 1 Design contract | **Done.** `design.md` fully replaced, `PRODUCT.md` updated. No Dart touched. |
-| 2 onward | Not started. |
+| 0 Checkpoint and baseline | **Done.** Work committed on `rebrand` (9 commits), branch `hilal` created, analyze and test green (`adhan_ring_screen_test` passes). The two html references (Qibla, Athkar reader) were not screenshotted. |
+| 1 Design contract | **Done.** `design.md` fully replaced, `PRODUCT.md` updated. |
+| 2 Tokens, theme, fonts | **Done, with gaps.** Cormorant 500/600, Jost 400/500, Amiri 400/700 bundled; Spectral and Plex removed; `noor_theme_test` updated. Gaps: the theme extension is still `NoorColors` / `context.noor`, not `HilalTheme` / `context.hilal` as `design.md` §2 says; `design.md` wants Cormorant 600 only and Jost 600, the bundle has Cormorant 500 and no Jost 600. |
+| 3 Logo, icon, splash | **Done, with a leftover.** New logo SVGs and PNG marks, app icon, native splash, custom splash. `assets/images/splash/*.svg` (4 files) is not referenced anywhere. |
+| 4 Art and ornaments | **Done, with a leftover.** Hero and skyline SVGs (paper and night), ornaments redrawn, `ayah_marker.svg`. The old `hero_*_light.webp` and `qibla_skyline_light.webp` are still on disk, still precached by the splash (`NoorArt.of`) and still tested in `art_assets_test.dart`, while `NoorHero` draws the SVGs. |
+| 5 Shared widgets | **Done.** Card, button, nav bar, hero, search, segmented, list row, pill, progress, sheet, dialogs, empty/loading state, pager pill, plus `arch_frame`, `noor_icon`, `noor_pressable`, `noor_star_badge`, `noor_well`, `noor_radio`, `noor_motion`, `noor_layout`. `icon_tile.dart` is gone. |
+| 6 Designed screens | **Implemented, not seen on a device.** Prayers, Quran index, Mushaf, Athkar list and reader, Qibla all changed with tests passing. Brass placement per screen is still the unreviewed assignment from Phase 1. |
+| 7 Derived screens | **Implemented, not seen on a device.** Ring screen, location and relocate sheets, calibration sheet, empty/loading/permission states (`states_test`, `location_sheet_test`, `permission_notice.dart`). |
+| 8 Refinement passes | **Not verified.** No record that critique, audit, harden, adapt, animate or polish were run as passes. `noor_layout.dart`, `noor_motion.dart` and their tests suggest adapt and animate were at least started. |
+| 9 Verification gate | **Partly run.** Done: analyze, test, leftover grep (no `faith_emblem`, `Spectral`, `Plex`, `NoorTint`, hero `_light` names outside the legacy webp path), and the diff of `adhan/services` and `local_storage` against the pre-rebrand base (empty). Not done: `flutter build apk --analyze-size` compiled but failed at packaging (no release keystore on this machine); asset sizes instead: fonts 1.7 MB to 1.6 MB, art and splash 0.4 MB to about 0.26 MB. Open: device pass, README and screenshots, the `hilal-design-system/` decision. |
 
 ## Phase 1 outcome: what later prompts must follow
 
