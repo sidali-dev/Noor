@@ -1,5 +1,5 @@
 name: noor
-description: "Noor Imene: prayer times and adhan, Quran, adhkar and qibla."
+description: "Faith: prayer times and adhan, Quran, adhkar and qibla."
 publish_to: 'none'
 
 version: 1.0.2+3
@@ -19,7 +19,6 @@ dependencies:
   flutter_localizations:
         sdk: flutter
   shared_preferences: ^2.2.3
-  flutter_spinkit: ^5.2.1
   csc_picker_plus: ^0.0.3
   http: ^1.2.0
   workmanager: ^0.10.10
@@ -42,7 +41,8 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/logo/app_icon.png"
-  adaptive_icon_background: "#F6F3EB"
+  image_path_ios: "assets/logo/app_icon_ios.png"
+  adaptive_icon_background: "#eef0f4"
   adaptive_icon_foreground: "assets/logo/app_icon_foreground.png"
   remove_alpha_ios: true
 
@@ -55,44 +55,37 @@ flutter:
     - assets/images/svg/
     - assets/images/art/
     - assets/images/ornaments/
-    - assets/images/splash/
-    - assets/logo/noor_imene_emblem.svg
-    - assets/logo/noor_imene_emblem_dark.svg
+    - assets/logo/faith-mark-paper.png
+    - assets/logo/faith-mark-night.png
     - assets/sounds/
     - assets/data/adhkar.json
 
   #------------- LOCAL FONTS -------------#
   fonts:
-    - family: Plex
+    - family: Cormorant Garamond
       fonts:
-        - asset: assets/fonts/plex/IBMPlexSansArabic-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/plex/IBMPlexSansArabic-Medium.ttf
+        - asset: assets/fonts/cormorant/CormorantGaramond-Medium.ttf
           weight: 500
-        - asset: assets/fonts/plex/IBMPlexSansArabic-SemiBold.ttf
+        - asset: assets/fonts/cormorant/CormorantGaramond-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/plex/IBMPlexSansArabic-Bold.ttf
-          weight: 700
 
-    - family: Spectral
+    - family: Jost
       fonts:
-        - asset: assets/fonts/spectral/Spectral-Regular.ttf
+        - asset: assets/fonts/jost/Jost-Regular.ttf
           weight: 400
-        - asset: assets/fonts/spectral/Spectral-Medium.ttf
+        - asset: assets/fonts/jost/Jost-Medium.ttf
           weight: 500
-        - asset: assets/fonts/spectral/Spectral-SemiBold.ttf
-          weight: 600
 
     - family: Amiri
       fonts:
-        - asset: assets\fonts\amiri\Amiri-Regular.ttf
+        - asset: assets/fonts/amiri/Amiri-Regular.ttf
           weight: 400
-        - asset: assets\fonts\amiri\Amiri-Bold.ttf
+        - asset: assets/fonts/amiri/Amiri-Bold.ttf
           weight: 700
 
     - family: Quran
       fonts:
-        - asset: assets\fonts\quran_font\Quran-Medium.ttf
+        - asset: assets/fonts/quran_font/Quran-Medium.ttf
 
 flutter_intl:
   enabled: true
