@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 20" fill="#C79A3B">
-  <path d="M4 10L43 9L43 11Z"/>
-  <path d="M116 10L77 9L77 11Z"/>
-  <circle cx="47" cy="10" r="1.6"/>
-  <circle cx="73" cy="10" r="1.6"/>
-  <path d="M60 3Q61 9 67 10Q61 11 60 17Q59 11 53 10Q59 9 60 3Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 20" fill="none" stroke="#7a6436" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M10 10H46M74 10H110"/>
+  <path d="M6 10L8 8L10 10L8 12Z"/>
+  <path d="M114 10L112 8L110 10L112 12Z"/>
+  <path d="M50 10H52M68 10H70"/>
+  <rect x="56.5" y="6.5" width="7" height="7"/>
+  <rect x="56.5" y="6.5" width="7" height="7" transform="rotate(45 60 10)"/>
 </svg>

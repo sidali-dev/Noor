@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 
 class SImageString {
   SImageString._();
@@ -29,11 +30,10 @@ abstract final class NoorArt {
   static const String heroQuran = 'assets/images/art/hero_quran';
   static const String heroAthkar = 'assets/images/art/hero_athkar';
   static const String qiblaSkyline = 'assets/images/art/qibla_skyline';
-  static const String splashTop = 'assets/images/splash/splash_top';
-  static const String splashBottom = 'assets/images/splash/splash_bottom';
 
-  static const String emblem = 'assets/logo/noor_imene_emblem.svg';
-  static const String emblemDark = 'assets/logo/noor_imene_emblem_dark.svg';
+  /// The Faith mark alone, rendered from the Hilal SVGs. Use [NoorMark].
+  static const String markPaper = 'assets/logo/faith-mark-paper.png';
+  static const String markNight = 'assets/logo/faith-mark-night.png';
   static const String surahCartouche =
       'assets/images/ornaments/surah_cartouche.svg';
   static const String pageCorner = 'assets/images/ornaments/page_corner.svg';
@@ -54,4 +54,9 @@ abstract final class NoorArt {
   // ponytail: always light until the _dark.webp files exist; then return
   // c.noor.isDark ? '${base}_dark.webp' : '${base}_light.webp'.
   static String of(BuildContext c, String base) => '${base}_light.webp';
+
+  /// The Hilal vector art: sky, moon, stars and the cloud-scroll base, drawn
+  /// in the active theme's window and paper colours. Used by [NoorHero].
+  static String svgOf(BuildContext c, String base) =>
+      '${base}_${c.noor.isDark ? 'night' : 'paper'}.svg';
 }
