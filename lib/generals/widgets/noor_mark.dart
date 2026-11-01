@@ -1,78 +1,38 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+/// The Faith mark alone (never the lockup), Paper on light and Night on dark.
+///
+/// Rasters rendered from `hilal-design-system/assets/Logos/faith-mark-*.svg`
+/// (flutter_svg drops the SVG drop-shadow filters). [size] is the artwork's
+/// height; the aspect ratio is fixed and the clear space the brand asks for
+/// (the crescent's width) is added around it, so the footprint is larger.
+/// Never recoloured, stretched or outlined, and below 32 the shadows and
+/// stars turn to noise.
 class NoorMark extends StatelessWidget {
   final double size;
-  final Color? color;
 
-  const NoorMark({
-    super.key,
-    this.size = 28,
-    this.color,
-  });
+  const NoorMark({super.key, this.size = 40});
+
+  // Artwork viewBox is 540 x 660; the crescent is 68 wide. The viewBox already
+  // keeps 35 of clear space around the artwork, so 33 more reaches 68.
+  static const double _aspect = 540 / 660;
+  static const double _pad = 33 / 660;
 
   @override
   Widget build(BuildContext context) {
-    final markColor = color ?? context.noor.primary;
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _NoorSunburstPainter(color: markColor),
+    final dark = context.noor.isDark;
+    final pad = size * _pad;
+    return Padding(
+      padding: EdgeInsets.all(pad),
+      child: Image.asset(
+        dark ? NoorArt.markNight : NoorArt.markPaper,
+        height: size,
+        width: size * _aspect,
+        fit: BoxFit.contain,
+        excludeFromSemantics: true,
       ),
     );
   }
-}
-
-class _NoorSunburstPainter extends CustomPainter {
-  final Color color;
-
-  _NoorSunburstPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.min(size.width, size.height) / 2;
-    final strokeWidth = math.max(1.5, radius * 0.12);
-
-    final linePaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final ringPaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    final innerRadius = radius * 0.35;
-    canvas.drawCircle(center, innerRadius, ringPaint);
-
-    const int rayCount = 12;
-    const double angleStep = (2 * math.pi) / rayCount;
-    final startDistance = innerRadius + strokeWidth * 0.8;
-
-    for (int i = 0; i < rayCount; i++) {
-      final angle = i * angleStep;
-      final isLong = i % 2 == 0;
-      final endDistance = isLong ? radius * 0.95 : radius * 0.68;
-
-      final start = Offset(
-        center.dx + math.cos(angle) * startDistance,
-        center.dy + math.sin(angle) * startDistance,
-      );
-      final end = Offset(
-        center.dx + math.cos(angle) * endDistance,
-        center.dy + math.sin(angle) * endDistance,
-      );
-
-      canvas.drawLine(start, end, linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _NoorSunburstPainter oldDelegate) =>
-      oldDelegate.color != color;
 }

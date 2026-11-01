@@ -4,10 +4,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
+import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+Widget _app(Widget home, {Locale locale = const Locale('en')}) =>
+    GetMaterialApp(
+      theme: NoorTheme.light(),
+      locale: locale,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      home: home,
+    );
+
+/// The one sliding pill, and whether it sits under [label].
+Finder get _pillFinder => find.byKey(const ValueKey('noor-nav-pill'));
+Finder _label(String label) =>
+    find.descendant(of: find.byType(NoorNavBar), matching: find.text(label));
+bool _under(WidgetTester tester, String label) =>
+    tester.getRect(_pillFinder).contains(tester.getCenter(_label(label)));
 
 void main() {
   // The ring screen's "Open Adhkar" does Get.offAll(SBottomNavigation(pageIndex: 2))
@@ -26,18 +49,7 @@ void main() {
     addTearDown(tester.view.reset);
     addTearDown(Get.reset);
 
-    await tester.pumpWidget(GetMaterialApp(
-      theme: NoorTheme.light(),
-      locale: const Locale('en'),
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: const SBottomNavigation(),
-    ));
+    await tester.pumpWidget(_app(const SBottomNavigation()));
     await tester.pump(const Duration(milliseconds: 100));
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 0);
 
@@ -47,5 +59,149 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
+  });
+
+  testWidgets('tapping a tab selects it and moves the window pill to it',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    SharedPrefService.resetForTest();
+    await tester.runAsync(() async {
+      await SharedPrefService.init();
+      await AdhkarData.init();
+    });
+    tester.view.physicalSize = const Size(840, 1870);
+    tester.view.devicePixelRatio = 2.1;
+    addTearDown(tester.view.reset);
+    addTearDown(Get.reset);
+
+    await tester.pumpWidget(_app(const SBottomNavigation()));
+    await tester.pump(const Duration(milliseconds: 100));
+    final window = NoorColors.light.window;
+    final pillBox =
+        find.descendant(of: _pillFinder, matching: find.byType(DecoratedBox));
+    expect(
+        (tester.widget<DecoratedBox>(pillBox).decoration as BoxDecoration)
+            .color,
+        window);
+    expect(_under(tester, 'Quran'), isTrue);
+    expect(_under(tester, 'Athkar'), isFalse);
+
+    // Athkar, not Qibla: Qibla starts the compass sensor.
+    await tester.tap(_label('Athkar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Mid-slide: between the two items, not yet under either.
+    final from = tester.getCenter(_label('Quran')).dx;
+    final to = tester.getCenter(_label('Athkar')).dx;
+    final mid = tester.getCenter(_pillFinder).dx;
+    expect(mid, greaterThan(from));
+    expect(mid, lessThan(to));
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
+    expect(_under(tester, 'Athkar'), isTrue);
+    expect(_under(tester, 'Quran'), isFalse);
+  });
+
+  testWidgets('only the shown tab keeps its hero twinkling', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    SharedPrefService.resetForTest();
+    await tester.runAsync(() async {
+      await SharedPrefService.init();
+      await AdhkarData.init();
+    });
+    tester.view.physicalSize = const Size(840, 1870);
+    tester.view.devicePixelRatio = 2.1;
+    addTearDown(tester.view.reset);
+    addTearDown(Get.reset);
+
+    await tester.pumpWidget(_app(const SBottomNavigation()));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // IndexedStack keeps visited tabs alive; their tickers must be muted.
+    int running() => find
+        .byType(NoorTwinkle, skipOffstage: false)
+        .evaluate()
+        .where((e) => TickerMode.valuesOf(e).enabled)
+        .length;
+    expect(find.byType(NoorTwinkle, skipOffstage: false), findsOneWidget);
+    expect(running(), 1);
+
+    await tester.tap(_label('Athkar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(NoorTwinkle, skipOffstage: false), findsNWidgets(2));
+    expect(running(), 1);
+
+    await tester.tap(_label('Quran'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(running(), 1);
+  });
+
+  testWidgets('bar floats s4 above the safe area and mirrors in Arabic',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 2;
+    tester.view.padding = const FakeViewPadding(bottom: 48); // 24 dp
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_app(
+      Scaffold(
+        bottomNavigationBar:
+            NoorNavBar(selectedIndex: 0, onItemSelected: (_) {}),
+      ),
+      locale: const Locale('ar'),
+    ));
+    await tester.pumpAndSettle();
+
+    final bar = tester.getRect(find.byType(NoorNavBar));
+    final strip = tester.getRect(find
+        .descendant(
+            of: find.byType(NoorNavBar), matching: find.byType(DecoratedBox))
+        .first);
+    expect(bar.bottom, 800); // the bar owns the safe area...
+    expect(800 - strip.bottom, 24 + NoorSpace.s4); // ...and floats above it
+    expect(strip.left, NoorSpace.s4);
+    expect(400 - strip.right, NoorSpace.s4);
+
+    // RTL: Quran (first) on the right, Qibla (last) on the left.
+    expect(tester.getCenter(find.text('القرآن')).dx,
+        greaterThan(tester.getCenter(find.text('القبلة')).dx));
+    for (final label in ['القرآن', 'الصلاة', 'الأذكار', 'القبلة']) {
+      final item = find
+          .ancestor(of: find.text(label), matching: find.byType(Container))
+          .first;
+      expect(tester.getSize(item).height, greaterThanOrEqualTo(48));
+    }
+  });
+
+  testWidgets('labels stay on one line and tappable at text scale 1.3',
+      (tester) async {
+    tester.view.physicalSize = const Size(720, 1600);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    var picked = -1;
+
+    await tester.pumpWidget(_app(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(1.3)),
+        child: Scaffold(
+          bottomNavigationBar:
+              NoorNavBar(selectedIndex: 0, onItemSelected: (i) => picked = i),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final item = find
+        .ancestor(of: find.text('Prayers'), matching: find.byType(Container))
+        .first;
+    expect(tester.getSize(item).height, greaterThanOrEqualTo(48));
+    await tester.tap(find.text('Prayers'));
+    expect(picked, 1);
   });
 }

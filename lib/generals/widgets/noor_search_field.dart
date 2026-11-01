@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+const double _ringWidth = 2;
+const double _ringGap = 2;
+
+/// A `surface-sunken` well (inset shadow, `line-strong` border) 48 dp tall with
+/// the search icon at the start and a 48 dp clear button once there is text.
+/// The hint is the only label; the hero overlap slot has no room for another.
 class NoorSearchField extends StatefulWidget {
   final String hint;
   final ValueChanged<String>? onChanged;
@@ -21,6 +30,7 @@ class _NoorSearchFieldState extends State<NoorSearchField> {
   late TextEditingController _effectiveController;
   bool _isInternalController = false;
   bool _hasText = false;
+  bool _focused = false;
 
   @override
   void initState() {
@@ -81,63 +91,87 @@ class _NoorSearchFieldState extends State<NoorSearchField> {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final borderRadius = BorderRadius.circular(NoorRadius.input);
+    const out = _ringWidth + _ringGap;
 
-    return Container(
+    // Fixed at 48 dp: the hero's overlap slot is 56, so the ring fits in it.
+    return SizedBox(
       height: 48,
-      decoration: BoxDecoration(
-        color: n.card,
-        borderRadius: borderRadius,
-        boxShadow: noorShadow(context),
-        border: n.isDark ? Border.all(color: n.line, width: 1) : null,
-      ),
-      alignment: Alignment.center,
-      child: TextField(
-        controller: _effectiveController,
-        onChanged: widget.onChanged,
-        style: NoorText.body(context).copyWith(color: n.ink),
-        cursorColor: n.primary,
-        decoration: InputDecoration(
-          isDense: true,
-          filled: false,
-          hintText: widget.hint,
-          hintStyle: NoorText.body(context).copyWith(color: n.muted),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: NoorSpace.md,
-            vertical: NoorSpace.sm + 2,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsetsDirectional.only(
-              start: NoorSpace.md,
-              end: NoorSpace.sm,
-            ),
-            child: Icon(
-              Icons.search_rounded,
-              color: n.muted,
-              size: 22,
-            ),
-          ),
-          prefixIconConstraints:
-              const BoxConstraints(minWidth: 40, minHeight: 40),
-          suffixIcon: _hasText
-              ? IconButton(
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: n.muted,
-                    size: 20,
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (v) => setState(() => _focused = v),
+        child: Stack(
+          clipBehavior: Clip.none,
+          fit: StackFit.expand,
+          children: [
+            NoorWell(
+              radius: NoorRadius.sm,
+              border: true,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: NoorSpace.s3,
+                      end: NoorSpace.s2,
+                    ),
+                    child: NoorIcon(NoorGlyph.search, color: n.muted, size: 22),
                   ),
-                  onPressed: _clear,
-                  splashRadius: 18,
-                  padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 40, minHeight: 40),
-                )
-              : null,
-          suffixIconConstraints:
-              const BoxConstraints(minWidth: 40, minHeight: 40),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
+                  Expanded(
+                    child: TextField(
+                      controller: _effectiveController,
+                      onChanged: widget.onChanged,
+                      style: NoorText.body(context),
+                      cursorColor: n.brass,
+                      decoration: InputDecoration.collapsed(
+                        hintText: widget.hint,
+                        hintStyle: NoorText.body(context).copyWith(
+                          color: n.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_hasText)
+                    IconButton(
+                      tooltip:
+                          MaterialLocalizations.of(context).clearButtonTooltip,
+                      icon:
+                          Icon(Iconsax.close_circle, color: n.muted, size: 22),
+                      onPressed: _clear,
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints.tightFor(width: 48, height: 48),
+                    ),
+                ],
+              ),
+            ),
+            if (_focused)
+              const PositionedDirectional(
+                start: -out,
+                end: -out,
+                top: -out,
+                bottom: -out,
+                child: _FocusRing(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The brass focus ring: 2 dp, 2 dp outside the well, painted over nothing.
+class _FocusRing extends StatelessWidget {
+  const _FocusRing();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(
+            NoorRadius.sm + _ringWidth + _ringGap,
+          ),
+          border: Border.all(color: context.noor.brass, width: _ringWidth),
         ),
       ),
     );

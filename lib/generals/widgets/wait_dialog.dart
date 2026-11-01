@@ -1,41 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:noor/generals/widgets/loading_state.dart';
+import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+/// A paper card with a spinner and one sentence. It has no action: the work
+/// behind it cannot be cancelled.
 class WaitDialog extends StatelessWidget {
   const WaitDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final n = context.noor;
+    final message = S.of(context).wait_please;
+
     return Dialog(
-      backgroundColor: n.card,
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: n.isDark ? BorderSide(color: n.line, width: 1) : BorderSide.none,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: NoorSpace.s5,
+        vertical: NoorSpace.s6,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SpinKitThreeBounce(
-              color: n.primary,
-              size: 28,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              S.of(context).wait_please,
-              textAlign: TextAlign.center,
-              style: NoorText.body(context).copyWith(
-                fontWeight: FontWeight.w500,
-                color: n.ink,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: NoorDialogCard(
+          child: Semantics(
+            liveRegion: true,
+            label: message,
+            child: ExcludeSemantics(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const LoadingDots(),
+                  const SizedBox(height: NoorSpace.s4),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: NoorText.body(context),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

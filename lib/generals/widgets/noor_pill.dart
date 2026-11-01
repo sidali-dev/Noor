@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+/// A raised paper chip: `surface-raised`, `radius-md`, `shadow-2` (`shadow-1`
+/// while pressed). The optional [icon] sits at the start, the label fills the
+/// middle and [trailing] (a chevron that mirrors in RTL by default) ends it.
+/// At least 48 dp tall; it fills the width it is given.
 class NoorPill extends StatelessWidget {
   final Widget? icon;
   final String label;
@@ -18,57 +23,52 @@ class NoorPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final borderRadius = BorderRadius.circular(NoorRadius.tile);
 
+    // chevron_right is declared matchTextDirection, so it flips in RTL.
     final defaultTrailing = Icon(
-      Icons.chevron_right_rounded, // mirrors in RTL
+      Icons.chevron_right_rounded,
       color: n.muted,
-      size: 20,
+      size: 22,
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: n.card,
-        borderRadius: borderRadius,
-        boxShadow: noorShadow(context),
-        border: n.isDark ? Border.all(color: n.line, width: 1) : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: borderRadius,
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NoorSpace.lg,
-                vertical: NoorSpace.sm + 2,
+    final labelStyle = NoorText.label(context);
+
+    return NoorPressable(
+      onPressed: onTap,
+      radius: NoorRadius.md,
+      builder: (context, pressed) => AnimatedContainer(
+        duration: kNoorPressDuration,
+        curve: Curves.ease,
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: NoorSpace.s4,
+          vertical: NoorSpace.s2,
+        ),
+        decoration: BoxDecoration(
+          color: n.card,
+          borderRadius: BorderRadius.circular(NoorRadius.md),
+          boxShadow: pressed ? n.shadow1 : n.shadow2,
+        ),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              IconTheme(
+                data: IconThemeData(color: n.ink, size: 20),
+                child: icon!,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    icon!,
-                    const SizedBox(width: NoorSpace.sm),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: NoorText.body(context).copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: n.ink,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: NoorSpace.sm),
-                  trailing ?? defaultTrailing,
-                ],
+              const SizedBox(width: NoorSpace.s3),
+            ],
+            Expanded(
+              child: Text(
+                label,
+                style: labelStyle.copyWith(color: n.ink),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
+            const SizedBox(width: NoorSpace.s2),
+            trailing ?? defaultTrailing,
+          ],
         ),
       ),
     );

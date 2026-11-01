@@ -1,82 +1,144 @@
 import 'package:flutter/material.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+// The front-most paper layer is `surface-raised` with `shadow-3` and no border.
+// Sheets round the top corners to `radius-lg` ([NoorSheet]); dialogs round all
+// four ([NoorDialogCard]). Neither clips, so the shadow is never cut.
+
+/// Shows a bottom sheet: a handle, an optional [title] in the display face
+/// (`titleOf` is re-evaluated when the locale changes), then [builder]'s
+/// content. It drags down to dismiss.
 Future<T?> showNoorSheet<T>(
   BuildContext context, {
   String? title,
-  String Function(BuildContext)? titleOf, // re-evaluated on locale change
+  String Function(BuildContext)? titleOf,
   required WidgetBuilder builder,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    // Centred on a wide window rather than stretched across it.
+    constraints: const BoxConstraints(maxWidth: NoorLayout.columnWidth),
     backgroundColor: Colors.transparent,
-    shape: const RoundedRectangleBorder(
-      borderRadius:
-          BorderRadius.vertical(top: Radius.circular(NoorRadius.sheet)),
-    ),
-    builder: (sheetContext) {
-      final n = sheetContext.noor;
-      final mq = MediaQuery.of(sheetContext);
-      final bottomInset =
-          mq.viewInsets.bottom + mq.padding.bottom + NoorSpace.xl;
-
-      final sheetTitle = titleOf?.call(sheetContext) ?? title;
-
-      return Container(
-        decoration: BoxDecoration(
-          color: n.card,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(NoorRadius.sheet),
+    elevation: 0,
+    // The sheet rises onto the page: ease-out, no overshoot, instant under
+    // Reduce Motion.
+    sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+        ? AnimationStyle.noAnimation
+        : const AnimationStyle(
+            duration: kNoorSettleDuration,
+            reverseDuration: kNoorSettleDuration,
+            curve: kNoorSettleCurve,
+            reverseCurve: Curves.easeIn,
           ),
-          border: n.isDark
-              ? Border(top: BorderSide(color: n.line, width: 1))
-              : null,
+    builder: (sheetContext) => NoorSheet(
+      title: titleOf?.call(sheetContext) ?? title,
+      child: builder(sheetContext),
+    ),
+  );
+}
+
+class NoorSheet extends StatelessWidget {
+  final String? title;
+  final Widget child;
+
+  const NoorSheet({super.key, this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+    final mq = MediaQuery.of(context);
+    final bottomInset = mq.viewInsets.bottom + mq.padding.bottom + NoorSpace.s4;
+
+    final titleStyle = NoorText.title(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: n.card,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(NoorRadius.lg),
         ),
+        boxShadow: n.shadow3,
+      ),
+      // Ink (ripples, tile fills) paints on the nearest Material, which is
+      // transparent here, so give the card its own above the paper.
+      child: Material(
+        type: MaterialType.transparency,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: NoorSpace.sm + 4),
+            const SizedBox(height: NoorSpace.s3),
             Center(
-              child: Container(
-                width: 36,
-                height: 4,
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: n.muted.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(2),
+                  color: n.lineStrong,
+                  borderRadius: BorderRadius.circular(NoorRadius.pill),
                 ),
+                child: const SizedBox(width: 36, height: 4),
               ),
             ),
-            const SizedBox(height: NoorSpace.sm),
-            if (sheetTitle != null) ...[
+            const SizedBox(height: NoorSpace.s3),
+            if (title != null) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: NoorSpace.xl,
-                  vertical: NoorSpace.sm,
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: NoorSpace.s4,
+                  vertical: NoorSpace.s2,
                 ),
-                child: Text(
-                  sheetTitle,
-                  style: NoorText.section(sheetContext),
-                  textAlign: TextAlign.center,
+                child: MediaQuery.withClampedTextScaling(
+                  maxScaleFactor: 1.3,
+                  child: Text(
+                    title!,
+                    style: titleStyle,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-              const SizedBox(height: NoorSpace.xs),
+              const SizedBox(height: NoorSpace.s1),
             ],
             Flexible(
               child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  left: NoorSpace.xl,
-                  right: NoorSpace.xl,
+                padding: EdgeInsetsDirectional.only(
+                  start: NoorSpace.s4,
+                  end: NoorSpace.s4,
+                  top: NoorSpace.s1,
                   bottom: bottomInset,
-                  top: NoorSpace.xs,
                 ),
-                child: builder(sheetContext),
+                child: child,
               ),
             ),
           ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
+}
+
+/// The paper card a dialog sits on: `surface-raised`, `shadow-3`, `radius-lg`.
+/// Put it inside a transparent, zero-elevation [Dialog].
+class NoorDialogCard extends StatelessWidget {
+  final Widget child;
+
+  const NoorDialogCard({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: n.card,
+        borderRadius: BorderRadius.circular(NoorRadius.lg),
+        boxShadow: n.shadow3,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(
+          padding: const EdgeInsets.all(NoorSpace.s5),
+          child: child,
+        ),
+      ),
+    );
+  }
 }

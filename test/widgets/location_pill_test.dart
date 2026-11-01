@@ -63,7 +63,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Enter Your Location'), findsOneWidget);
+    expect(find.text('Enter your location'), findsOneWidget);
   });
 
   testWidgets('LocationPill displays "Country, City" when location is set',

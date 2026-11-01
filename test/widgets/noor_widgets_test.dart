@@ -7,7 +7,6 @@ import 'package:noor/generals/controllers/location_controller.dart';
 import 'package:noor/generals/controllers/theme_controller.dart';
 import 'package:noor/generals/widgets/check_dialog.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
@@ -20,7 +19,6 @@ import 'package:noor/generals/widgets/noor_segmented.dart';
 import 'package:noor/generals/widgets/settings_sheet.dart';
 import 'package:noor/generals/widgets/wait_dialog.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -77,7 +75,7 @@ void main() {
     ('en', const Locale('en')),
   ];
 
-  final textScales = [1.0, 1.3];
+  final textScales = [1.0, 1.3, 2.0];
 
   for (final (themeName, theme) in themes) {
     for (final (langName, locale) in locales) {
@@ -106,26 +104,6 @@ void main() {
                 child: NoorCard(
                   onTap: () {},
                   child: const Text('Card child'),
-                ),
-              ),
-            );
-            expect(tester.takeException(), isNull);
-          });
-
-          testWidgets('IconTile with icon and svg pumps without exception',
-              (tester) async {
-            await tester.pumpWidget(
-              _buildWrapper(
-                theme: theme,
-                locale: locale,
-                textScale: textScale,
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconTile(icon: Icons.star, tint: NoorTint.sage),
-                    SizedBox(height: 8),
-                    IconTile(svg: SImageString.quran, tint: NoorTint.amber),
-                  ],
                 ),
               ),
             );

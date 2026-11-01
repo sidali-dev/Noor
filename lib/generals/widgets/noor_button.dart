@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
+/// `primary` is a piece of night sky (moon-white in Night), `tonal` is raised
+/// paper, `outline` is paper-less with a visible control edge, `danger` is the
+/// destructive fill. [onWindow] and [ghostOnWindow] are for a `window` ground
+/// (moon-white fill, or bare moon-white label) in both themes.
 enum NoorButtonVariant {
   primary,
   tonal,
   outline,
   danger,
+  onWindow,
+  ghostOnWindow,
 }
 
+/// Hilal Button. Pressing moves it 1 dp down and drops it to `shadow-1`;
+/// disabled is 45% opacity with no shadow; keyboard focus draws a 2 dp brass
+/// ring (see [NoorPressable]). At least 48 dp tall, the label wraps rather
+/// than clips at large text scales.
 class NoorButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -25,36 +36,47 @@ class NoorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final borderRadius = BorderRadius.circular(NoorRadius.tile);
+    final borderRadius = BorderRadius.circular(NoorRadius.md);
 
     Color bg;
     Color fg;
-    Border? border;
+    BoxBorder? border;
+    var raised = true;
 
     switch (variant) {
       case NoorButtonVariant.primary:
-        bg = n.primary;
-        fg = n.onPrimary;
-        border = null;
+        // Night inverts so the primary stays the strongest shape on screen.
+        bg = n.isDark ? n.onWindow : n.window;
+        fg = n.isDark ? n.window : n.onWindow;
         break;
       case NoorButtonVariant.tonal:
-        bg = n.tintBg(NoorTint.sage);
-        fg = n.isDark ? n.ink : n.primary;
-        border = null;
+        bg = n.card;
+        fg = n.ink;
         break;
       case NoorButtonVariant.danger:
         bg = n.danger;
-        fg = Colors.white;
-        border = null;
+        fg = n.isDark ? n.paper : n.card;
+        break;
+      case NoorButtonVariant.onWindow:
+        bg = n.onWindow;
+        fg = n.window;
+        break;
+      case NoorButtonVariant.ghostOnWindow:
+        bg = Colors.transparent;
+        fg = n.onWindow;
+        raised = false;
         break;
       case NoorButtonVariant.outline:
         bg = Colors.transparent;
         fg = n.ink;
-        border = Border.all(color: n.line, width: 1.5);
+        border = Border.all(color: n.lineStrong);
+        raised = false;
         break;
     }
 
     final isEnabled = onPressed != null;
+
+    final labelStyle = NoorText.label(context);
 
     final content = Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -65,18 +87,14 @@ class NoorButton extends StatelessWidget {
             data: IconThemeData(color: fg, size: 20),
             child: icon!,
           ),
-          const SizedBox(width: NoorSpace.sm),
+          const SizedBox(width: NoorSpace.s2),
         ],
         Flexible(
           child: Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Plex',
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: fg,
-            ),
-            maxLines: 1,
+            style: labelStyle.copyWith(color: fg),
+            textAlign: TextAlign.center,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -85,23 +103,29 @@ class NoorButton extends StatelessWidget {
 
     return Opacity(
       opacity: isEnabled ? 1.0 : 0.45,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: borderRadius,
-          border: border,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: borderRadius,
-            onTap: onPressed,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-              child: Center(child: content),
-            ),
+      child: NoorPressable(
+        onPressed: onPressed,
+        radius: NoorRadius.md,
+        builder: (context, pressed) => AnimatedContainer(
+          duration: kNoorPressDuration,
+          curve: Curves.ease,
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          padding: const EdgeInsets.symmetric(
+            horizontal: NoorSpace.s4,
+            vertical: NoorSpace.s3,
           ),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: borderRadius,
+            border: border,
+            boxShadow: !isEnabled || !raised
+                ? const []
+                : pressed
+                    ? n.shadow1
+                    : n.shadow2,
+          ),
+          child: content,
         ),
       ),
     );
