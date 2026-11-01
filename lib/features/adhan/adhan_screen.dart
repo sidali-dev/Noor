@@ -7,19 +7,25 @@ import 'package:intl/intl.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
+import 'package:noor/features/adhan/widgets/permission_notice.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_sheet.dart';
 import 'package:noor/generals/location_flow.dart';
 import 'package:noor/generals/widgets/check_dialog.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/icon_tile.dart';
+import 'package:noor/generals/widgets/loading_state.dart';
 import 'package:noor/generals/widgets/location_pill.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
+import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 bool _isSameDay(DateTime a, DateTime b) =>
@@ -61,7 +67,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
         context: context,
         builder: (c) => CheckDialog(
           title: S.of(c).year_ended,
-          icon: Icons.event_busy_outlined,
+          glyph: NoorGlyph.calendar,
           color: c.noor.danger,
         ),
       );
@@ -77,7 +83,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
         context: context,
         builder: (c) => CheckDialog(
           title: S.of(c).year_ended,
-          icon: Icons.event_busy_outlined,
+          glyph: NoorGlyph.calendar,
           color: c.noor.danger,
         ),
       );
@@ -86,20 +92,23 @@ class _AdhanScreenState extends State<AdhanScreen> {
     }
   }
 
+  /// The calendar entry of the selected day, or null before it has loaded.
+  dynamic _datum(AdhanController controller) {
+    final d = controller.date.value;
+    final monthList = controller.prayerTime.value?.data[d.month.toString()];
+    return (monthList != null && d.day - 1 >= 0 && d.day - 1 < monthList.length)
+        ? monthList[d.day - 1]
+        : null;
+  }
+
   String _formatDateTitle(BuildContext context, AdhanController controller) {
     final d = controller.date.value;
-    final isToday = _isSameDay(d, DateTime.now());
-    if (isToday) {
+    if (_isSameDay(d, DateTime.now())) {
       return S.of(context).today;
     }
 
     final isRtl = Localizations.localeOf(context).languageCode == 'ar';
-    final pt = controller.prayerTime.value;
-    final monthList = pt?.data[d.month.toString()];
-    final datum =
-        (monthList != null && d.day - 1 >= 0 && d.day - 1 < monthList.length)
-            ? monthList[d.day - 1]
-            : null;
+    final datum = _datum(controller);
 
     if (datum != null) {
       return isRtl
@@ -108,6 +117,18 @@ class _AdhanScreenState extends State<AdhanScreen> {
     }
 
     return DateFormat('EEEE, dd MMM yyyy').format(d);
+  }
+
+  /// "12 Rajab 1448" from the API date "12-07-1448" and its month name; the
+  /// raw API date when the cached calendar has no month name yet.
+  String? _formatHijri(BuildContext context, AdhanController controller) {
+    final hijri = _datum(controller)?.date.hijri;
+    if (hijri == null) return null;
+    final parts = (hijri.date as String).split('-');
+    final month = hijri.month;
+    if (month == null || parts.length != 3) return hijri.date;
+    final isRtl = Localizations.localeOf(context).languageCode == 'ar';
+    return "${int.tryParse(parts[0]) ?? parts[0]} ${isRtl ? month.ar : month.en} ${parts[2]}";
   }
 
   String _formatNextPrayerDuration(BuildContext context,
@@ -158,19 +179,15 @@ class _AdhanScreenState extends State<AdhanScreen> {
               overlap: const LocationPill(),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
+              padding:
+                  EdgeInsets.symmetric(horizontal: NoorLayout.gutter(context)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: NoorSpace.md),
+                  const SizedBox(height: NoorSpace.s5),
                   Obx(() {
                     if (controller.isLoading.value) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(NoorSpace.xxxl),
-                          child: CircularProgressIndicator(color: n.primary),
-                        ),
-                      );
+                      return LoadingState(message: S.of(context).wait_please);
                     }
 
                     final timings = controller.selectedTimings;
@@ -184,12 +201,25 @@ class _AdhanScreenState extends State<AdhanScreen> {
                         (AppPrefs.country.isNotEmpty &&
                             AppPrefs.city.isNotEmpty);
 
-                    if (!hasLocation || timings == null) {
+                    if (!hasLocation) {
                       return EmptyState(
-                        message: S.of(context).enter_location,
+                        message: S.of(context).location_needed,
                         actionLabel: S.of(context).add_location,
                         onAction: () => pickLocation(context),
                         icon: Iconsax.location,
+                      );
+                    }
+
+                    // A saved city with no calendar: the fetch failed, so say
+                    // so instead of asking for a location again.
+                    if (timings == null) {
+                      return EmptyState(
+                        danger: true,
+                        icon: NoorGlyph.alert,
+                        message: S.of(context).prayer_times_failed,
+                        actionLabel: S.of(context).try_again,
+                        onAction: () =>
+                            controller.initController(DateTime.now().year),
                       );
                     }
 
@@ -197,22 +227,19 @@ class _AdhanScreenState extends State<AdhanScreen> {
                         _isSameDay(controller.date.value, DateTime.now());
                     final next = isToday ? controller.nextPrayer() : null;
 
-                    return Column(
+                    // The card's night theme only reaches widgets below it, so the
+                    // text here takes the window colours itself.
+                    final hijri = _formatHijri(context, controller);
+
+                    return NoorSettle(
+                        child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (next != null) ...[
                           NoorCard(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: NoorSpace.lg,
-                              vertical: NoorSpace.md,
-                            ),
+                            tone: NoorCardTone.night,
                             child: Row(
                               children: [
-                                const IconTile(
-                                  svg: SImageString.masjid,
-                                  tint: NoorTint.sage,
-                                ),
-                                const SizedBox(width: NoorSpace.md),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -220,89 +247,97 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        S.of(context).next_prayer,
-                                        style: NoorText.meta(context),
+                                        '${S.of(context).next_prayer} · ${next.prayer.localizedTitle(context)}',
+                                        style: NoorText.bodySm(context)
+                                            .copyWith(color: n.onWindowMuted),
                                       ),
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: NoorSpace.s1),
+                                      // The one brass of the screen.
+                                      Text(
+                                        _removeTimeZone(
+                                          next.prayer.timeFromTimings(
+                                            controller.timingsFor(next.at) ??
+                                                controller.selectedTimings!,
+                                          ),
+                                        ),
+                                        style: NoorText.numeral(context,
+                                            size: 48, color: n.brass),
+                                      ),
+                                      const SizedBox(height: NoorSpace.s1),
                                       Text(
                                         _formatNextPrayerDuration(
                                             context, next),
-                                        style: NoorText.rowTitle(context),
-                                        maxLines: 1,
+                                        style: NoorText.body(context)
+                                            .copyWith(color: n.onWindow),
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: NoorSpace.sm),
-                                Text(
-                                  _removeTimeZone(
-                                    next.prayer.timeFromTimings(
-                                      controller.timingsFor(next.at) ??
-                                          controller.selectedTimings!,
-                                    ),
-                                  ),
-                                  style: NoorText.numeral(context, size: 22),
-                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: NoorSpace.md),
+                          const SizedBox(height: NoorSpace.s6),
                         ],
-                        NoorCard(
-                          padding: const EdgeInsets.all(NoorSpace.xs),
+                        NoorWell(
+                          radius: NoorRadius.md,
                           child: Row(
                             children: [
                               IconButton(
                                 onPressed: () =>
                                     _onPreviousDay(context, controller),
-                                icon: Icon(chevronBack, color: n.primary),
+                                constraints: const BoxConstraints.tightFor(
+                                    width: 48, height: 56),
+                                icon: Icon(chevronBack, color: n.ink),
                               ),
                               Expanded(
-                                child: Text(
-                                  _formatDateTitle(context, controller),
-                                  style: NoorText.rowTitle(context),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _formatDateTitle(context, controller),
+                                      style: NoorText.heading(context),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (hijri != null)
+                                      Text(
+                                        hijri,
+                                        style: NoorText.bodySm(context),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
                                 ),
                               ),
                               IconButton(
                                 onPressed: () =>
                                     _onNextDay(context, controller),
-                                icon: Icon(chevron, color: n.primary),
+                                constraints: const BoxConstraints.tightFor(
+                                    width: 48, height: 56),
+                                icon: Icon(chevron, color: n.ink),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: NoorSpace.md),
-                        NoorCard(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: NoorSpace.xs,
-                          ),
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < Prayer.all.length; i++) ...[
-                                if (i > 0)
-                                  Divider(
-                                    color: n.line,
-                                    height: 1,
-                                    thickness: 1,
-                                    indent: NoorSpace.lg,
-                                    endIndent: NoorSpace.lg,
-                                  ),
-                                AdhanLine(
-                                  prayer: Prayer.all[i],
-                                  time: _removeTimeZone(
-                                    Prayer.all[i].timeFromTimings(timings),
-                                  ),
-                                  isNext: next?.prayer == Prayer.all[i],
+                        const SizedBox(height: NoorSpace.s5),
+                        const PermissionNotice(),
+                        NoorListGroup(
+                          children: [
+                            for (final prayer in Prayer.all)
+                              AdhanLine(
+                                prayer: prayer,
+                                time: _removeTimeZone(
+                                  prayer.timeFromTimings(timings),
                                 ),
-                              ],
-                            ],
-                          ),
+                                isNext: next?.prayer == prayer,
+                              ),
+                          ],
                         ),
-                        const SizedBox(height: NoorSpace.md),
+                        const SizedBox(height: NoorSpace.s6),
                         // Pick Adhan has no other entry point, so it stays.
                         Obx(() {
                           final soundName =
@@ -311,7 +346,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                             icon: Icon(
                               Iconsax.volume_high,
                               size: 18,
-                              color: n.primary,
+                              color: n.ink,
                             ),
                             label: soundName.isNotEmpty
                                 ? soundName
@@ -320,9 +355,12 @@ class _AdhanScreenState extends State<AdhanScreen> {
                           );
                         }),
                       ],
-                    );
+                    ));
                   }),
-                  const SizedBox(height: 96),
+                  // extendBody: the shell reports the floating nav bar as bottom padding.
+                  SizedBox(
+                    height: MediaQuery.paddingOf(context).bottom + NoorSpace.s4,
+                  ),
                 ],
               ),
             ),

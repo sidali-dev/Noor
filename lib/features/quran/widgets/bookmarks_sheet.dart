@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/features/quran/screens/read_quran_screen.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
@@ -28,47 +30,43 @@ Future<void> showBookmarksSheet(BuildContext context) {
           final bookmarks = AppPrefs.bookmarks;
           if (bookmarks.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: NoorSpace.lg),
+              padding: const EdgeInsets.symmetric(vertical: NoorSpace.s4),
               child: EmptyState(
                 message: S.of(context).no_bookmarks,
-                icon: Icons.bookmark_border_rounded,
+                icon: NoorGlyph.bookmark,
               ),
             );
           }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
+          return NoorListGroup(
             children: [
               for (final page in bookmarks)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: NoorSpace.sm),
-                  child: NoorListRow(
-                    title: getLineTitle(page, context),
-                    trailing: IconButton(
-                      tooltip: S.of(context).remove,
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        color: context.noor.danger,
-                        size: 22,
-                      ),
-                      onPressed: () async {
-                        final list = List<int>.from(AppPrefs.bookmarks);
-                        list.remove(page);
-                        await AppPrefs.setBookmarks(list);
-                        setSheetState(() {});
-                        if (Get.isRegistered<QuranScreenController>()) {
-                          Get.find<QuranScreenController>().refreshProgress();
-                        }
-                      },
+                NoorListRow(
+                  title: getLineTitle(page, context),
+                  trailing: IconButton(
+                    tooltip: S.of(context).remove,
+                    icon: Icon(
+                      Iconsax.trash,
+                      color: context.noor.danger,
+                      size: 22,
                     ),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      AppPrefs.setLastReadPage(page);
+                    onPressed: () async {
+                      final list = List<int>.from(AppPrefs.bookmarks);
+                      list.remove(page);
+                      await AppPrefs.setBookmarks(list);
+                      setSheetState(() {});
                       if (Get.isRegistered<QuranScreenController>()) {
                         Get.find<QuranScreenController>().refreshProgress();
                       }
-                      Get.to(() => ReadQuranScreen(pageIndex: page - 1));
                     },
                   ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    AppPrefs.setLastReadPage(page);
+                    if (Get.isRegistered<QuranScreenController>()) {
+                      Get.find<QuranScreenController>().refreshProgress();
+                    }
+                    Get.to(() => ReadQuranScreen(pageIndex: page - 1));
+                  },
                 ),
             ],
           );

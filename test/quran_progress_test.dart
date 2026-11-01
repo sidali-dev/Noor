@@ -1,4 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:noor/features/quran/quran_screen.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
 import 'package:noor/utils/constants/shared_pref_keys.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
@@ -139,6 +145,57 @@ void main() {
       await QuranProgress.markRead(-1);
       await QuranProgress.markRead(605);
       expect(QuranProgress.readCount, 0);
+    });
+  });
+
+  group('Quran index', () {
+    Future<void> pump(WidgetTester tester, {bool dark = false}) async {
+      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      addTearDown(Get.reset);
+      await tester.pumpWidget(GetMaterialApp(
+        theme: dark ? NoorTheme.dark() : NoorTheme.light(),
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: const QuranScreen(),
+      ));
+      await tester.pump();
+    }
+
+    testWidgets('shows no progress before anything is read', (tester) async {
+      await _useStore({});
+      await pump(tester);
+
+      expect(find.text('Continue Reading'), findsNothing);
+      expect(find.textContaining('of 604 pages'), findsNothing);
+      // Rows carry no progress; only the continue card does.
+      expect(find.textContaining('%'), findsNothing);
+      expect(find.text('Al Fatiha\n7 verses · Meccan'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('card and rows show only pages that were read', (tester) async {
+      await _useStore({});
+      await QuranProgress.markRead(1);
+      await QuranProgress.markRead(2);
+      await pump(tester);
+
+      expect(find.text('Continue Reading'), findsOneWidget);
+      expect(find.text('2 of 604 pages'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing); // rows show no progress
+
+      await tester.tap(find.text('Hizb'));
+      await tester.pump();
+      expect(find.text('Hizb 1'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing); // no hizb progress data
+      expect(tester.takeException(), isNull);
     });
   });
 }

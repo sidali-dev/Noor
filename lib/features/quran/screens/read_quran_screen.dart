@@ -4,9 +4,12 @@ import 'package:get/get.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/features/quran/widgets/mushaf_frame.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -84,7 +87,7 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
 
   void _goToPage(int index) => _pageController.animateToPage(
         index,
-        duration: const Duration(milliseconds: 250),
+        duration: noorDuration(context, const Duration(milliseconds: 220)),
         curve: Curves.easeOutCubic,
       );
 
@@ -105,7 +108,7 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: n.mushaf,
+        backgroundColor: n.paper,
         body: SafeArea(
           child: Stack(
             children: [
@@ -117,7 +120,9 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                   itemCount: quran.totalPagesCount,
                   onPageChanged: _onPageChanged,
                   itemBuilder: (context, index) {
-                    return _buildPageContent(context, index + 1);
+                    return NoorColumn(
+                      child: _buildPageContent(context, index + 1),
+                    );
                   },
                 ),
               ),
@@ -127,7 +132,8 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                 right: 0,
                 child: AnimatedOpacity(
                   opacity: _showChrome ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
+                  duration:
+                      noorDuration(context, const Duration(milliseconds: 200)),
                   curve: Curves.easeOutCubic,
                   child: IgnorePointer(
                     ignoring: !_showChrome,
@@ -139,12 +145,13 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                 ),
               ),
               Positioned(
-                bottom: NoorSpace.md,
+                bottom: NoorSpace.s3,
                 left: 0,
                 right: 0,
                 child: AnimatedOpacity(
                   opacity: _showChrome ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
+                  duration:
+                      noorDuration(context, const Duration(milliseconds: 200)),
                   curve: Curves.easeOutCubic,
                   child: IgnorePointer(
                     ignoring: !_showChrome,
@@ -168,17 +175,12 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: n.mushaf.withValues(alpha: 0.94),
-        border: Border(
-          bottom: BorderSide(
-            color: n.line.withValues(alpha: 0.6),
-            width: 1,
-          ),
-        ),
+        color: n.paper,
+        border: Border(bottom: BorderSide(color: n.line)),
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: NoorSpace.md,
-        vertical: NoorSpace.xs,
+      padding: EdgeInsets.symmetric(
+        horizontal: NoorSpace.s3 + NoorLayout.margin(context),
+        vertical: NoorSpace.s1,
       ),
       child: Row(
         children: [
@@ -191,33 +193,44 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
             tooltip: S.of(context).back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: NoorSpace.sm),
+          const SizedBox(width: NoorSpace.s2),
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   surahName,
-                  style: NoorText.rowTitle(context),
+                  style: NoorText.heading(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   "${S.of(context).page} $pageNumber",
-                  style: NoorText.meta(context),
+                  style: NoorText.bodySm(context),
                   maxLines: 1,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: NoorSpace.sm),
+          const SizedBox(width: NoorSpace.s2),
           IconButton(
-            icon: Icon(
-              isBookmarked
-                  ? Icons.bookmark_rounded
-                  : Icons.bookmark_border_rounded,
-              color: isBookmarked ? n.gold : n.muted,
-              size: 24,
+            // Saved: ink on a brassSoft disc, so the state is not colour alone.
+            icon: DecoratedBox(
+              decoration: BoxDecoration(
+                color: isBookmarked ? n.brassSoft : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Center(
+                  child: NoorIcon(
+                    NoorGlyph.bookmark,
+                    color: isBookmarked ? n.ink : n.muted,
+                    size: 22,
+                  ),
+                ),
+              ),
             ),
             tooltip: S.of(context).bookmark,
             onPressed: _toggleBookmark,
@@ -256,10 +269,13 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
       final end = data["end"] as int;
 
       if (start == 1) {
-        if (children.isNotEmpty) children.add(const SizedBox(height: 44));
+        if (children.isNotEmpty) {
+          children.add(const SizedBox(height: NoorSpace.s7));
+        }
         children.add(
           SurahCartouche(name: 'سورة ${quran.getSurahNameArabic(surah)}'),
         );
+        children.add(const SizedBox(height: NoorSpace.s4));
         if (surah != 1 && surah != 9) {
           children.add(
             Text(
@@ -276,15 +292,23 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
         }
       }
 
-      final buf = StringBuffer();
-      for (int v = start; v <= end; v++) {
-        buf.write(quran.getVerse(surah, v, verseEndSymbol: true));
-        if (v < end) buf.write(' ');
-      }
-
+      // The package's end sign is swapped for AyahMarker; the verse text
+      // itself is untouched.
       children.add(
-        Text(
-          buf.toString(),
+        Text.rich(
+          TextSpan(
+            children: [
+              for (var v = start; v <= end; v++) ...[
+                TextSpan(text: quran.getVerse(surah, v)),
+                const TextSpan(text: ' '),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: AyahMarker(v),
+                ),
+                if (v < end) const TextSpan(text: ' '),
+              ],
+            ],
+          ),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Quran',
@@ -296,23 +320,25 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
       );
     }
 
-    // Frame margins + padding add up to the old 20 / 56 / 88, so the text
-    // keeps its width and clears the top bar and the pager pill.
+    // The page sits on the ground with a small margin; the text clears the
+    // brass frame and, by the frame's own margins, the corner stars, the foot
+    // and the pager pill.
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NoorSpace.sm,
-        NoorSpace.sm,
-        NoorSpace.sm,
-        NoorSpace.sm,
+        NoorSpace.s2,
+        NoorSpace.s2,
+        NoorSpace.s2,
+        NoorSpace.s2,
       ),
       child: MushafFrame(
+        pageNumber: pageNumber,
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
-              NoorSpace.md,
-              48,
-              NoorSpace.md,
-              72,
+              NoorSpace.s5,
+              NoorSpace.s4,
+              NoorSpace.s5,
+              NoorSpace.s4,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

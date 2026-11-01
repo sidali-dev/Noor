@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         Get.put(LocalizationController());
 
     return GetMaterialApp(
-      title: 'Noor Imene',
+      title: 'Faith',
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,

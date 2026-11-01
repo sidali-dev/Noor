@@ -1,16 +1,30 @@
+import 'dart:math' as math;
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
-import 'package:noor/features/adhan/widgets/adhan_line.dart';
+import 'package:noor/generals/widgets/arch_frame.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/constants/image_strings.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
+
+/// Latin and Arabic name of each prayer, keyed by [Prayer.key]. Both show in
+/// every locale, stacked at equal weight.
+const _names = {
+  'fajr': ('Fajr', 'الفجر'),
+  'chourouk': ('Chourouk', 'الشروق'),
+  'dhuhr': ('Dhuhr', 'الظهر'),
+  'asr': ('Asr', 'العصر'),
+  'maghrib': ('Maghrib', 'المغرب'),
+  'isha': ('Isha', 'العشاء'),
+};
 
 class AdhanRingScreen extends StatefulWidget {
   final AlarmSettings alarmSettings;
@@ -21,6 +35,9 @@ class AdhanRingScreen extends StatefulWidget {
 }
 
 class _AdhanRingScreenState extends State<AdhanRingScreen> {
+  /// Below this the screen scrolls: room for the arch, a note and two buttons.
+  static const double _minHeight = 480;
+
   @override
   void dispose() {
     Alarm.stop(widget.alarmSettings.id);
@@ -54,483 +71,167 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final deep = Color.lerp(n.primary, Colors.black, 0.3)!;
     final baseId = AdhanScheduler.baseOf(widget.alarmSettings.id);
     final prayer = _prayerFromBaseId(baseId);
+    final names = prayer == null ? null : _names[prayer.key];
 
     final title = widget.alarmSettings.notificationSettings.title;
     final body = widget.alarmSettings.notificationSettings.body;
+    // 'en' keeps Western digits 0-9 in every locale.
     final formattedTime =
-        DateFormat('HH:mm').format(widget.alarmSettings.dateTime);
+        DateFormat('HH:mm', 'en').format(widget.alarmSettings.dateTime);
 
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        backgroundColor: n.paper,
-        body: Stack(
-          children: [
-            // Faint backdrop: clouds and the mosque skyline. Decoration only.
-            Positioned.fill(
-              child: IgnorePointer(
-                child: ExcludeSemantics(
-                  child: CustomPaint(
-                    painter: _BackdropPainter(n.primary),
-                  ),
-                ),
+    // The ground is the night sky in both themes, so the system bars take
+    // light icons whatever the theme.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: noorSystemOverlay(Brightness.dark),
+      child: PopScope(
+        canPop: false,
+        child: Scaffold(
+          backgroundColor: n.window,
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                NoorLayout.gutter(context),
+                NoorSpace.s5,
+                NoorLayout.gutter(context),
+                NoorSpace.s4,
               ),
-            ),
-            SafeArea(
+              // Short phones and large text scroll the whole screen rather than
+              // squeeze the arch to nothing or push the buttons off it.
               child: LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    NoorSpace.xxl,
-                    NoorSpace.xxl,
-                    NoorSpace.xxl,
-                    NoorSpace.xxl,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - NoorSpace.xxl * 2,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Center(
-                            child: SvgPicture.asset(
-                              n.isDark ? NoorArt.emblemDark : NoorArt.emblem,
-                              height: 48,
-                              excludeFromSemantics: true,
-                            ),
+                builder: (context, view) => SingleChildScrollView(
+                  child: SizedBox(
+                    height: math.max(view.maxHeight, _minHeight),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, box) {
+                              final width = box.maxWidth <
+                                      box.maxHeight / ArchFrame.aspect
+                                  ? box.maxWidth
+                                  : box.maxHeight / ArchFrame.aspect;
+                              return Center(
+                                // The active alarm screen is one of the loops
+                                // Hilal allows: the sky twinkles.
+                                child: NoorTwinkle(
+                                  builder: (context, twinkle) => ArchFrame(
+                                    width: width,
+                                    twinkle: twinkle,
+                                    child: _ArchContent(
+                                      unit: width / 240,
+                                      names: names,
+                                      title: title,
+                                      time: formattedTime,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          const Spacer(flex: 3),
-                          Center(
-                            child: _Mihrab(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 72,
-                                    height: 72,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: n.tintBg(NoorTint.sage),
-                                    ),
-                                    child: Icon(
-                                      prayer?.icon ?? Iconsax.sun_fog,
-                                      size: 34,
-                                      color: n.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: NoorSpace.xxl),
-                                  if (title.isNotEmpty)
-                                    Text(
-                                      title,
-                                      style: NoorText.section(context).copyWith(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w700,
-                                          color: deep),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  Text(
-                                    formattedTime,
-                                    style: NoorText.section(context).copyWith(
-                                      fontSize: 50,
-                                      height: 1.2,
-                                      fontWeight: FontWeight.w500,
-                                      color: deep,
-                                    ),
-                                  ),
-                                  const SizedBox(height: NoorSpace.md),
-                                  const _OrnamentDivider(),
-                                  if (body.isNotEmpty) ...[
-                                    const SizedBox(height: NoorSpace.md),
-                                    Text(
-                                      body,
-                                      style: NoorText.body(context)
-                                          .copyWith(color: n.muted),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ],
+                        ),
+                        // Reminders say how long until the prayer; keep the
+                        // sentence, and let a long one scroll in its own box.
+                        if (body.isNotEmpty) ...[
+                          const SizedBox(height: NoorSpace.s4),
+                          ConstrainedBox(
+                            constraints:
+                                const BoxConstraints(maxHeight: _minHeight / 4),
+                            child: SingleChildScrollView(
+                              child: Text(
+                                body,
+                                style: NoorText.bodySm(context)
+                                    .copyWith(color: n.onWindowMuted),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
-                          const Spacer(flex: 4),
-                          _PrimaryAction(
-                            label: S.of(context).open_adhkar,
-                            onTap: _openAdhkar,
-                          ),
-                          const SizedBox(height: NoorSpace.lg),
-                          _CloseAction(
-                            label: S.of(context).close,
-                            onTap: _close,
-                          ),
                         ],
-                      ),
+                        const SizedBox(height: NoorSpace.s5),
+                        NoorButton(
+                          label: S.of(context).stop_adhan,
+                          onPressed: _close,
+                          variant: NoorButtonVariant.onWindow,
+                        ),
+                        const SizedBox(height: NoorSpace.s2),
+                        NoorButton(
+                          label: S.of(context).open_adhkar,
+                          onPressed: _openAdhkar,
+                          variant: NoorButtonVariant.ghostOnWindow,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The text in the arch's night window: one brass ornament, the Latin and
+/// Arabic names at equal weight, the time beneath. Scaled down as a block when
+/// a large text scale would not fit the window, never clipped.
+class _ArchContent extends StatelessWidget {
+  /// One ArchFrame artwork unit in dp.
+  final double unit;
+  final (String, String)? names;
+  final String title;
+  final String time;
+
+  const _ArchContent({
+    required this.unit,
+    required this.names,
+    required this.title,
+    required this.time,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+    final names = this.names;
+    final time = this.time;
+    return SizedBox(
+      width: 150 * unit,
+      height: 130 * unit,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (names != null) ...[
+              Text(
+                names.$1,
+                textDirection: TextDirection.ltr,
+                style: NoorText.displayXl(context).copyWith(color: n.onWindow),
+              ),
+              Text(
+                names.$2,
+                textDirection: TextDirection.rtl,
+                style:
+                    NoorText.arabicDisplay(context).copyWith(color: n.onWindow),
+              ),
+            ] else
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: NoorText.display(context).copyWith(color: n.onWindow),
+              ),
+            const SizedBox(height: NoorSpace.s2),
+            Text(
+              time,
+              textDirection: TextDirection.ltr,
+              style: NoorText.numeral(context, size: 40, color: n.onWindow)
+                  .copyWith(height: 44 / 40),
+            ),
           ],
         ),
       ),
     );
   }
-}
-
-/// Pointed-arch frame that fades out at its foot.
-class _Mihrab extends StatelessWidget {
-  final Widget child;
-  const _Mihrab({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width * 0.5;
-    return CustomPaint(
-      painter: _MihrabPainter(context.noor.card, context.noor.primary),
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints(minWidth: width, maxWidth: width, minHeight: 340),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NoorSpace.md,
-            NoorSpace.xxxl + NoorSpace.xl,
-            NoorSpace.md,
-            NoorSpace.xxxl,
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _MihrabPainter extends CustomPainter {
-  final Color fill;
-  final Color accent;
-  _MihrabPainter(this.fill, this.accent);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    // Ogee tip, rounded shoulders, straight sides; mirrored about the centre.
-    final path = Path()
-      ..moveTo(0, h)
-      ..lineTo(0, h * 0.26)
-      ..quadraticBezierTo(0, h * 0.14, w * 0.2, h * 0.13)
-      ..cubicTo(w * 0.36, h * 0.12, w * 0.42, h * 0.05, w * 0.5, 0)
-      ..cubicTo(w * 0.58, h * 0.05, w * 0.64, h * 0.12, w * 0.8, h * 0.13)
-      ..quadraticBezierTo(w, h * 0.14, w, h * 0.26)
-      ..lineTo(w, h)
-      ..close();
-
-    final rect = Offset.zero & size;
-    final fade = [Colors.white, Colors.white.withValues(alpha: 0)];
-    LinearGradient vertical(List<Color> c, [List<double>? stops]) =>
-        LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: c,
-          stops: stops,
-        );
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = accent.withValues(alpha: 0.025)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
-    );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = vertical([
-          Color.lerp(fill, Colors.white, 0.4)!.withValues(alpha: 0.75),
-          accent.withValues(alpha: 0.03),
-          accent.withValues(alpha: 0),
-        ], const [
-          0,
-          0.6,
-          1
-        ]).createShader(rect),
-    );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3
-        ..shader = vertical(
-          [fade[0].withValues(alpha: 0.95), fade[1]],
-          const [0.2, 0.85],
-        ).createShader(rect),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_MihrabPainter old) =>
-      old.fill != fill || old.accent != accent;
-}
-
-class _OrnamentDivider extends StatelessWidget {
-  const _OrnamentDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.noor.primary.withValues(alpha: 0.3);
-    Widget line() => Container(width: 28, height: 1.5, color: c);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        line(),
-        const SizedBox(width: NoorSpace.sm),
-        Transform.rotate(
-          angle: 0.785398,
-          child: Container(width: 7, height: 7, color: c),
-        ),
-        const SizedBox(width: NoorSpace.sm),
-        line(),
-      ],
-    );
-  }
-}
-
-const _actionHeight = 62.0;
-const _actionRadius = 31.0;
-
-/// Chevron always points right, as drawn in the design, even in RTL.
-Widget _chevron(Color color) => Directionality(
-      textDirection: TextDirection.ltr,
-      child: Icon(Icons.chevron_right_rounded, color: color, size: 26),
-    );
-
-class _PrimaryAction extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _PrimaryAction({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final n = context.noor;
-    final radius = BorderRadius.circular(_actionRadius);
-    return Container(
-      height: _actionHeight,
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.lerp(n.primary, Colors.white, 0.1)!,
-            n.primary,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: n.primary.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xxl),
-            child: Row(
-              children: [
-                _chevron(n.onPrimary),
-                const Spacer(),
-                Text(
-                  label,
-                  style: NoorText.rowTitle(context)
-                      .copyWith(color: n.onPrimary, fontSize: 18),
-                ),
-                Container(
-                  width: 1,
-                  height: 26,
-                  margin: const EdgeInsets.symmetric(horizontal: NoorSpace.lg),
-                  color: n.onPrimary.withValues(alpha: 0.3),
-                ),
-                SvgPicture.asset(
-                  SImageString.masjid,
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(n.onPrimary, BlendMode.srcIn),
-                ),
-                const Spacer(flex: 2),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CloseAction extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _CloseAction({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final n = context.noor;
-    final radius = BorderRadius.circular(_actionRadius);
-    return Container(
-      height: _actionHeight - 4,
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        color: n.tintBg(NoorTint.sage).withValues(alpha: 0.7),
-        border: Border.all(color: n.primary.withValues(alpha: 0.12)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: NoorSpace.xxl),
-            child: Row(
-              children: [
-                Icon(Icons.close_rounded, color: n.primary, size: 22),
-                Expanded(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: NoorText.rowTitle(context)
-                        .copyWith(color: n.primary, fontSize: 18),
-                  ),
-                ),
-                // Balances the close icon so the label stays centred.
-                const SizedBox(width: 22),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Soft clouds near the top and a pale mosque skyline above the buttons.
-class _BackdropPainter extends CustomPainter {
-  final Color tint;
-  _BackdropPainter(this.tint);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-
-    final cloud = Paint()
-      ..color = tint.withValues(alpha: 0.04)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
-    for (final c in [
-      Offset(w * 0.02, h * 0.2),
-      Offset(w * 0.17, h * 0.22),
-      Offset(w * 0.09, h * 0.17),
-      Offset(w * 0.96, h * 0.24),
-      Offset(w * 0.85, h * 0.26),
-      Offset(w * 0.93, h * 0.21),
-    ]) {
-      canvas.drawOval(
-        Rect.fromCenter(center: c, width: w * 0.34, height: h * 0.07),
-        cloud,
-      );
-    }
-
-    final g = h * 0.715; // ground line
-    final u = w / 100; // 1 unit = 1% of width
-    final cx = w / 2;
-    final sil = Paint()..color = tint.withValues(alpha: 0.09);
-    const pi = 3.14159;
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, g)
-        ..quadraticBezierTo(w * 0.2, g - u * 7, w * 0.45, g - u * 2)
-        ..quadraticBezierTo(w * 0.75, g - u * 9, w, g - u * 4)
-        ..lineTo(w, g)
-        ..close(),
-      Paint()..color = tint.withValues(alpha: 0.05),
-    );
-
-    void dome(double dx, double base, double width, double height) =>
-        canvas.drawArc(
-          Rect.fromCenter(
-            center: Offset(cx + u * dx, g - u * base),
-            width: u * width,
-            height: u * height,
-          ),
-          pi,
-          pi,
-          true,
-          sil,
-        );
-
-    // Main dome, crescent, hall and side domes.
-    canvas.drawRect(Rect.fromLTRB(cx - u * 12, g - u * 7, cx + u * 12, g), sil);
-    dome(0, 7, 12, 14);
-    canvas.drawCircle(Offset(cx, g - u * 15), u * 1, sil);
-    for (final dx in [-9.0, 9.0, -14.0, 14.0]) {
-      dome(dx, 5, 5, 6);
-    }
-
-    // Minarets: shaft, balcony, pointed cap.
-    for (final dx in [-10.5, 10.5, -17.0, 17.0]) {
-      final tall = dx.abs() < 12;
-      final top = g - u * (tall ? 21 : 12);
-      final x = cx + u * dx;
-      final half = u * (tall ? 1.4 : 1.1);
-      canvas.drawRect(Rect.fromLTRB(x - half, top, x + half, g), sil);
-      canvas.drawRect(
-        Rect.fromLTRB(x - half * 1.7, top + u * 3, x + half * 1.7, top + u * 4),
-        sil,
-      );
-      canvas.drawPath(
-        Path()
-          ..moveTo(x - half, top)
-          ..lineTo(x, top - u * (tall ? 5 : 3.5))
-          ..lineTo(x + half, top)
-          ..close(),
-        sil,
-      );
-    }
-
-    // Palms and bushes.
-    for (final dx in [-29.0, -32.0, 30.0]) {
-      final x = cx + u * dx;
-      canvas.drawLine(
-        Offset(x, g),
-        Offset(x, g - u * 9),
-        Paint()
-          ..color = sil.color
-          ..strokeWidth = u * 0.8,
-      );
-      for (final a in [-0.9, -0.3, 0.3, 0.9]) {
-        canvas
-          ..save()
-          ..translate(x, g - u * 9)
-          ..rotate(a)
-          ..drawOval(Rect.fromLTWH(-u * 0.6, -u * 4, u * 1.2, u * 4.5), sil)
-          ..restore();
-      }
-    }
-    for (final dx in [-20.0, 20.0, -34.0, 34.0]) {
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: Offset(cx + u * dx, g - u * 1.2),
-          width: u * 12,
-          height: u * 4.5,
-        ),
-        sil,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_BackdropPainter old) => old.tint != tint;
 }

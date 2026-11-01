@@ -155,16 +155,14 @@ class _DriftPrompt extends StatelessWidget {
           style: NoorText.body(context).copyWith(color: context.noor.muted),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: NoorSpace.xxl),
+        const SizedBox(height: NoorSpace.s5),
         NoorButton(
           label: s.relocate_auto,
-          icon: const Icon(Icons.my_location_rounded, size: 20),
           onPressed: () => Navigator.of(context).pop(LocationSource.gps),
         ),
-        const SizedBox(height: NoorSpace.md),
+        const SizedBox(height: NoorSpace.s3),
         NoorButton(
           label: s.relocate_manual,
-          icon: const Icon(Icons.edit_location_alt_outlined, size: 20),
           variant: NoorButtonVariant.outline,
           onPressed: () => Navigator.of(context).pop(LocationSource.manual),
         ),

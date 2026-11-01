@@ -11,12 +11,16 @@ import 'package:noor/features/qibla/widgets/qibla_calibration_sheet.dart';
 import 'package:noor/features/qibla/widgets/qibla_compass.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/loading_state.dart';
 import 'package:noor/generals/widgets/location_pill.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -91,7 +95,7 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
 
   Widget _scroll(Widget child) => SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(top: NoorSpace.xl),
+        padding: const EdgeInsets.only(top: NoorSpace.s4),
         child: child,
       );
 
@@ -100,53 +104,32 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
     // The shell's Scaffold extends the body under the nav bar and reports its
     // height as bottom padding; nothing of ours may sit in that band.
     final navInset = MediaQuery.paddingOf(context).bottom;
-    // The skyline rests just above the nav bar's top edge, and the card stays
-    // clear of the Kaaba.
-    const footerBand = 56.0;
 
     return Scaffold(
       backgroundColor: context.noor.paper,
-      body: Stack(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Footer art, first in the stack so it sits under all content.
-          // Never mirrored (NoorArt.noMirror).
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: navInset - 20,
-            child: IgnorePointer(
-              child: ExcludeSemantics(
-                child: Image.asset(
-                  NoorArt.of(context, NoorArt.qiblaSkyline),
-                  fit: BoxFit.fitWidth,
-                  alignment: Alignment.bottomCenter,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
-              ),
-            ),
+          // The night skyline is the hero's art; it is in NoorArt.noMirror,
+          // so it keeps its place in RTL.
+          NoorHero(
+            art: NoorArt.qiblaSkyline,
+            settings: true,
+            title: S.of(context).nav_qibla,
+            subtitle: S.of(context).tagline_qibla,
+            height: 236,
+            overlap: const LocationPill(),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NoorHero(
-                settings: true,
-                title: S.of(context).nav_qibla,
-                subtitle: S.of(context).tagline_qibla,
-                height: 180,
-                overlap: const LocationPill(),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                NoorLayout.gutter(context),
+                NoorSpace.s4,
+                NoorLayout.gutter(context),
+                navInset + NoorSpace.s4,
               ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    NoorSpace.xl,
-                    NoorSpace.sm,
-                    NoorSpace.xl,
-                    navInset + footerBand,
-                  ),
-                  child: _buildBody(),
-                ),
-              ),
-            ],
+              child: _buildBody(),
+            ),
           ),
         ],
       ),
@@ -161,22 +144,21 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
           return _buildCalmSpinner();
         }
 
+        // No button on these two: the sensor check runs once, so a retry would
+        // only rebuild the same result.
         if (snapshot.hasError) {
           return _scroll(EmptyState(
-            icon: Icons.error_outline_rounded,
-            message: '${snapshot.error}',
-            actionLabel: S.of(context).try_again,
-            onAction: () => setState(() {}),
+            danger: true,
+            icon: NoorGlyph.alert,
+            message: S.of(context).compass_error,
           ));
         }
 
         // If sensor unsupported
         if (snapshot.data == false) {
           return _scroll(EmptyState(
-            icon: Icons.explore_off_outlined,
+            icon: NoorGlyph.compass,
             message: S.of(context).sensor_not_supported,
-            actionLabel: S.of(context).try_again,
-            onAction: () => setState(() {}),
           ));
         }
 
@@ -187,7 +169,9 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
           builder: (context, locationSnapshot) {
             if (locationSnapshot.hasError) {
               return _scroll(EmptyState(
-                message: '${locationSnapshot.error}',
+                danger: true,
+                icon: NoorGlyph.alert,
+                message: S.of(context).location_failed,
                 actionLabel: S.of(context).try_again,
                 onAction: () => _controller.restartCheckLocationStatus(),
               ));
@@ -201,8 +185,8 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
             // GPS signal is off
             if (!status.enabled) {
               return _scroll(EmptyState(
-                icon: Icons.location_off_outlined,
-                message: S.of(context).enable_location_body,
+                icon: Iconsax.location_slash,
+                message: S.of(context).gps_off,
                 actionLabel: S.of(context).open_settings,
                 // The resume observer re-checks on return.
                 onAction: Geolocator.openLocationSettings,
@@ -218,7 +202,7 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
               case LocationPermission.denied:
               case LocationPermission.deniedForever:
                 return _scroll(EmptyState(
-                  icon: Icons.location_off_outlined,
+                  icon: Iconsax.location_slash,
                   message: S.of(context).enable_location_permission,
                   actionLabel: status.status == LocationPermission.deniedForever
                       ? S.of(context).open_settings
@@ -239,19 +223,11 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCalmSpinner() {
-    return const Center(
-      child: SizedBox(
-        width: 32,
-        height: 32,
-        child: CircularProgressIndicator(strokeWidth: 2.5),
-      ),
-    );
-  }
+  Widget _buildCalmSpinner() => const LoadingState();
 
   // Below this the compass can't keep 160 dp beside the card, so scroll.
   // ponytail: fixed card-height estimate; measure the card if its content grows.
-  static const double _minFit = 160 + NoorSpace.lg + 200;
+  static const double _minFit = 160 + NoorSpace.s4 + 200;
 
   Widget _buildActiveCompass() {
     return StreamBuilder<QiblahDirection>(
@@ -267,10 +243,12 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
           direction: qiblahDirection.direction,
           qiblah: qiblahDirection.qiblah,
         );
-        final card = QiblaDirectionCard(
-          offset: qiblahDirection.offset,
-          distanceKm: _distanceKm,
-          onCalibrate: () => showQiblaCalibrationSheet(context),
+        final card = NoorSettle(
+          child: QiblaDirectionCard(
+            offset: qiblahDirection.offset,
+            distanceKm: _distanceKm,
+            onCalibrate: () => showQiblaCalibrationSheet(context),
+          ),
         );
 
         return LayoutBuilder(
@@ -280,7 +258,7 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
                 child: Column(
                   children: [
                     SizedBox(height: 160, child: compass),
-                    const SizedBox(height: NoorSpace.lg),
+                    const SizedBox(height: NoorSpace.s4),
                     card,
                   ],
                 ),
@@ -291,7 +269,7 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: Center(child: compass)),
-                const SizedBox(height: NoorSpace.lg),
+                const SizedBox(height: NoorSpace.s4),
                 card,
               ],
             );
@@ -317,81 +295,101 @@ class QiblaDirectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
+    // Side by side no longer fit past about 1.5x; stack them instead.
+    final stacked = MediaQuery.textScalerOf(context).scale(16) > 24;
+
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          S.of(context).qibla_direction,
+          style: NoorText.bodySm(context),
+        ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            '${offset.toStringAsFixed(2)}°',
+            textDirection: TextDirection.ltr,
+            style: NoorText.numeral(
+              context,
+              size: 48,
+              color: n.ink,
+            ),
+          ),
+        ),
+      ],
+    );
+    final calibrate = NoorButton(
+      label: S.of(context).calibrate,
+      icon: const NoorIcon(NoorGlyph.compass),
+      variant: NoorButtonVariant.tonal,
+      onPressed: onCalibrate,
+    );
+    final distanceLabel = Text(
+      S.of(context).distance_to_kaaba,
+      style: NoorText.bodySm(context),
+    );
+    final distanceValue = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Text(
+        '~ ${distanceKm?.toInt()} km',
+        style: NoorText.numeral(
+          context,
+          size: 18,
+          color: n.muted,
+        ),
+      ),
+    );
 
     return NoorCard(
-      padding: const EdgeInsets.all(NoorSpace.lg),
+      padding: const EdgeInsets.all(NoorSpace.s4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).qibla_direction,
-                      style: NoorText.meta(context),
-                    ),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        '${offset.toStringAsFixed(2)}°',
-                        style: NoorText.numeral(
-                          context,
-                          size: 48,
-                          color: n.ink,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: NoorSpace.md),
-              NoorButton(
-                label: S.of(context).calibrate,
-                icon: const Icon(Icons.explore_outlined, size: 20),
-                variant: NoorButtonVariant.tonal,
-                onPressed: onCalibrate,
-              ),
-            ],
-          ),
+          if (stacked) ...[
+            heading,
+            const SizedBox(height: NoorSpace.s3),
+            calibrate,
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: heading),
+                const SizedBox(width: NoorSpace.s3),
+                calibrate,
+              ],
+            ),
           if (distanceKm != null) ...[
             Container(
               height: 1,
               color: n.line,
-              margin: const EdgeInsets.symmetric(vertical: NoorSpace.md),
+              margin: const EdgeInsets.symmetric(vertical: NoorSpace.s3),
             ),
             Row(
+              crossAxisAlignment: stacked
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
               children: [
                 Icon(
                   Iconsax.location,
                   size: 18,
                   color: n.muted,
                 ),
-                const SizedBox(width: NoorSpace.sm),
-                Text(
-                  S.of(context).distance_to_kaaba,
-                  style: NoorText.body(context).copyWith(
-                    color: n.muted,
-                    fontSize: 14,
-                  ),
+                const SizedBox(width: NoorSpace.s2),
+                Expanded(
+                  child: stacked
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [distanceLabel, distanceValue],
+                        )
+                      : distanceLabel,
                 ),
-                const Spacer(),
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Text(
-                    '~ ${distanceKm!.toInt()} km',
-                    style: NoorText.numeral(
-                      context,
-                      size: 15,
-                      color: n.muted,
-                    ),
-                  ),
-                ),
+                if (!stacked) ...[
+                  const SizedBox(width: NoorSpace.s2),
+                  distanceValue,
+                ],
               ],
             ),
           ],

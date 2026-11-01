@@ -3,12 +3,14 @@ import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/widgets/location_picker_sheet.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
-import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_radio.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generals/widgets/wait_dialog.dart';
 import 'package:noor/generated/l10n.dart';
@@ -63,7 +65,7 @@ Future<void> pickLocation(BuildContext context,
     if (permissionDenied) {
       await _showFailSheet(
         context,
-        icon: Icons.location_off_outlined,
+        icon: Iconsax.location_slash,
         message: S.of(context).enable_location_permission,
         actionLabel: S.of(context).open_settings,
         onAction: openAppSettings,
@@ -96,7 +98,8 @@ Future<void> pickLocation(BuildContext context,
     if (country == null || state == null || city == null) {
       await _showFailSheet(
         context,
-        icon: Icons.location_off_outlined,
+        icon: NoorGlyph.alert,
+        danger: true,
         message: S.of(context).location_failed,
         actionLabel: S.of(context).try_again,
         onAction: () => pickLocation(context),
@@ -163,12 +166,11 @@ Future<void> _saveLocation(
 
   await _showFailSheet(
     context,
-    icon: error is NoInternetException
-        ? Icons.wifi_off_rounded
-        : Icons.location_off_outlined,
+    icon: NoorGlyph.alert,
+    danger: true,
     message: error is NoInternetException
         ? S.of(context).no_internet
-        : S.of(context).location_failed,
+        : S.of(context).prayer_times_failed,
     actionLabel: S.of(context).try_again,
     onAction: () => _saveLocation(context, country, state, city),
   );
@@ -176,7 +178,8 @@ Future<void> _saveLocation(
 
 Future<void> _showFailSheet(
   BuildContext context, {
-  required IconData icon,
+  required Object icon, // IconData or NoorGlyph, as EmptyState takes
+  bool danger = false,
   required String message,
   required String actionLabel,
   required VoidCallback onAction,
@@ -185,6 +188,7 @@ Future<void> _showFailSheet(
     context,
     builder: (sheetContext) => EmptyState(
       icon: icon,
+      danger: danger,
       message: message,
       actionLabel: actionLabel,
       onAction: () {
@@ -224,92 +228,73 @@ class _LocationChoiceState extends State<_LocationChoice> {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    return RadioGroup<LocationSource>(
-      groupValue: _source,
-      onChanged: (v) => setState(() => _source = v),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            s.location_subtitle,
-            style: NoorText.body(context).copyWith(color: context.noor.muted),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: NoorSpace.xl),
-          _SourceCard(
-            value: LocationSource.gps,
-            icon: Icons.my_location_rounded,
-            tint: NoorTint.sage,
-            title: s.gps,
-            subtitle: s.gps_subtitle,
-            onTap: () => setState(() => _source = LocationSource.gps),
-          ),
-          const SizedBox(height: NoorSpace.md),
-          _SourceCard(
-            value: LocationSource.manual,
-            icon: Icons.edit_location_alt_outlined,
-            tint: NoorTint.mint,
-            title: s.manually,
-            subtitle: s.manual_subtitle,
-            onTap: () => setState(() => _source = LocationSource.manual),
-          ),
-          const SizedBox(height: NoorSpace.xxl),
-          NoorButton(
-            label: s.confirm_location,
-            onPressed: _source == null
-                ? null
-                : () => Navigator.of(context).pop(_source),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          s.location_subtitle,
+          style: NoorText.body(context).copyWith(color: context.noor.muted),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: NoorSpace.s4),
+        NoorListGroup(
+          children: [
+            _SourceRow(
+              icon: Iconsax.gps,
+              title: s.gps,
+              subtitle: s.gps_subtitle,
+              selected: _source == LocationSource.gps,
+              onTap: () => setState(() => _source = LocationSource.gps),
+            ),
+            _SourceRow(
+              icon: Iconsax.edit,
+              title: s.manually,
+              subtitle: s.manual_subtitle,
+              selected: _source == LocationSource.manual,
+              onTap: () => setState(() => _source = LocationSource.manual),
+            ),
+          ],
+        ),
+        const SizedBox(height: NoorSpace.s5),
+        NoorButton(
+          label: s.confirm_location,
+          onPressed:
+              _source == null ? null : () => Navigator.of(context).pop(_source),
+        ),
+      ],
     );
   }
 }
 
-class _SourceCard extends StatelessWidget {
-  final LocationSource value;
+class _SourceRow extends StatelessWidget {
   final IconData icon;
-  final NoorTint tint;
   final String title;
   final String subtitle;
+  final bool selected;
   final VoidCallback onTap;
 
-  const _SourceCard({
-    required this.value,
+  const _SourceRow({
     required this.icon,
-    required this.tint,
     required this.title,
     required this.subtitle,
+    required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    return NoorCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(
-        horizontal: NoorSpace.lg,
-        vertical: NoorSpace.md,
-      ),
-      child: Row(
-        children: [
-          IconTile(icon: icon, tint: tint),
-          const SizedBox(width: NoorSpace.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: NoorText.rowTitle(context).copyWith(color: n.ink)),
-                Text(subtitle,
-                    style: NoorText.meta(context).copyWith(color: n.muted)),
-              ],
-            ),
-          ),
-          Radio<LocationSource>(value: value, activeColor: n.primary),
-        ],
+    return Semantics(
+      checked: selected,
+      inMutuallyExclusiveGroup: true,
+      child: NoorListRow(
+        leading: Icon(icon, size: 24, color: n.ink),
+        title: title,
+        meta: subtitle,
+        trailing: NoorRadioMark(selected: selected),
+        onTap: onTap,
+        titleStyle: NoorText.heading(context).copyWith(color: n.ink),
       ),
     );
   }

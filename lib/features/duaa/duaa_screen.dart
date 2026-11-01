@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/features/duaa/adhkar_categories.dart';
 import 'package:noor/features/duaa/adhkar_display_screen.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/features/duaa/data/adhkar_search.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/icon_tile.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/text_normalize.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 class DuaaScreen extends StatefulWidget {
@@ -101,7 +103,10 @@ class _DuaaScreenState extends State<DuaaScreen> {
     return Scaffold(
       backgroundColor: n.paper,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 96),
+        // extendBody: the shell reports the floating nav bar as bottom padding.
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.paddingOf(context).bottom + NoorSpace.s4,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -114,11 +119,12 @@ class _DuaaScreenState extends State<DuaaScreen> {
                 onChanged: _onSearchChanged,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                NoorSpace.xl,
-                NoorSpace.xl,
-                NoorSpace.xl,
+            NoorSettle(
+                child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                NoorLayout.gutter(context),
+                NoorSpace.s4,
+                NoorLayout.gutter(context),
                 0,
               ),
               child: Column(
@@ -126,30 +132,35 @@ class _DuaaScreenState extends State<DuaaScreen> {
                 children: [
                   if (showEmptyState)
                     Padding(
-                      padding: const EdgeInsets.only(top: NoorSpace.xxl),
-                      child: EmptyState(message: s.no_results),
+                      padding: const EdgeInsets.only(top: NoorSpace.s5),
+                      child: EmptyState.noResults(context),
                     )
                   else ...[
-                    for (int i = 0; i < filteredCategories.length; i++) ...[
-                      if (i > 0) const SizedBox(height: NoorSpace.md),
-                      _buildCategoryRow(context, filteredCategories[i], s),
-                    ],
+                    if (filteredCategories.isNotEmpty)
+                      NoorListGroup(
+                        children: [
+                          for (final c in filteredCategories)
+                            _buildCategoryRow(context, c, s),
+                        ],
+                      ),
                     if (isQueryLongEnough && _textHits.isNotEmpty) ...[
-                      const SizedBox(height: NoorSpace.xxl),
+                      const SizedBox(height: NoorSpace.s5),
                       Text(
                         s.in_adhkar_text,
-                        style: NoorText.section(context),
+                        style: NoorText.heading(context),
                       ),
-                      const SizedBox(height: NoorSpace.md),
-                      for (int i = 0; i < _textHits.length; i++) ...[
-                        if (i > 0) const SizedBox(height: NoorSpace.md),
-                        _buildHitRow(context, _textHits[i], s),
-                      ],
+                      const SizedBox(height: NoorSpace.s3),
+                      NoorListGroup(
+                        children: [
+                          for (final hit in _textHits)
+                            _buildHitRow(context, hit, s),
+                        ],
+                      ),
                     ],
                   ],
                 ],
               ),
-            ),
+            )),
           ],
         ),
       ),
@@ -165,11 +176,9 @@ class _DuaaScreenState extends State<DuaaScreen> {
     final metaText = count != null ? s.adhkar_count(count) : null;
 
     return NoorListRow(
-      leading: IconTile(
-        svg: category.svgAsset,
-        tint: category.tint,
-      ),
+      leading: _icon(context, category.svgAsset),
       title: category.title(s),
+      titleMaxLines: 2,
       meta: metaText,
       onTap: () => _openCategory(category),
     );
@@ -184,15 +193,19 @@ class _DuaaScreenState extends State<DuaaScreen> {
     final title = category != null ? category.title(s) : '';
 
     return NoorListRow(
-      leading: category != null
-          ? IconTile(
-              svg: category.svgAsset,
-              tint: category.tint,
-            )
-          : null,
+      leading: category != null ? _icon(context, category.svgAsset) : null,
       title: title,
+      titleMaxLines: 2,
       meta: hit.snippet,
       onTap: () => _openHit(hit),
     );
   }
+
+  // Hilal retires the icon tile: the leading is a bare ink glyph.
+  Widget _icon(BuildContext context, String svg) => SvgPicture.asset(
+        svg,
+        width: 24,
+        height: 24,
+        colorFilter: ColorFilter.mode(context.noor.ink, BlendMode.srcIn),
+      );
 }

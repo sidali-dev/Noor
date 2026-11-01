@@ -10,7 +10,9 @@ import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/generals/widgets/noor_progress_bar.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
 import 'package:noor/generals/widgets/noor_segmented.dart';
@@ -18,6 +20,8 @@ import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
+import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -28,6 +32,7 @@ class QuranScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(QuranScreenController());
     final n = context.noor;
+    final gutter = NoorLayout.gutter(context);
 
     return Scaffold(
       backgroundColor: n.paper,
@@ -52,39 +57,44 @@ class QuranScreen extends StatelessWidget {
                       onChanged: controller.setQuery,
                     ),
                   ),
-                  // Without a last-read page and any dwelled page there is
-                  // nothing to continue from.
-                  if (controller.lastReadPageNumber.value > 1 ||
-                      QuranProgress.readCount > 0) ...[
-                    const SizedBox(height: NoorSpace.lg),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                      child: _buildContinueReadingCard(context, controller),
-                    ),
-                  ],
-                  const SizedBox(height: NoorSpace.lg),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: NoorSpace.xl),
-                    child: NoorSegmented<int>(
-                      items: [
-                        (value: 0, label: S.of(context).surah),
-                        (value: 1, label: S.of(context).hizb),
+                  NoorSettle(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Without a last-read page and any dwelled page there is
+                      // nothing to continue from.
+                      if (controller.lastReadPageNumber.value > 1 ||
+                          QuranProgress.readCount > 0) ...[
+                        const SizedBox(height: NoorSpace.s4),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: gutter),
+                          child: _buildContinueReadingCard(context, controller),
+                        ),
                       ],
-                      value: tabIndex,
-                      onChanged: controller.changeIndex,
-                    ),
-                  ),
-                  const SizedBox(height: NoorSpace.md),
+                      const SizedBox(height: NoorSpace.s5),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: gutter),
+                        child: NoorSegmented<int>(
+                          items: [
+                            (value: 0, label: S.of(context).surah),
+                            (value: 1, label: S.of(context).hizb),
+                          ],
+                          value: tabIndex,
+                          onChanged: controller.changeIndex,
+                        ),
+                      ),
+                      const SizedBox(height: NoorSpace.s4),
+                    ],
+                  )),
                 ],
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.only(
-                left: NoorSpace.xl,
-                right: NoorSpace.xl,
-                bottom: 96,
+              // extendBody: the shell reports the floating nav bar as bottom padding.
+              padding: EdgeInsets.only(
+                left: gutter,
+                right: gutter,
+                bottom: MediaQuery.paddingOf(context).bottom + NoorSpace.s4,
               ),
               sliver: tabIndex == 0
                   ? _buildSurahList(context, controller)
@@ -109,37 +119,56 @@ class QuranScreen extends StatelessWidget {
     final overallFraction = QuranProgress.overallFraction;
 
     return NoorCard(
-      padding: const EdgeInsets.all(NoorSpace.lg),
+      padding: const EdgeInsets.all(NoorSpace.s4),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Text(S.of(context).last_read, style: NoorText.meta(context)),
-              const Spacer(),
-              TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: n.muted,
-                  minimumSize: const Size(48, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: NoorSpace.sm),
-                ),
-                onPressed: () => _showResetProgressSheet(context, controller),
+              Expanded(
                 child: Text(
-                  S.of(context).reset_progress,
-                  style: NoorText.meta(context),
+                  S.of(context).last_read,
+                  style: NoorText.bodySm(context),
+                ),
+              ),
+              Flexible(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: n.muted,
+                    minimumSize: const Size(48, 48),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: NoorSpace.s2),
+                  ),
+                  onPressed: () => _showResetProgressSheet(context, controller),
+                  child: Text(
+                    S.of(context).reset_progress,
+                    textAlign: TextAlign.end,
+                    style: NoorText.bodySm(context).copyWith(
+                      decoration: TextDecoration.underline,
+                      decorationColor: n.muted,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-          Text(subtitle, style: NoorText.rowTitle(context)),
-          const SizedBox(height: NoorSpace.xs),
-          Text(
-            S.of(context).pages_read(readCount, 604),
-            style: NoorText.meta(context),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(subtitle, style: NoorText.heading(context)),
+              ),
+              const SizedBox(width: NoorSpace.s3),
+              Text(
+                S.of(context).pages_read(readCount, 604),
+                style: NoorText.bodySm(context),
+              ),
+            ],
           ),
-          const SizedBox(height: NoorSpace.md),
-          NoorProgressBar(value: overallFraction, height: 6),
-          const SizedBox(height: NoorSpace.lg),
+          const SizedBox(height: NoorSpace.s3),
+          NoorProgressBar(value: overallFraction, showPercent: false),
+          const SizedBox(height: NoorSpace.s4),
           Row(
             children: [
               Expanded(
@@ -152,23 +181,20 @@ class QuranScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(width: NoorSpace.sm),
+              const SizedBox(width: NoorSpace.s2),
               Tooltip(
                 message: S.of(context).bookmarks,
-                child: Material(
-                  color: n.tintBg(NoorTint.sage),
-                  borderRadius: BorderRadius.circular(NoorRadius.tile),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(NoorRadius.tile),
-                    onTap: () => showBookmarksSheet(context),
-                    child: SizedBox(
-                      width: 52,
-                      height: 52,
-                      child: Icon(
-                        Icons.bookmark_rounded,
-                        color: n.isDark ? n.ink : n.primary,
-                        size: 24,
-                      ),
+                child: NoorPressable(
+                  onPressed: () => showBookmarksSheet(context),
+                  radius: NoorRadius.md,
+                  builder: (context, pressed) => DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(NoorRadius.md),
+                      border: Border.all(color: n.lineStrong),
+                    ),
+                    child: const SizedBox.square(
+                      dimension: 52,
+                      child: Center(child: NoorIcon(NoorGlyph.bookmark)),
                     ),
                   ),
                 ),
@@ -194,7 +220,7 @@ class QuranScreen extends StatelessWidget {
             style: NoorText.body(sheetContext),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: NoorSpace.xl),
+          const SizedBox(height: NoorSpace.s4),
           NoorButton(
             label: S.of(sheetContext).confirm,
             onPressed: () async {
@@ -204,7 +230,7 @@ class QuranScreen extends StatelessWidget {
             },
             variant: NoorButtonVariant.danger,
           ),
-          const SizedBox(height: NoorSpace.sm),
+          const SizedBox(height: NoorSpace.s2),
           NoorButton(
             label: S.of(sheetContext).cancel,
             onPressed: () => Navigator.of(sheetContext).pop(),
@@ -221,26 +247,24 @@ class QuranScreen extends StatelessWidget {
     if (surahs.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: NoorSpace.xxl),
-          child: EmptyState(message: S.of(context).no_results),
+          padding: const EdgeInsets.symmetric(vertical: NoorSpace.s5),
+          child: EmptyState.noResults(context),
         ),
       );
     }
-    return SliverList.builder(
+    return NoorListGroup.sliver(
+      context,
       itemCount: surahs.length,
       itemBuilder: (context, index) {
         final surahNumber = surahs[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: NoorSpace.md),
-          child: SurahLine(
-            number: surahNumber,
-            onTap: () {
-              final firstPage = quran.getSurahPages(surahNumber).first;
-              AppPrefs.setLastReadPage(firstPage);
-              controller.refreshProgress();
-              Get.to(() => ReadQuranScreen(pageIndex: firstPage - 1));
-            },
-          ),
+        return SurahLine(
+          number: surahNumber,
+          onTap: () {
+            final firstPage = quran.getSurahPages(surahNumber).first;
+            AppPrefs.setLastReadPage(firstPage);
+            controller.refreshProgress();
+            Get.to(() => ReadQuranScreen(pageIndex: firstPage - 1));
+          },
         );
       },
     );
@@ -252,46 +276,36 @@ class QuranScreen extends StatelessWidget {
     if (hizbs.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: NoorSpace.xxl),
-          child: EmptyState(message: S.of(context).no_results),
+          padding: const EdgeInsets.symmetric(vertical: NoorSpace.s5),
+          child: EmptyState.noResults(context),
         ),
       );
     }
-    return SliverList.builder(
+    return NoorListGroup.sliver(
+      context,
       itemCount: hizbs.length,
       itemBuilder: (context, index) {
         final hizbNumber = hizbs[index];
         final startPage = hizbStartPage(hizbNumber);
-        final leading = Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: context.noor.tintBg(NoorTint.sage),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            hizbNumber.toString(),
-            style: NoorText.numeral(
-              context,
-              size: 16,
-              color: context.noor.ink,
+
+        return NoorListRow(
+          leading: SizedBox(
+            width: NoorSpace.s6,
+            child: Text(
+              '$hizbNumber',
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.ltr,
+              style: NoorText.numeral(context,
+                  size: 16, color: context.noor.muted),
             ),
           ),
-        );
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: NoorSpace.md),
-          child: NoorListRow(
-            leading: leading,
-            title: "${S.of(context).hizb} $hizbNumber",
-            meta: "${S.of(context).page} $startPage",
-            onTap: () {
-              AppPrefs.setLastReadPage(startPage);
-              controller.refreshProgress();
-              Get.to(() => ReadQuranScreen(pageIndex: startPage - 1));
-            },
-          ),
+          title: "${S.of(context).hizb} $hizbNumber",
+          meta: "${S.of(context).page} $startPage",
+          onTap: () {
+            AppPrefs.setLastReadPage(startPage);
+            controller.refreshProgress();
+            Get.to(() => ReadQuranScreen(pageIndex: startPage - 1));
+          },
         );
       },
     );

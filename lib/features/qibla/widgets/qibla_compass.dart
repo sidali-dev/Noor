@@ -2,16 +2,22 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_star_badge.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
-// Sizes below are drawn for a 300 dp dial (radius 150) and scaled by
-// radius / 150, so the dial reads the same when it shrinks.
-const double _designRadius = 150;
+// Hilal draws the dial in a 300 unit box shown at 280 dp. Shapes in box units
+// scale by size / 300; the paper layers are in dp and scale by size / 280.
+const double _box = 300;
+const double _maxSize = 280;
 
-/// A compass with a green pointer on the qibla. The dial turns with the phone
-/// so N stays north; the pointer is the one signal. Turn until it meets the
-/// gold tick at the top: the ring then glows gold and the phone vibrates once.
+/// A compass cut from paper: a raised disc around a sunken well, the dial
+/// (72 ticks, a long one every 15 degrees, N/E/S/W in the display face) and a
+/// `window` hub. The dial turns with the phone so N stays north; the brass
+/// arrow and star are the one signal. Turn until the arrow meets the fixed
+/// heading tick at the top: the rim ring then turns brass with a soft halo and
+/// the phone vibrates once.
 ///
 /// [direction] is the phone's heading and [qiblah] is heading minus the qibla
 /// bearing, both in degrees (`flutter_qiblah`), so `-qiblah` is where the
@@ -75,12 +81,18 @@ class _QiblaCompassState extends State<QiblaCompass> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Up to 300 dp, shrinking to whatever width and height are left.
+        // Up to 280 dp, shrinking to whatever width and height are left.
         final double size = math.min(
           math.min(constraints.maxWidth, constraints.maxHeight),
-          300.0,
+          _maxSize,
         );
-        final double s = size / 2 / _designRadius;
+        final double k = size / _maxSize;
+        final Size box = Size(size, size);
+        final letter = NoorText.numeral(
+          context,
+          size: math.max(12.0, 16.0 * k),
+          color: n.muted,
+        );
 
         return Semantics(
           container: true,
@@ -92,55 +104,90 @@ class _QiblaCompassState extends State<QiblaCompass> {
               height: size,
               child: Stack(
                 alignment: Alignment.center,
+                clipBehavior: Clip.none,
                 children: [
+                  // The disc and the well are circles, so they never turn.
+                  SizedBox.square(
+                    dimension: size,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: n.card,
+                        shape: BoxShape.circle,
+                        boxShadow: n.shadow3,
+                      ),
+                    ),
+                  ),
+                  CustomPaint(
+                    size: box,
+                    painter: _WellPainter(
+                      fill: n.surfaceSunken,
+                      shadow: n.inset.first,
+                      inset: 13 * k,
+                    ),
+                  ),
                   // The dial is painted once; turning it only moves the layer.
                   Transform.rotate(
                     angle: -_rad(direction),
                     child: RepaintBoundary(
                       child: CustomPaint(
-                        size: Size(size, size),
+                        size: box,
                         painter: _DialPainter(
-                          noor: n,
-                          letters: NoorText.numeral(
-                            context,
-                            size: math.max(12.0, 16.0 * s),
-                            color: n.ink,
-                          ),
+                          tick: n.lineStrong,
+                          letter: letter,
+                          north: letter.copyWith(color: n.danger),
                         ),
                       ),
                     ),
                   ),
-                  // Gold glow on the ring while aligned. Circles look the same
-                  // at any heading, so this layer never rotates.
+                  // The rim ring: a `line` hairline that turns brass with a
+                  // soft halo while aligned. A circle looks the same at any
+                  // heading, so this layer never rotates.
                   TweenAnimationBuilder<double>(
                     tween: Tween(end: _aligned ? 1.0 : 0.0),
                     duration: MediaQuery.disableAnimationsOf(context)
                         ? Duration.zero
-                        : const Duration(milliseconds: 250),
+                        : const Duration(milliseconds: 220),
                     curve: Curves.easeOutCubic,
-                    builder: (context, t, _) => t == 0
-                        ? const SizedBox.shrink()
-                        : CustomPaint(
-                            size: Size(size, size),
-                            painter: _GlowPainter(color: n.gold, t: t),
-                          ),
+                    builder: (context, t, _) => CustomPaint(
+                      size: box,
+                      painter: _RingPainter(
+                        rest: n.line,
+                        brass: n.brass,
+                        t: t,
+                      ),
+                    ),
                   ),
                   Transform.rotate(
                     angle: -_rad(qiblah),
                     child: CustomPaint(
-                      size: Size(size, size),
-                      painter: _PointerPainter(noor: n),
+                      size: box,
+                      painter: _ArrowPainter(color: n.brass),
                     ),
                   ),
-                  // Fixed gold tick: the top of the phone.
-                  Positioned(
-                    top: 0,
-                    child: Container(
-                      width: 2.5,
-                      height: 16 * s + 4,
+                  // Fixed heading tick: the top of the phone.
+                  CustomPaint(size: box, painter: _HeadingPainter(n.ink)),
+                  SizedBox.square(
+                    dimension: 84 * k,
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: n.gold,
-                        borderRadius: BorderRadius.circular(1.25),
+                        color: n.window,
+                        shape: BoxShape.circle,
+                        boxShadow: n.shadow2,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: n.card, width: 4 * k),
+                        ),
+                        child: Center(
+                          child: ExcludeSemantics(
+                            child: NoorIcon(
+                              NoorGlyph.moon,
+                              color: n.onWindow,
+                              size: 30 * k,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -154,192 +201,201 @@ class _QiblaCompassState extends State<QiblaCompass> {
   }
 }
 
-/// A four-point kite star: tips at [long] on the axes, base [half] wide.
-Path _star(Offset c, double long, double half, double rot) {
-  final p = Path();
-  for (int i = 0; i < 4; i++) {
-    final a = rot + i * math.pi / 2;
-    Offset at(double r, double da) =>
-        Offset(c.dx + r * math.sin(a + da), c.dy - r * math.cos(a + da));
-    p
-      ..moveTo(c.dx, c.dy)
-      ..lineTo(at(half, -math.pi / 4).dx, at(half, -math.pi / 4).dy)
-      ..lineTo(at(long, 0).dx, at(long, 0).dy)
-      ..lineTo(at(half, math.pi / 4).dx, at(half, math.pi / 4).dy)
-      ..close();
-  }
-  return p;
-}
+/// The well cut into the disc: `surface-sunken` with `shadow-inset`. A
+/// [BoxDecoration] cannot paint a shadow inside its box, so the shadow of a
+/// hole the shape of the well is drawn clipped to the well.
+class _WellPainter extends CustomPainter {
+  final Color fill;
+  final BoxShadow shadow;
+  final double inset;
 
-class _DialPainter extends CustomPainter {
-  final NoorColors noor;
-  final TextStyle letters;
-
-  const _DialPainter({required this.noor, required this.letters});
+  const _WellPainter({
+    required this.fill,
+    required this.shadow,
+    required this.inset,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset c = size.center(Offset.zero);
-    final double radius = size.width / 2;
-    final double s = radius / _designRadius;
-    final double ring = radius * 0.88;
+    final double r = size.width / 2 - inset;
+    canvas.drawCircle(c, r, Paint()..color = fill);
 
-    // Cream face with a hairline edge, then the primary ring.
-    canvas.drawCircle(c, radius * 0.98, Paint()..color = noor.card);
-    canvas.drawCircle(
-      c,
-      radius * 0.98,
+    canvas.save();
+    canvas.clipPath(Path()..addOval(Rect.fromCircle(center: c, radius: r)));
+    canvas.drawPath(
+      Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(Offset.zero & size)
+        ..addOval(Rect.fromCircle(center: c + shadow.offset, radius: r)),
       Paint()
-        ..color = noor.line
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
+        ..color = shadow.color
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadow.blurSigma),
     );
-    canvas.drawCircle(
-      c,
-      ring,
-      Paint()
-        ..color = noor.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
+    canvas.restore();
+  }
 
-    // Short gold ticks every 15 degrees; the cardinals get a marker instead.
-    final tick = Paint()
-      ..color = noor.gold
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
-    final marker = Paint()..color = noor.gold;
-    for (int i = 0; i < 24; i++) {
-      final double a = i * math.pi / 12 - math.pi / 2;
+  @override
+  bool shouldRepaint(covariant _WellPainter old) =>
+      old.fill != fill || old.shadow != shadow || old.inset != inset;
+}
+
+/// 72 ticks with a long one every 15 degrees, and N/E/S/W inside them.
+class _DialPainter extends CustomPainter {
+  final Color tick;
+  final TextStyle letter;
+  final TextStyle north;
+
+  const _DialPainter({
+    required this.tick,
+    required this.letter,
+    required this.north,
+  });
+
+  static const int _ticks = 72;
+  static const int _majorEvery = 3;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset c = size.center(Offset.zero);
+    final double s = size.width / _box;
+    final double k = size.width / _maxSize;
+
+    for (int i = 0; i < _ticks; i++) {
+      final bool major = i % _majorEvery == 0;
+      final double a = i * 2 * math.pi / _ticks - math.pi / 2;
       final Offset d = Offset(math.cos(a), math.sin(a));
-      if (i % 6 == 0) {
-        // Kite straddling the ring, apex inward.
-        final Offset perp = Offset(-d.dy, d.dx);
-        canvas.drawPath(
-          Path()
-            ..moveTo(
-                c.dx + d.dx * (ring - 14 * s), c.dy + d.dy * (ring - 14 * s))
-            ..lineTo(c.dx + d.dx * (ring + 6 * s) + perp.dx * 4 * s,
-                c.dy + d.dy * (ring + 6 * s) + perp.dy * 4 * s)
-            ..lineTo(c.dx + d.dx * (ring + 6 * s) - perp.dx * 4 * s,
-                c.dy + d.dy * (ring + 6 * s) - perp.dy * 4 * s)
-            ..close(),
-          marker,
-        );
-      } else {
-        canvas.drawLine(c + d * ring, c + d * (ring - 7 * s), tick);
-      }
+      canvas.drawLine(
+        c + d * (major ? 128 : 122) * s,
+        c + d * 116 * s,
+        Paint()
+          ..color = tick
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = (major ? 2 : 1) * k,
+      );
     }
 
-    // N/E/S/W just inside the markers.
     const names = [('N', 0.0), ('E', 90.0), ('S', 180.0), ('W', 270.0)];
-    final double letterRadius = ring - 32 * s;
-    for (final (letter, deg) in names) {
+    for (final (name, deg) in names) {
       final double a = (deg - 90.0) * math.pi / 180.0;
       final tp = TextPainter(
-        text: TextSpan(text: letter, style: letters),
+        text: TextSpan(text: name, style: deg == 0 ? north : letter),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(
         canvas,
         c +
-            Offset(math.cos(a), math.sin(a)) * letterRadius -
+            Offset(math.cos(a), math.sin(a)) * 92 * s -
             Offset(tp.width / 2, tp.height / 2),
       );
     }
-
-    // 8-point rose, kept quiet so the pointer is the signal: soft gold
-    // diagonals under pale cardinals.
-    canvas.drawPath(
-      _star(c, 60 * s, 11 * s, math.pi / 4),
-      Paint()..color = noor.gold.withValues(alpha: 0.6),
-    );
-    canvas.drawPath(
-      _star(c, 84 * s, 13 * s, 0),
-      Paint()..color = Color.lerp(noor.card, noor.ink, 0.18)!,
-    );
   }
 
   @override
   bool shouldRepaint(covariant _DialPainter old) =>
-      old.noor != noor || old.letters != letters;
+      old.tick != tick || old.letter != letter || old.north != north;
 }
 
-/// The ring turned gold, with a soft blurred halo on both sides of it. Stays
-/// inside the dial face, so a clipping parent can't cut it.
-class _GlowPainter extends CustomPainter {
-  final Color color;
+/// The ring on the disc's rim. At [t] 0 a `line` hairline; at 1 a brass ring
+/// with a soft blurred halo, the only blur on the screen.
+class _RingPainter extends CustomPainter {
+  final Color rest;
+  final Color brass;
   final double t;
 
-  const _GlowPainter({required this.color, required this.t});
+  const _RingPainter({
+    required this.rest,
+    required this.brass,
+    required this.t,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset c = size.center(Offset.zero);
-    final double radius = size.width / 2;
-    final double s = radius / _designRadius;
-    final double ring = radius * 0.88;
+    final double k = size.width / _maxSize;
+    // Mid-way along the 13 dp paper rim, so the halo stays on the disc.
+    final double r = size.width / 2 - 6.5 * k;
 
+    if (t > 0) {
+      canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..color = brass.withValues(alpha: 0.5 * t)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6 * k
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4 * k),
+      );
+    }
     canvas.drawCircle(
       c,
-      ring,
+      r,
       Paint()
-        ..color = color.withValues(alpha: 0.55 * t)
+        ..color = Color.lerp(rest, brass, t)!
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 8 * s
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * s),
-    );
-    canvas.drawCircle(
-      c,
-      ring,
-      Paint()
-        ..color = color.withValues(alpha: t)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0,
+        ..strokeWidth = (1 + t) * k,
     );
   }
 
   @override
-  bool shouldRepaint(covariant _GlowPainter old) =>
-      old.t != t || old.color != color;
+  bool shouldRepaint(covariant _RingPainter old) =>
+      old.t != t || old.rest != rest || old.brass != brass;
 }
 
-/// Two-tone kite pointer and hub, drawn pointing at 12.
-class _PointerPainter extends CustomPainter {
-  final NoorColors noor;
+/// The brass arrow to the qibla, drawn pointing at 12, with the brass star
+/// where it meets the ticks.
+class _ArrowPainter extends CustomPainter {
+  final Color color;
 
-  const _PointerPainter({required this.noor});
+  const _ArrowPainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset c = size.center(Offset.zero);
-    final double s = size.width / 2 / _designRadius;
+    final double s = size.width / _box;
+    final double k = size.width / _maxSize;
 
-    Path half(double sign) => Path()
-      ..moveTo(c.dx, c.dy - 86 * s)
-      ..lineTo(c.dx + sign * 21 * s, c.dy)
-      ..lineTo(c.dx, c.dy + 18 * s)
-      ..close();
-
-    canvas.drawPath(half(-1), Paint()..color = noor.primary);
     canvas.drawPath(
-      half(1),
-      Paint()..color = Color.lerp(noor.primary, noor.card, 0.4)!,
+      Path()
+        ..moveTo(c.dx, c.dy - 80 * s)
+        ..lineTo(c.dx + 12 * s, c.dy)
+        ..lineTo(c.dx, c.dy - 8 * s)
+        ..lineTo(c.dx - 12 * s, c.dy)
+        ..close(),
+      Paint()..color = color,
     );
-
-    canvas.drawCircle(c, 9 * s, Paint()..color = noor.card);
-    canvas.drawCircle(
-      c,
-      9 * s,
-      Paint()
-        ..color = noor.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+    canvas.drawPath(
+      noorStarPath(Offset(c.dx, c.dy - 128 * s), 9 * k),
+      Paint()..color = color,
     );
-    canvas.drawCircle(c, 2.5 * s, Paint()..color = noor.primary);
   }
 
   @override
-  bool shouldRepaint(covariant _PointerPainter old) => old.noor != noor;
+  bool shouldRepaint(covariant _ArrowPainter old) => old.color != color;
+}
+
+/// The fixed ink tick at the top of the dial: where the phone points.
+class _HeadingPainter extends CustomPainter {
+  final Color color;
+
+  const _HeadingPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double s = size.width / _box;
+    final double x = size.width / 2;
+
+    canvas.drawPath(
+      Path()
+        ..moveTo(x, 6 * s)
+        ..lineTo(x + 8 * s, 20 * s)
+        ..lineTo(x - 8 * s, 20 * s)
+        ..close(),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeadingPainter old) => old.color != color;
 }

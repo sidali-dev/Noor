@@ -57,7 +57,9 @@ class SBottomNavigation extends StatelessWidget {
           children: [
             for (var k = 0; k < tabs.length; k++)
               controller.visited.contains(k) && (k != 3 || k == i)
-                  ? tabs[k]
+                  // IndexedStack keeps hidden tabs alive but still ticking;
+                  // only the shown tab may run animations.
+                  ? TickerMode(enabled: k == i, child: tabs[k])
                   : const SizedBox.shrink(),
           ],
         );

@@ -34,21 +34,21 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: NoorSpace.sm),
+        const SizedBox(height: NoorSpace.s2),
         CSCPickerPlus(
           flagState: CountryFlag.DISABLE,
           layout: Layout.vertical,
           dropdownDecoration: BoxDecoration(
             color: n.card,
-            borderRadius: BorderRadius.circular(NoorRadius.input),
+            borderRadius: BorderRadius.circular(NoorRadius.md),
             border: Border.all(color: n.line, width: 1.2),
           ),
           disabledDropdownDecoration: BoxDecoration(
             color: n.isDark ? n.paper : n.line.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(NoorRadius.input),
+            borderRadius: BorderRadius.circular(NoorRadius.md),
             border: Border.all(color: n.line.withValues(alpha: 0.5), width: 1),
           ),
-          dropdownHeadingStyle: NoorText.rowTitle(context).copyWith(
+          dropdownHeadingStyle: NoorText.heading(context).copyWith(
             color: n.ink,
           ),
           dropdownItemStyle: NoorText.body(context).copyWith(
@@ -82,7 +82,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
             });
           },
         ),
-        const SizedBox(height: NoorSpace.xl),
+        const SizedBox(height: NoorSpace.s4),
         Row(
           children: [
             Expanded(
@@ -94,7 +94,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                 },
               ),
             ),
-            const SizedBox(width: NoorSpace.md),
+            const SizedBox(width: NoorSpace.s3),
             Expanded(
               child: NoorButton(
                 label: s.confirm,
@@ -121,7 +121,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
             ),
           ],
         ),
-        const SizedBox(height: NoorSpace.sm),
+        const SizedBox(height: NoorSpace.s2),
       ],
     );
   }

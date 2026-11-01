@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/generals/widgets/noor_radio.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/sound_string.dart';
@@ -84,31 +87,23 @@ class _SoundPickerSheetState extends State<SoundPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return RadioGroup<String>(
-      groupValue: _selected,
-      onChanged: (v) {
-        if (v == null || v == _selected) return;
-        _sound.stopPreview();
-        setState(() => _selected = v);
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final o in kAdhanSoundOptions)
-            _SoundRow(
-              option: o,
-              selected: o.path == _selected,
-              onTap: () {
-                if (o.path == _selected) return;
-                _sound.stopPreview();
-                setState(() => _selected = o.path);
-              },
-            ),
-          const SizedBox(height: NoorSpace.xl),
-          NoorButton(label: S.of(context).save, onPressed: _save),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final o in kAdhanSoundOptions)
+          _SoundRow(
+            option: o,
+            selected: o.path == _selected,
+            onTap: () {
+              if (o.path == _selected) return;
+              _sound.stopPreview();
+              setState(() => _selected = o.path);
+            },
+          ),
+        const SizedBox(height: NoorSpace.s4),
+        NoorButton(label: S.of(context).save, onPressed: _save),
+      ],
     );
   }
 }
@@ -129,41 +124,47 @@ class _SoundRow extends StatelessWidget {
     final n = context.noor;
     final sound = Get.find<SoundPickerController>();
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(NoorRadius.tile),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 56),
-        child: Row(
-          children: [
-            Radio<String>(value: option.path, activeColor: n.primary),
-            Expanded(
-              child: Text(
-                option.titleBuilder(context),
-                style: NoorText.rowTitle(context).copyWith(
-                  color: selected ? n.ink : n.body,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+    // Brass is the radio alone; the play disc is a sunken, ink-glyph control.
+    return Semantics(
+      checked: selected,
+      inMutuallyExclusiveGroup: true,
+      child: NoorPressable(
+        onPressed: onTap,
+        radius: NoorRadius.md,
+        builder: (context, pressed) => ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Row(
+            children: [
+              const SizedBox(width: NoorSpace.s2),
+              NoorRadioMark(selected: selected),
+              const SizedBox(width: NoorSpace.s3),
+              Expanded(
+                child: Text(
+                  option.titleBuilder(context),
+                  style: NoorText.heading(context).copyWith(
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            if (selected)
-              Obx(() {
-                final playing = sound.playingPath.value == option.path;
-                return IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: n.tintBg(NoorTint.sage),
-                    minimumSize: const Size(48, 48),
-                  ),
-                  icon: Icon(
-                    playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                    color: n.primary,
-                  ),
-                  onPressed: () => sound.togglePreview(option.path),
-                );
-              }),
-          ],
+              if (selected)
+                Obx(() {
+                  final playing = sound.playingPath.value == option.path;
+                  return IconButton(
+                    style: IconButton.styleFrom(
+                      backgroundColor: n.surfaceSunken,
+                      minimumSize: const Size(48, 48),
+                    ),
+                    icon: Icon(
+                      playing ? Iconsax.stop : Iconsax.play,
+                      color: n.ink,
+                    ),
+                    onPressed: () => sound.togglePreview(option.path),
+                  );
+                }),
+            ],
+          ),
         ),
       ),
     );
