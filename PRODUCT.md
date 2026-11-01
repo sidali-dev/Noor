@@ -14,16 +14,16 @@ Noor puts a Muslim's daily worship in one calm, offline-friendly app: adhan alar
 
 ## Capabilities and Constraints
 - Prayer times come from the aladhan.com calendar API and are cached per year in shared preferences. Adhan and reminder alarms use the `alarm` plugin; a Workmanager task reschedules them every 12 hours. Alarm IDs and preference keys are persisted and must not change.
-- Adhkar content lives in the bundled `assets/noor.db` (SQLite). Quran text comes from the `quran` package, rendered with the bundled Quran font.
-- Three languages (ar, fr, en) through generated `S` localisations; light and dark themes.
+- Adhkar content lives in the bundled `assets/data/adhkar.json`. Quran text comes from the `quran` package, rendered with the bundled Quran font.
+- Three languages (ar, fr, en) through generated `S` localisations; Paper (light) and Night (dark) themes.
 - Qibla needs location permission, GPS and a compass sensor.
 - No account, no analytics, no ads.
 
 ## Brand Commitments
-Name: Noor Imene (نور الإيمان, "light of faith"). Brand mark: the arch-and-book emblem for the app icon and the custom splash; the small star mark beside the serif wordmark "Noor Imene" in screen headers. The Dart package name `noor` and the application id `com.sidalidev.noor` stay unchanged. References that are binding: `assets/screens/screens.png`, `assets/screens/splash.png` and `assets/screens/splash_dark.png`.
+Name: Faith (the Arabic name stays نور الإيمان, "light of faith"). Design system: Hilal, in cut paper. Surfaces are layered sheets of paper lifted by shadow; hierarchy comes from that layering, not from colour, borders or gradients. Two themes: Paper (light, cool card-stock) and Night (dark, a near-black ground with the same layering). A "window" is the night sky seen through a cut-out; it is always framed by raised paper, and in Night its buttons and tabs invert to moon-white. Brass is the single warm accent and means the one current thing (the next prayer, the place you left off, the qibla); it appears at most once per region. Brand mark: the new Faith logo in `hilal-design-system/assets/Logos/` (Paper and Night lockups, mark, app icon), for the app icon, the splash and the Prayers hero. The old teal-mint emblem and its gradient are retired. Type: Cormorant Garamond and Jost for Latin, Amiri for all Arabic; Western digits 0–9 in every locale. The contract is in `design.md`. The Dart package name `noor` and the application id `com.sidalidev.noor` stay unchanged.
 
 ## Evidence on Hand
-Three reference screens (Adhkar, Qibla, Quran) in `assets/screens/`. Reading progress, search and compass calibration are new features: progress is computed only from pages the user actually dwelled on, search runs over real adhkar and surah data, and the calibration sheet guides the user but never claims to calibrate the sensor. None of these may show invented numbers.
+Reading progress, search and compass calibration are new features: progress is computed only from pages the user actually dwelled on, search runs over real adhkar and surah data, and the calibration sheet guides the user but never claims to calibrate the sensor. None of these may show invented numbers.
 
 ## Product Principles
 1. Calm over clever: nothing flashes, nothing competes with the text of worship.

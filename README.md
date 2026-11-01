@@ -1,4 +1,4 @@
-# Noor Imene (نور إيمان)
+# Faith (نور الإيمان)
 
 Prayer times with adhan alarms, the Mushaf by page, adhkar with a repetition counter, and a qibla compass. Arabic, French and English; light and dark.
 
