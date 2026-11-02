@@ -10,12 +10,18 @@ import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
+import 'package:noor/features/adhan/widgets/adhan_reminders_sheet.dart';
+import 'package:noor/features/adhan/widgets/next_prayer_card.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_sheet.dart';
 import 'package:noor/generals/controllers/localization_controller.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
 import 'package:noor/generals/controllers/theme_controller.dart';
+import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generals/widgets/noor_sheet.dart';
+import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/sound_string.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
@@ -27,6 +33,7 @@ Widget _buildTestApp({
   required Widget child,
   Locale locale = const Locale('en'),
   double scale = 1.0,
+  bool reduceMotion = true,
 }) {
   return GetMaterialApp(
     theme: NoorTheme.light(),
@@ -41,7 +48,7 @@ Widget _buildTestApp({
     builder: (context, app) => MediaQuery(
       // Reduce Motion: the hero's star twinkle loops and would hang pumpAndSettle.
       data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(scale), disableAnimations: true),
+          textScaler: TextScaler.linear(scale), disableAnimations: reduceMotion),
       child: app!,
     ),
     home: Scaffold(
@@ -79,7 +86,7 @@ Map<String, dynamic> _createMockCalendarData(int year,
           'hijri': {
             'date': '${(i % 29) + 1}-07-1448',
             'weekday': {'en': 'Al Ithnin', 'ar': 'الاثنين'},
-            if (hijriMonth) 'month': {'number': 7, 'en': 'Rajab', 'ar': 'رجب'},
+            if (hijriMonth) 'month': {'number': 7, 'en': 'Rajāb', 'ar': 'رجب'},
           },
         },
       };
@@ -91,6 +98,20 @@ Map<String, dynamic> _createMockCalendarData(int year,
     'status': 'OK',
     'data': dataJson,
   };
+}
+
+TextEditingController _reminderField(WidgetTester tester) =>
+    tester.widget<TextField>(find.byType(TextField)).controller!;
+
+Future<AdhanController> _loadCalendar(DateTime now) async {
+  final mockJson = _createMockCalendarData(now.year);
+  await AppPrefs.setLocation('Algeria', 'Algiers', 'Algiers');
+  await AppPrefs.setPrayerYearJson(now.year, jsonEncode(mockJson));
+  final controller = Get.find<AdhanController>();
+  controller.locationController.country.value = 'Algeria';
+  controller.locationController.city.value = 'Algiers';
+  controller.prayerTime.value = PrayerTime.fromJson(mockJson);
+  return controller;
 }
 
 void main() {
@@ -169,7 +190,14 @@ void main() {
     // The six rows share one paper list, and the next prayer has its card.
     expect(find.byType(NoorListGroup), findsOneWidget);
     expect(find.byType(AdhanLine), findsNWidgets(6));
-    expect(find.textContaining('Next · '), findsOneWidget);
+    expect(find.byType(NextPrayerCard), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.textContaining(' in '),
+      ),
+      findsOneWidget,
+    );
 
     // Today's Hijri date sits under the day title.
     expect(find.text('Today'), findsOneWidget);
@@ -211,7 +239,7 @@ void main() {
   });
 
   for (final locale in const [Locale('en'), Locale('fr'), Locale('ar')]) {
-    testWidgets('AdhanLine and its editor fit 320 dp at 200%: $locale',
+    testWidgets('AdhanLine and its reminders sheet fit 320 dp at 200%: $locale',
         (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;
@@ -236,8 +264,7 @@ void main() {
     });
   }
 
-  testWidgets('AdhanLine expands on tap to show reminder options',
-      (tester) async {
+  testWidgets('AdhanLine opens a sheet to set a new alarm', (tester) async {
     await tester.pumpWidget(
       _buildTestApp(
         child: const AdhanLine(
@@ -248,13 +275,178 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Set new alarm'), findsNothing);
+    expect(find.byType(NoorSheet), findsNothing);
 
-    // Tap to expand
     await tester.tap(find.text('Fajr'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(NoorSheet), findsOneWidget);
     expect(find.text('Set new alarm'), findsOneWidget);
+    expect(find.text('min after adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '10');
+  });
+
+  testWidgets('Tapping the day opens a calendar that picks the date',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime.now();
+    final controller = await _loadCalendar(now);
+
+    await tester.pumpWidget(_buildTestApp(child: const AdhanScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Today'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
+
+    final day = now.day == 15 ? 16 : 15;
+    await tester.tap(find.text('$day'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CalendarDatePicker), findsNothing);
+    expect(controller.date.value, DateTime(now.year, now.month, day));
+    expect(find.byType(NextPrayerCard), findsNothing);
+  });
+
+  testWidgets('The next prayer card animates out when leaving today',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime.now();
+    final controller = await _loadCalendar(now);
+
+    await tester.pumpWidget(
+        _buildTestApp(child: const AdhanScreen(), reduceMotion: false));
+    await tester.pump(const Duration(milliseconds: 300));
+    final before = tester.getTopLeft(find.byType(NoorWell).first).dy;
+
+    controller.date.value =
+        DateTime(now.year, now.month, now.day == 1 ? 2 : now.day - 1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final mid = tester.getTopLeft(find.byType(NoorWell).first).dy;
+    expect(find.byType(NextPrayerCard), findsOneWidget);
+    expect(mid, lessThan(before));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.byType(NextPrayerCard), findsNothing);
+    expect(tester.getTopLeft(find.byType(NoorWell).first).dy, lessThan(mid));
+  });
+
+  test('The day arrows move by calendar day from local midnight', () {
+    final controller = Get.find<AdhanController>();
+    for (var day = 1; day <= 365; day++) {
+      final midnight = DateTime(2026, 1, day);
+      controller.date.value = midnight;
+      controller.incrementDay();
+      expect(controller.date.value, DateTime(2026, 1, day + 1));
+      controller.decrementDay();
+      expect(controller.date.value, midnight);
+    }
+  });
+
+  testWidgets('Reminder field takes a typed value and a direction',
+      (tester) async {
+    await tester.pumpWidget(_buildTestApp(
+      child: const AdhanRemindersSheet(prayer: Prayer.fajr, time: '05:00'),
+    ));
+    await tester.pumpAndSettle();
+    final field = find.byType(TextField);
+    NoorButton button() =>
+        tester.widget<NoorButton>(find.widgetWithText(NoorButton, 'Set new alarm'));
+
+    // The words open the field too.
+    await tester.tap(find.text('min after adhan'));
+    await tester.pump();
+    expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+
+    // A bare number keeps the direction; a minus means before.
+    await tester.enterText(field, '15');
+    await tester.pump();
+    expect(find.text('min after adhan'), findsOneWidget);
+    await tester.enterText(field, '-15');
+    await tester.pump();
+    expect(find.text('min before adhan'), findsOneWidget);
+
+    // Past the limit it clamps; Arabic-Indic digits count.
+    await tester.enterText(field, '-90');
+    await tester.pump();
+    expect(_reminderField(tester).text, '-60');
+    await tester.enterText(field, '١٥');
+    await tester.pump();
+    expect(button().onPressed, isNotNull);
+
+    // No number: nothing to set.
+    await tester.enterText(field, '');
+    await tester.pump();
+    expect(button().onPressed, isNull);
+
+    // Leaving an empty field falls back to the last value, direction kept.
+    tester.widget<TextField>(field).focusNode!.unfocus();
+    await tester.pump();
+    expect(_reminderField(tester).text, '10');
+    expect(find.text('min after adhan'), findsOneWidget);
+
+    // A committed minus sticks: the next bare number stays before.
+    await tester.enterText(field, '-5');
+    await tester.pump();
+    tester.widget<TextField>(field).focusNode!.unfocus();
+    await tester.pump();
+    expect(_reminderField(tester).text, '5');
+    await tester.enterText(field, '8');
+    await tester.pump();
+    expect(find.text('min before adhan'), findsOneWidget);
+  });
+
+  testWidgets('AdhanLine sets the next prayer time in brass', (tester) async {
+    await tester.pumpWidget(_buildTestApp(
+      child: const AdhanLine(prayer: Prayer.fajr, time: '05:00', isNext: true),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Text>(find.text('05:00')).style!.color,
+        NoorColors.light.brass);
+  });
+
+  testWidgets('Reminders stepper crosses the adhan without stopping at zero',
+      (tester) async {
+    await tester.pumpWidget(_buildTestApp(
+      child: const AdhanRemindersSheet(prayer: Prayer.fajr, time: '05:00'),
+    ));
+    await tester.pumpAndSettle();
+
+    final earlier = find.byTooltip('before adhan');
+    for (var i = 0; i < 10; i++) {
+      await tester.tap(earlier);
+      await tester.pump();
+    }
+    expect(_reminderField(tester).text, '1');
+    expect(find.text('min before adhan'), findsOneWidget);
+  });
+
+  testWidgets('Reminders sheet lists the set alarms and stops at two',
+      (tester) async {
+    const prayer = Prayer.fajr;
+    await AppPrefs.setReminder(prayer.alarmId1, prayer.durationKey1, -15);
+
+    await tester.pumpWidget(_buildTestApp(
+      child: const AdhanRemindersSheet(prayer: prayer, time: '05:00'),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Remove'), findsOneWidget);
+    expect(find.text('Set new alarm'), findsOneWidget);
+
+    await AppPrefs.setReminder(prayer.alarmId2, prayer.durationKey2, 20);
+    await tester.pumpWidget(_buildTestApp(
+      child: const AdhanRemindersSheet(
+          key: ValueKey('two'), prayer: prayer, time: '05:00'),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Remove'), findsNWidgets(2));
+    expect(find.text('Set new alarm'), findsNothing);
   });
 
   testWidgets('SoundPickerSheet renders 5 options and allows selection',
@@ -288,7 +480,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp(child: const SoundPickerSheet()));
     await tester.pumpAndSettle();
 
-    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(NoorCloudButton), findsOneWidget);
     expect(
       tester.getSemantics(find.text('Adhan Sheikh Alafasy 1')),
       isNot(isSemantics(isChecked: true)),
@@ -298,7 +490,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Play follows the selection and stays alone.
-    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(NoorCloudButton), findsOneWidget);
     expect(
       tester.getSemantics(find.text('Adhan Sheikh Alafasy 1')),
       isSemantics(isChecked: true),

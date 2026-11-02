@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
+import 'package:noor/features/adhan/widgets/next_prayer_card.dart';
 import 'package:noor/features/adhan/widgets/permission_notice.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_sheet.dart';
@@ -15,11 +16,13 @@ import 'package:noor/generals/widgets/check_dialog.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/loading_state.dart';
 import 'package:noor/generals/widgets/location_pill.dart';
-import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -35,6 +38,23 @@ String _formatDate(String timeStamp) => DateFormat('dd MMM yyyy')
     .format(DateTime.fromMillisecondsSinceEpoch(int.parse(timeStamp) * 1000));
 
 String _removeTimeZone(String timeString) => timeString.split(' ').first;
+
+/// Plain Latin month names: the API's `month.en` is scholarly transliteration
+/// ("Muḥarram", "Dhū al-Ḥijjah").
+const _hijriMonths = [
+  'Muharram',
+  'Safar',
+  'Rabi al-Awwal',
+  'Rabi al-Thani',
+  'Jumada al-Ula',
+  'Jumada al-Akhirah',
+  'Rajab',
+  'Shaban',
+  'Ramadan',
+  'Shawwal',
+  'Dhu al-Qadah',
+  'Dhu al-Hijjah',
+];
 
 class AdhanScreen extends StatefulWidget {
   const AdhanScreen({super.key});
@@ -92,6 +112,33 @@ class _AdhanScreenState extends State<AdhanScreen> {
     }
   }
 
+  /// Picking a day applies it and closes the sheet. Limited to the selected
+  /// year, the one the prayer calendar holds, as the day arrows are.
+  Future<void> _pickDate(
+      BuildContext context, AdhanController controller) async {
+    final d = controller.date.value;
+    final n = context.noor;
+    final picked = await showNoorSheet<DateTime>(
+      context,
+      builder: (sheet) => DatePickerTheme(
+        // Brass once in the sheet: the selected day. Today is marked in ink.
+        data: DatePickerThemeData(
+          todayForegroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? n.onBrass : n.ink,
+          ),
+          todayBorder: BorderSide(color: n.ink),
+        ),
+        child: CalendarDatePicker(
+          initialDate: d,
+          firstDate: DateTime(d.year),
+          lastDate: DateTime(d.year, 12, 31),
+          onDateChanged: (day) => Navigator.of(sheet).pop(day),
+        ),
+      ),
+    );
+    if (picked != null) controller.date.value = picked;
+  }
+
   /// The calendar entry of the selected day, or null before it has loaded.
   dynamic _datum(AdhanController controller) {
     final d = controller.date.value;
@@ -127,8 +174,10 @@ class _AdhanScreenState extends State<AdhanScreen> {
     final parts = (hijri.date as String).split('-');
     final month = hijri.month;
     if (month == null || parts.length != 3) return hijri.date;
+    final monthNumber = int.tryParse(parts[1]) ?? 0;
+    if (monthNumber < 1 || monthNumber > 12) return hijri.date;
     final isRtl = Localizations.localeOf(context).languageCode == 'ar';
-    return "${int.tryParse(parts[0]) ?? parts[0]} ${isRtl ? month.ar : month.en} ${parts[2]}";
+    return "${int.tryParse(parts[0]) ?? parts[0]} ${isRtl ? month.ar : _hijriMonths[monthNumber - 1]} ${parts[2]}";
   }
 
   String _formatNextPrayerDuration(BuildContext context,
@@ -206,7 +255,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                         message: S.of(context).location_needed,
                         actionLabel: S.of(context).add_location,
                         onAction: () => pickLocation(context),
-                        icon: Iconsax.location,
+                        icon: NoorGlyph.location,
                       );
                     }
 
@@ -226,99 +275,133 @@ class _AdhanScreenState extends State<AdhanScreen> {
                     final isToday =
                         _isSameDay(controller.date.value, DateTime.now());
                     final next = isToday ? controller.nextPrayer() : null;
-
-                    // The card's night theme only reaches widgets below it, so the
-                    // text here takes the window colours itself.
                     final hijri = _formatHijri(context, controller);
 
                     return NoorSettle(
                         child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (next != null) ...[
-                          NoorCard(
-                            tone: NoorCardTone.night,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '${S.of(context).next_prayer} · ${next.prayer.localizedTitle(context)}',
-                                        style: NoorText.bodySm(context)
-                                            .copyWith(color: n.onWindowMuted),
-                                      ),
-                                      const SizedBox(height: NoorSpace.s1),
-                                      // The one brass of the screen.
-                                      Text(
-                                        _removeTimeZone(
-                                          next.prayer.timeFromTimings(
-                                            controller.timingsFor(next.at) ??
-                                                controller.selectedTimings!,
-                                          ),
-                                        ),
-                                        style: NoorText.numeral(context,
-                                            size: 48, color: n.brass),
-                                      ),
-                                      const SizedBox(height: NoorSpace.s1),
-                                      Text(
-                                        _formatNextPrayerDuration(
-                                            context, next),
-                                        style: NoorText.body(context)
-                                            .copyWith(color: n.onWindow),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                        AnimatedSwitcher(
+                          duration:
+                              noorDuration(context, kNoorSettleDuration),
+                          switchInCurve: kNoorSettleCurve,
+                          switchOutCurve: Curves.easeIn,
+                          layoutBuilder: (current, previous) => Stack(
+                            fit: StackFit.passthrough,
+                            clipBehavior: Clip.none,
+                            children: [
+                              ...previous,
+                              if (current != null) current,
+                            ],
+                          ),
+                          // The card fades out, then the page closes up: no
+                          // clip, so its shadow is never cut, and nothing is
+                          // visible for the page to slide over.
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(
+                            opacity: CurvedAnimation(
+                              parent: animation,
+                              curve: const Interval(0.4, 1),
+                            ),
+                            child: AnimatedBuilder(
+                              animation: animation,
+                              builder: (context, child) => Align(
+                                alignment: Alignment.topCenter,
+                                heightFactor: const Interval(0, 0.4)
+                                    .transform(animation.value),
+                                child: child,
+                              ),
+                              child: child,
                             ),
                           ),
-                          const SizedBox(height: NoorSpace.s6),
-                        ],
+                          child: next == null
+                              ? const SizedBox.shrink(key: ValueKey('no-card'))
+                              : Column(
+                                  key: const ValueKey('next-prayer'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    NextPrayerCard(
+                                      time: _removeTimeZone(
+                                        next.prayer.timeFromTimings(
+                                          controller.timingsFor(next.at) ??
+                                              controller.selectedTimings!,
+                                        ),
+                                      ),
+                                      countdown: _formatNextPrayerDuration(
+                                          context, next),
+                                    ),
+                                    const SizedBox(height: NoorSpace.s6),
+                                  ],
+                                ),
+                        ),
                         NoorWell(
                           radius: NoorRadius.md,
                           child: Row(
                             children: [
-                              IconButton(
-                                onPressed: () =>
+                              NoorCloudButton(
+                                size: 40,
+                                onTap: () =>
                                     _onPreviousDay(context, controller),
-                                constraints: const BoxConstraints.tightFor(
-                                    width: 48, height: 56),
-                                icon: Icon(chevronBack, color: n.ink),
+                                icon: const Icon(chevronBack),
                               ),
                               Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _formatDateTitle(context, controller),
-                                      style: NoorText.heading(context),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                child: NoorPressable(
+                                  onPressed: () =>
+                                      _pickDate(context, controller),
+                                  radius: NoorRadius.sm,
+                                  builder: (context, pressed) => Container(
+                                    // Transparent, not absent: the whole slot
+                                    // takes the tap.
+                                    color: Colors.transparent,
+                                    constraints:
+                                        const BoxConstraints(minHeight: 56),
+                                    alignment: Alignment.center,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                _formatDateTitle(
+                                                    context, controller),
+                                                style:
+                                                    NoorText.heading(context),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                                width: NoorSpace.s1),
+                                            NoorIcon(
+                                              NoorGlyph.calendar,
+                                              size: 14,
+                                              color: n.muted,
+                                            ),
+                                          ],
+                                        ),
+                                        if (hijri != null)
+                                          Text(
+                                            hijri,
+                                            style: NoorText.bodySm(context),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ],
                                     ),
-                                    if (hijri != null)
-                                      Text(
-                                        hijri,
-                                        style: NoorText.bodySm(context),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                              IconButton(
-                                onPressed: () =>
-                                    _onNextDay(context, controller),
-                                constraints: const BoxConstraints.tightFor(
-                                    width: 48, height: 56),
-                                icon: Icon(chevron, color: n.ink),
+                              NoorCloudButton(
+                                size: 40,
+                                onTap: () => _onNextDay(context, controller),
+                                icon: const Icon(chevron),
                               ),
                             ],
                           ),
@@ -326,6 +409,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                         const SizedBox(height: NoorSpace.s5),
                         const PermissionNotice(),
                         NoorListGroup(
+                          divided: false,
                           children: [
                             for (final prayer in Prayer.all)
                               AdhanLine(

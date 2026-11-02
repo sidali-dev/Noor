@@ -128,9 +128,22 @@ class NoorPagerPill extends StatelessWidget {
         prev,
         const SizedBox(width: NoorSpace.s3),
         Flexible(
+          // A window is never bare: a paper ring lifts it (a `line` seam too in
+          // Night, where the window's own edge cannot be seen).
           child: DecoratedBox(
-            decoration: BoxDecoration(color: n.window, borderRadius: pill),
-            child: centre,
+            decoration: BoxDecoration(
+              color: n.card,
+              borderRadius: pill,
+              border: n.isDark ? Border.all(color: n.line) : null,
+              boxShadow: n.shadow3,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: n.window, borderRadius: pill),
+                child: centre,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: NoorSpace.s3),

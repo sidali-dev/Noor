@@ -265,7 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tagline_qibla": MessageLookupByLibrary.simpleMessage(
             "Tourne ton visage vers la Mosquée sacrée. — Al-Baqara 2:144"),
         "tagline_quran": MessageLookupByLibrary.simpleMessage(
-            "Ce Coran guide vers ce qu’il y a de plus droit. — Al-Isra 17:9"),
+            "Ce Coran guide vers ce qu’il y a de plus droit. — Al-⁠Isra 17:9"),
         "tasbeeh": MessageLookupByLibrary.simpleMessage("Tasbeehs"),
         "tips": MessageLookupByLibrary.simpleMessage("Conseils"),
         "today": MessageLookupByLibrary.simpleMessage("Aujourd\'hui"),

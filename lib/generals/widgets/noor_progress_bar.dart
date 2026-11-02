@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -42,11 +44,21 @@ class NoorProgressBar extends StatelessWidget {
           curve: Curves.easeOutCubic,
           tween: Tween<double>(begin: 0.0, end: clamped),
           builder: (context, animatedValue, child) {
-            return FractionallySizedBox(
-              alignment: AlignmentDirectional.centerStart,
-              widthFactor: animatedValue,
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: n.brass, borderRadius: radius),
+            // Any progress at all shows as at least a round dot, so the first
+            // pages of 604 are not a sliver.
+            return LayoutBuilder(
+              builder: (context, track) => Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: SizedBox(
+                  width: animatedValue <= 0
+                      ? 0
+                      : math.max(height, track.maxWidth * animatedValue),
+                  height: height,
+                  child: DecoratedBox(
+                    decoration:
+                        BoxDecoration(color: n.brass, borderRadius: radius),
+                  ),
+                ),
               ),
             );
           },

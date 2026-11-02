@@ -5,19 +5,24 @@ import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A pressed-in `surface-sunken` well: the fill, `shadow-inset` drawn inside
 /// the edge, and optionally a 1 dp `line-strong` border (inside the box, so it
-/// never changes layout). Text fields, the segmented trough and sunken tiles
-/// share it. [BoxDecoration] cannot paint a shadow inside the box, hence the
-/// painter. Pass [NoorRadius.pill] for a trough or a disc.
+/// never changes layout). The segmented trough and sunken tiles share it. [BoxDecoration] cannot paint a shadow inside the box, hence the
+/// painter. Pass [NoorRadius.pill] for a trough or a disc. [fill] and
+/// [borderColor] replace the fill and edge for a panel pressed into raised
+/// paper, such as the Mushaf page.
 class NoorWell extends StatelessWidget {
   const NoorWell({
     super.key,
     required this.radius,
     this.border = false,
+    this.fill,
+    this.borderColor,
     this.child,
   });
 
   final double radius;
   final bool border;
+  final Color? fill;
+  final Color? borderColor;
   final Widget? child;
 
   @override
@@ -26,9 +31,9 @@ class NoorWell extends StatelessWidget {
     return CustomPaint(
       painter: _WellPainter(
         radius: radius,
-        fill: n.surfaceSunken,
+        fill: fill ?? n.surfaceSunken,
         shadows: n.inset,
-        border: border ? n.lineStrong : null,
+        border: borderColor ?? (border ? n.lineStrong : null),
       ),
       child: child,
     );

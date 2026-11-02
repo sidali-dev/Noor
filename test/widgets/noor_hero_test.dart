@@ -147,7 +147,20 @@ void main() {
     final deco = band.decoration as BoxDecoration;
     expect(deco.color, n.window);
     expect(deco.gradient, isNull);
+    expect(deco.boxShadow, n.shadow3);
     expect(tester.getRect(find.text('Qibla')).left, closeTo(16, 1));
+  });
+
+  testWidgets('NoorHero with art casts no shadow on the page', (tester) async {
+    await pumpHero(tester, const Locale('en'), long);
+
+    final band = tester.widget<DecoratedBox>(find
+        .descendant(
+          of: find.byType(NoorHero),
+          matching: find.byType(DecoratedBox),
+        )
+        .first);
+    expect((band.decoration as BoxDecoration).boxShadow, isNull);
   });
 
   const subtitles = {

@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/features/quran/widgets/mushaf_frame.dart';
+import 'package:noor/generals/widgets/noor_cartouche.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
-import 'package:noor/generals/widgets/noor_pager_pill.dart';
+import 'package:noor/generals/widgets/noor_tasbih.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
@@ -144,8 +146,9 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                   ),
                 ),
               ),
+              // The counter's top meets the page's text limit: it covers no ayah.
               Positioned(
-                bottom: NoorSpace.s3,
+                bottom: NoorSpace.s2,
                 left: 0,
                 right: 0,
                 child: AnimatedOpacity(
@@ -173,67 +176,44 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     final surahName =
         isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
 
+    // The page number is on the counter below, up at the same moment. The
+    // strip keeps the page's ribbon and first line out from between the puffs.
     return Container(
-      decoration: BoxDecoration(
-        color: n.paper,
-        border: Border(bottom: BorderSide(color: n.line)),
-      ),
+      decoration: BoxDecoration(color: n.card, boxShadow: n.shadow1),
       padding: EdgeInsets.symmetric(
-        horizontal: NoorSpace.s3 + NoorLayout.margin(context),
+        horizontal: NoorLayout.gutter(context),
         vertical: NoorSpace.s1,
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(
-              Icons.arrow_back_rounded, // mirrors itself in RTL
-              color: n.ink,
-              size: 24,
-            ),
+          NoorCloudButton(
+            icon: const Icon(Icons.arrow_back_rounded), // mirrors itself in RTL
             tooltip: S.of(context).back,
-            onPressed: () => Navigator.of(context).maybePop(),
+            onTap: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: NoorSpace.s2),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  surahName,
-                  style: NoorText.heading(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  "${S.of(context).page} $pageNumber",
-                  style: NoorText.bodySm(context),
-                  maxLines: 1,
-                ),
-              ],
-            ),
-          ),
+          Expanded(child: NoorCartouche.title(surahName)),
           const SizedBox(width: NoorSpace.s2),
-          IconButton(
-            // Saved: ink on a brassSoft disc, so the state is not colour alone.
+          NoorCloudButton(
+            // Saved: brass on a brassSoft disc, so the state is not colour alone.
             icon: DecoratedBox(
               decoration: BoxDecoration(
                 color: isBookmarked ? n.brassSoft : Colors.transparent,
                 shape: BoxShape.circle,
               ),
-              child: SizedBox(
-                width: 32,
-                height: 32,
+              child: SizedBox.square(
+                dimension: 28,
                 child: Center(
                   child: NoorIcon(
                     NoorGlyph.bookmark,
-                    color: isBookmarked ? n.ink : n.muted,
-                    size: 22,
+                    color: isBookmarked ? n.brass : n.muted,
+                    size: 20,
                   ),
                 ),
               ),
             ),
             tooltip: S.of(context).bookmark,
-            onPressed: _toggleBookmark,
+            onTap: _toggleBookmark,
           ),
         ],
       ),
@@ -244,17 +224,21 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     final page = S.of(context).page;
     final hasPrev = _currentPage > 0;
     final hasNext = _currentPage < quran.totalPagesCount - 1;
-    // The pill sits in the reader's RTL Directionality, so "previous" is at
+    // The row sits in the reader's RTL Directionality, so "previous" is at
     // the start (right) and "next" at the end (left): left = next page (U7).
-    return Center(
-      child: NoorPagerPill(
-        split: true,
+    // The page's brass is the bookmark, so the thread has none of its own.
+    return NoorCounterRow(
+      counter: TasbihCloud(
+        size: 64,
+        accent: false,
+        total: quran.totalPagesCount,
+        said: pageNumber,
         label: '$pageNumber',
-        previousTooltip: '$page ${pageNumber - 1}',
-        nextTooltip: '$page ${pageNumber + 1}',
-        onPrevious: hasPrev ? () => _goToPage(_currentPage - 1) : null,
-        onNext: hasNext ? () => _goToPage(_currentPage + 1) : null,
       ),
+      previousTooltip: '$page ${pageNumber - 1}',
+      nextTooltip: '$page ${pageNumber + 1}',
+      onPrevious: hasPrev ? () => _goToPage(_currentPage - 1) : null,
+      onNext: hasNext ? () => _goToPage(_currentPage + 1) : null,
     );
   }
 
@@ -321,8 +305,8 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     }
 
     // The page sits on the ground with a small margin; the text clears the
-    // brass frame and, by the frame's own margins, the corner stars, the foot
-    // and the pager pill.
+    // hairline frame and, by the frame's own margins, the corner stars, the
+    // foot and the pager pill.
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         NoorSpace.s2,
@@ -332,6 +316,8 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
       ),
       child: MushafFrame(
         pageNumber: pageNumber,
+        bookmarked: AppPrefs.bookmarks.contains(pageNumber),
+        footVisible: !_showChrome,
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(

@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:quran/quran.dart' as quran;
 
-/// One surah row of the index, to sit in a [NoorListGroup]: its number, the
-/// Arabic name, then Latin name, verses and place.
+/// A number on a [CloudMedallion], leading a row of the index.
+class IndexNumber extends StatelessWidget {
+  final int number;
+
+  const IndexNumber(this.number, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CloudMedallion(
+      size: 40,
+      child: Text(
+        '$number',
+        textDirection: TextDirection.ltr,
+        textScaler: TextScaler.noScaling,
+        style: NoorText.numeral(context, size: 16),
+      ),
+    );
+  }
+}
+
+/// One surah row of the index, to sit in a [NoorListGroup], set like a printed
+/// contents page: its number, the Arabic name over verses and place, and the
+/// Latin name across from it.
 class SurahLine extends StatelessWidget {
   final int number;
   final String? arabicName;
@@ -36,15 +58,7 @@ class SurahLine extends StatelessWidget {
 
     return NoorListRow(
       onTap: onTap,
-      leading: SizedBox(
-        width: NoorSpace.s6,
-        child: Text(
-          '$number',
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.ltr,
-          style: NoorText.numeral(context, size: 16, color: n.muted),
-        ),
-      ),
+      leading: IndexNumber(number),
       title: arName,
       titleStyle: TextStyle(
         fontFamily: 'Amiri',
@@ -53,8 +67,26 @@ class SurahLine extends StatelessWidget {
         height: 1.4,
         color: n.ink,
       ),
-      // Two fixed lines: a wrapped one would strand the separator.
-      meta: '$latinName\n${S.of(context).verse_count(verseCount)} · $place',
+      meta: '${S.of(context).verse_count(verseCount)} · $place',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // A share of the row, so a large text scale cannot squeeze the name.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width * 0.32,
+            ),
+            child: Text(
+              latinName,
+              style: NoorText.bodySm(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: NoorSpace.s2),
+          Icon(Icons.chevron_right_rounded, color: n.muted, size: 22),
+        ],
+      ),
     );
   }
 }

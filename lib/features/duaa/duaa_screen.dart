@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/features/duaa/adhkar_categories.dart';
 import 'package:noor/features/duaa/adhkar_display_screen.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/features/duaa/data/adhkar_search.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
 import 'package:noor/generated/l10n.dart';
@@ -176,7 +177,7 @@ class _DuaaScreenState extends State<DuaaScreen> {
     final metaText = count != null ? s.adhkar_count(count) : null;
 
     return NoorListRow(
-      leading: _icon(context, category.svgAsset),
+      leading: _icon(category.glyph),
       title: category.title(s),
       titleMaxLines: 2,
       meta: metaText,
@@ -193,7 +194,7 @@ class _DuaaScreenState extends State<DuaaScreen> {
     final title = category != null ? category.title(s) : '';
 
     return NoorListRow(
-      leading: category != null ? _icon(context, category.svgAsset) : null,
+      leading: category != null ? _icon(category.glyph) : null,
       title: title,
       titleMaxLines: 2,
       meta: hit.snippet,
@@ -201,11 +202,6 @@ class _DuaaScreenState extends State<DuaaScreen> {
     );
   }
 
-  // Hilal retires the icon tile: the leading is a bare ink glyph.
-  Widget _icon(BuildContext context, String svg) => SvgPicture.asset(
-        svg,
-        width: 24,
-        height: 24,
-        colorFilter: ColorFilter.mode(context.noor.ink, BlendMode.srcIn),
-      );
+  // The same puff that carries a surah's number in the Quran index.
+  Widget _icon(NoorGlyph glyph) => NoorCloudIcon(NoorIcon(glyph));
 }

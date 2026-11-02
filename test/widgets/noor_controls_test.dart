@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -46,23 +47,59 @@ void main() {
           onChanged: changes.add,
         ),
       ));
-      expect(find.byType(IconButton), findsNothing);
-      expect(tester.getSize(find.byType(NoorSearchField)).height, 48);
+      expect(find.byType(NoorCloudButton), findsNothing);
+      expect(tester.getSize(find.byType(NoorSearchField)).height, 56);
 
       await tester.enterText(find.byType(TextField), 'fatiha');
       await tester.pump();
       expect(changes, ['fatiha']);
-      expect(find.byType(IconButton), findsOneWidget);
-      final size = tester.getSize(find.byType(IconButton));
+      expect(find.byType(NoorCloudButton), findsOneWidget);
+      final size = tester.getSize(find.byType(NoorCloudButton));
       expect(size.width, greaterThanOrEqualTo(48));
       expect(size.height, greaterThanOrEqualTo(48));
 
-      await tester.tap(find.byType(IconButton));
+      await tester.tap(find.byType(NoorCloudButton));
       await tester.pump();
       expect(controller.text, isEmpty);
       expect(changes.last, '');
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(NoorCloudButton), findsNothing);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('focus adds one ring and a shadow change, a tap outside ends it',
+        (tester) async {
+      await tester.pumpWidget(_app(
+        const Locale('en'),
+        const NoorSearchField(hint: 'Search'),
+      ));
+      final n = tester.element(find.byType(NoorSearchField)).noor;
+      List<BoxShadow>? shadow() =>
+          (tester.widget<AnimatedContainer>(find.byType(AnimatedContainer))
+                  .decoration as BoxDecoration)
+              .boxShadow;
+      expect(shadow(), n.shadow2);
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      expect(shadow(), n.shadow1);
+      final decoration =
+          tester.widget<InputDecorator>(find.byType(InputDecorator)).decoration;
+      expect(decoration.focusedBorder, InputBorder.none);
+      expect(decoration.enabledBorder, InputBorder.none);
+
+      await tester.tapAt(const Offset(200, 500));
+      await tester.pumpAndSettle();
+      expect(shadow(), n.shadow2);
+
+      // The icon is on the pill, not the text line: it focuses and keeps focus.
+      final icon = find.byWidgetPredicate(
+          (w) => w is NoorIcon && w.glyph == NoorGlyph.search);
+      await tester.tap(icon);
+      await tester.pumpAndSettle();
+      expect(shadow(), n.shadow1);
+      await tester.tap(icon);
+      await tester.pumpAndSettle();
+      expect(shadow(), n.shadow1);
     });
 
     testWidgets('search icon is at the start: right in Arabic, left in English',

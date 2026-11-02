@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
@@ -25,12 +26,16 @@ Widget _app(Widget home, {Locale locale = const Locale('en')}) =>
       home: home,
     );
 
-/// The one sliding pill, and whether it sits under [label].
-Finder get _pillFinder => find.byKey(const ValueKey('noor-nav-pill'));
 Finder _label(String label) =>
     find.descendant(of: find.byType(NoorNavBar), matching: find.text(label));
-bool _under(WidgetTester tester, String label) =>
-    tester.getRect(_pillFinder).contains(tester.getCenter(_label(label)));
+
+/// The colour of the puff above [label].
+Color? _puff(WidgetTester tester, String label) => tester
+    .widget<CloudMedallion>(find.descendant(
+      of: find.ancestor(of: _label(label), matching: find.byType(Column)).first,
+      matching: find.byType(CloudMedallion),
+    ))
+    .front;
 
 void main() {
   // The ring screen's "Open Adhkar" does Get.offAll(SBottomNavigation(pageIndex: 2))
@@ -61,7 +66,7 @@ void main() {
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
   });
 
-  testWidgets('tapping a tab selects it and moves the window pill to it',
+  testWidgets('tapping a tab selects it and turns its puff to the window',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     SharedPrefService.resetForTest();
@@ -77,32 +82,23 @@ void main() {
     await tester.pumpWidget(_app(const SBottomNavigation()));
     await tester.pump(const Duration(milliseconds: 100));
     final window = NoorColors.light.window;
-    final pillBox =
-        find.descendant(of: _pillFinder, matching: find.byType(DecoratedBox));
-    expect(
-        (tester.widget<DecoratedBox>(pillBox).decoration as BoxDecoration)
-            .color,
-        window);
-    expect(_under(tester, 'Quran'), isTrue);
-    expect(_under(tester, 'Athkar'), isFalse);
+    final paper = NoorColors.light.card;
+    expect(_puff(tester, 'Quran'), window);
+    expect(_puff(tester, 'Athkar'), paper);
 
     // Athkar, not Qibla: Qibla starts the compass sensor.
     await tester.tap(_label('Athkar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Mid-slide: between the two items, not yet under either.
-    final from = tester.getCenter(_label('Quran')).dx;
-    final to = tester.getCenter(_label('Athkar')).dx;
-    final mid = tester.getCenter(_pillFinder).dx;
-    expect(mid, greaterThan(from));
-    expect(mid, lessThan(to));
+    // Mid-change: the puff is on its way, neither paper nor window yet.
+    expect(_puff(tester, 'Athkar'), isNot(anyOf(paper, window)));
 
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
-    expect(_under(tester, 'Athkar'), isTrue);
-    expect(_under(tester, 'Quran'), isFalse);
+    expect(_puff(tester, 'Athkar'), window);
+    expect(_puff(tester, 'Quran'), paper);
   });
 
   testWidgets('only the shown tab keeps its hero twinkling', (tester) async {

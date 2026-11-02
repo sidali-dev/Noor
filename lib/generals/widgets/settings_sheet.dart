@@ -4,6 +4,7 @@ import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/generals/controllers/localization_controller.dart';
 import 'package:noor/generals/controllers/theme_controller.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_segmented.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
@@ -70,7 +71,7 @@ class _SettingsSheetContentState extends State<_SettingsSheetContent> {
         const SizedBox(height: NoorSpace.s2),
         Row(
           children: [
-            const NoorIcon(NoorGlyph.moon),
+            const NoorCloudIcon(NoorIcon(NoorGlyph.moon)),
             const SizedBox(width: NoorSpace.s3),
             Expanded(
               child: Text(

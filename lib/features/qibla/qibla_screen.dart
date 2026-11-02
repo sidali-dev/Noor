@@ -117,7 +117,6 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
             settings: true,
             title: S.of(context).nav_qibla,
             subtitle: S.of(context).tagline_qibla,
-            height: 236,
             overlap: const LocationPill(),
           ),
           Expanded(
@@ -227,7 +226,7 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
 
   // Below this the compass can't keep 160 dp beside the card, so scroll.
   // ponytail: fixed card-height estimate; measure the card if its content grows.
-  static const double _minFit = 160 + NoorSpace.s4 + 200;
+  static const double _minFit = 160 + NoorSpace.s4 + 245;
 
   Widget _buildActiveCompass() {
     return StreamBuilder<QiblahDirection>(
@@ -343,7 +342,6 @@ class QiblaDirectionCard extends StatelessWidget {
     );
 
     return NoorCard(
-      padding: const EdgeInsets.all(NoorSpace.s4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

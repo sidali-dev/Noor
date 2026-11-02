@@ -27,7 +27,7 @@ Accessor: `context.hilal`. Field names are the camelCase of the token names. All
 |---|---|---|---|
 | `surface` | `#eef0f4` | `#101217` | Page ground. Never white in Paper. |
 | `surfaceRaised` | `#ffffff` | `#1c1f27` | Cut paper lifted off the ground: cards, sheets, tab bar, ArchFrame, rings. Always carries a shadow. |
-| `surfaceSunken` | `#e3e6ec` | `#0a0b0f` | Pressed-in paper: search/text wells, toggle tracks, segmented troughs. Pairs with `shadowInset`. |
+| `surfaceSunken` | `#e3e6ec` | `#0a0b0f` | Pressed-in paper: toggle tracks, segmented troughs, sunken tiles. Pairs with `shadowInset`. |
 | `line` | `#cfd3dc` | `#2c303a` | Hairline dividers and ornament rules. Decorative only, never the sole border of a control. |
 | `lineStrong` | `#7d8391` | `#6b7180` | Control borders that must be seen (input at rest, unchecked toggle). |
 | `ink` | `#1a1c22` | `#eceef2` | Primary text and icons. |
@@ -201,7 +201,7 @@ Flutter has no CSS-style `inset`; and a shadow list is a `List<BoxShadow>`. Each
 
 Placement **[token]**: `shadow1` flat paper (list groups, inputs on raised paper, the tab bar); `shadow2` cards and buttons, the default lift; `shadow3` the front-most layer (hero ArchFrame, sheets, dialogs); `shadowInset` sunken wells.
 
-Flutter note: `BoxShadow.blurRadius` is twice the Gaussian sigma, matching CSS `blur`, so values copy 1:1. `shadowInset` has no native widget: implement it once as a `HilalInsetShadow` painter (clip, then paint an offset inverted shadow), used by `HilalField`, `HilalSegmented` trough and toggle track. Do not fake it with a border.
+Flutter note: `BoxShadow.blurRadius` is twice the Gaussian sigma, matching CSS `blur`, so values copy 1:1. `shadowInset` has no native widget: implement it once as a `HilalInsetShadow` painter (clip, then paint an offset inverted shadow), used by the `HilalSegmented` trough and toggle track. Do not fake it with a border.
 
 ## 6. Window, brass, and the Night problem
 
@@ -237,7 +237,7 @@ Brass placement per screen (reassigned from the mocks, where several screens spe
 | Quran index | The "continue reading" progress marker only (computed from pages the user dwelled on; no invented numbers). |
 | Quran page | The bookmark / current-position marker. The Mushaf frame uses `line`, not brass. |
 | Athkar list | None. The search field's focus ring is the only brass that can appear. |
-| Athkar reader | The repeat-count badge (`brassSoft` fill, `brass` text): the count you are on. Step bar uses `window`. |
+| Athkar reader | The bead about to be said, on the tasbih counter. |
 | Qibla | The qibla pointer (arrow plus Kaaba marker). Aligned state adds a `success` word and check icon, not more brass. |
 
 ## 7. Motion
@@ -259,18 +259,19 @@ tokens.json has **no motion tokens**. These come from `README.md` / `bundle.css`
 | Widget | Replaces | Spec |
 |---|---|---|
 | `HilalScaffold` | the scaffold and `NoorHero` mount | `surface` ground, safe areas, no shared app bar. |
-| `HilalCard` | `NoorCard` | `surfaceRaised`, `radius-lg` 24, `shadow2`, padding `s4`. Ink-well becomes the press-down (section 7). No nested cards. |
-| `HilalListGroup` / `HilalListRow` | `NoorListRow` | One `surfaceRaised` group with `shadow1`, `radius-md` 14. Rows separated by `line` hairlines (decorative rule). Row: leading (number or icon), title `heading`, secondary `bodySm` in `inkMuted`, trailing chevron that mirrors in RTL. Vertical padding `s3`. Used for adhkar categories, surahs, hizbs. Icon tiles (48 dp tinted circles) are gone: leading is a plain `ink` icon at 22–24 dp. |
+| `HilalCard` | `NoorCard` | `surfaceRaised`, `radius-lg` 24, `shadow2`, cut as a `NoorPagePanel` (8.2) so every paper card gets the panel, the stars and the clouds without asking. Ink-well becomes the press-down (section 7). No nested cards. The night tone (next prayer) keeps its window and its own clouds. |
+| `HilalListGroup` / `HilalListRow` | `NoorListRow` | One `surfaceRaised` group with `shadow1`, `radius-md` 14. Rows separated by `line` hairlines (decorative rule). Row: leading (number or icon), title `heading`, secondary `bodySm` in `inkMuted`, trailing chevron that mirrors in RTL. Vertical padding `s3`. Used for adhkar categories, surahs, hizbs, prayers. Leading is a `CloudMedallion` at 40 dp: `IndexNumber` for a number, `NoorCloudIcon` for an icon (8.2). A list group is not cut as a page: it scrolls and carries too many rows. |
 | `HilalButton` | `NoorButton` | Variants `primary` (`window` fill, `onWindow` text; Night inverts, 6.1), `secondary` (`surfaceRaised` with `shadow2`, `ink` text), `ghost` (text only). `radius-md` 14, `label` style, `shadow2`, min height 48. One `primary` per screen. |
 | `HilalSegmented` | `NoorSegmented` | Trough `surfaceSunken` + `shadowInset`; selected segment `surfaceRaised` + `shadow1`. Selection is paper, not colour. |
-| `HilalField` / `HilalSearchField` | `NoorSearchField` | `surfaceSunken` well + `shadowInset`, `radius-sm` 8 (token), 48 dp, leading search icon, clear button when non-empty. Focus ring brass. Placeholder `inkMuted` (≥ 5.52:1). |
+| `HilalField` / `HilalSearchField` | `NoorSearchField` | A `NoorCartouche` (8.2) to type in, 56 dp, filling the hero slot: search icon at the start, a star at the end that gives way to a 40 dp `NoorCloudButton` to clear. Text and cursor `onWindow`, hint and icon `onWindowMuted`, so no brass sits on the window. Focus: brass ring outside the pill plus a settle to `shadow1`. Replaces the raised paper pill with puffs behind its top edge. Decided by the owner, 2026-11-02. |
 | `HilalChip` / `HilalBadge` | `NoorPill` | `radius-sm` 8, `brassSoft`/`brass` tone for the one current thing, `surfaceSunken`/`inkMuted` otherwise. |
-| `HilalLocationPill` | `NoorPill` (location) | `surfaceRaised`, `radius-md` 14, 48 dp, `shadow1`, leading pin, label, trailing chevron (mirrors). |
-| `HilalTabBar` | `NoorNavBar` | Floating `surfaceRaised` pill, `radius-pill`, `shadow1`, four items: Quran, Prayers, Athkar, Qibla (ar: القرآن، الصلاة، الأذكار، القبلة). Active tab: `window` pill with `onWindow` icon and label (Night inverts). Inactive: `inkMuted`. No raised 56 dp circle, no 14 dp lift. Labels `caption`. Respect safe area; clamp text scale on the labels only. |
-| `HilalSheet` | `NoorSheet` | `surfaceRaised`, `radius-lg` top corners, `shadow3`, drag handle, title in `title`. Replaces most dialogs. Swipe down dismisses. |
+| `HilalLocationPill` | `NoorPill` (location) | A `NoorCartouche` (8.2) in the same hero slot as search, 56 dp: location icon, label, trailing chevron (mirrors). Decided by the owner, 2026-11-02. `NoorPill` stays raised paper for everything else, such as the adhan sound. |
+| `HilalTabBar` | `NoorNavBar` | Floating `surfaceRaised` strip, `radius-lg`, `shadow1`, four items: Quran, Prayers, Athkar, Qibla (ar: القرآن، الصلاة، الأذكار، القبلة). Every item is its icon on a 40 dp `CloudMedallion` over its label. Inactive: `inkMuted`. No sliding pill, no raised 56 dp circle, no 14 dp lift. Labels `caption`. Respect safe area; clamp text scale on the labels only. Decided by the owner, 2026-11-02. Proposed, to confirm: the active puff turns `window` with an `onWindow` icon (Night inverts), rises to `shadow2` and its label takes `ink` at weight 600, so the choice is never colour alone. |
+| `HilalSheet` | `NoorSheet` | `surfaceRaised`, `radius-lg` top corners, `shadow3`, drag handle, title in `title`, cut as a `NoorPagePanel` (8.2) with content inset `s5`. The clouds stay below the scrolling content and give way to the keyboard. Replaces most dialogs. Swipe down dismisses. Decided by the owner, 2026-11-02. |
 | `HilalArchFrame` | `NoorHero` | The one hero. Nested arch rings of `surfaceRaised` over a `window`, each ring on `depthShadow`. The only place a gradient exists (top `surfaceRaised` → bottom `paperShade`), plus `skyGlow` around the crescent, plus twinkle (Prayers only). Front-most layer: `shadow3`. |
 | `HilalOrnament` | | Thin `line` rule with a small diamond; section divider in the reader. |
-| `HilalPager` | `NoorPagerPill` | Dhikr counter and Mushaf page controls: `window` pill (Night inverts to `onWindow` pill with `window` glyphs), prev/next circles in `onWindow` fill with `window` glyph (mock), `shadow3`, `surfaceRaised` 3 dp ring. Chevrons follow `Directionality`; in the Mushaf, left = next page, as before. |
+| `CloudMedallion` | Brass star ayah marker and surah number | A number or icon on a puff of the cloud scroll: a back row forming a rim (`surfaceSunken`, `line` in Night) under a `surfaceRaised` front row with a crisp 1 dp lip (`line`, `depthShadow` in Night), the whole puff on one `shadow1`. No blur between the rows and no curls: at this size they read as a smudge. Ayah markers (30 dp, scaled with text); index rows, list icons, tab bar and in-row buttons (40 dp); free-standing buttons (48 dp); counters (64 and 132 dp, on `shadow2`). No brass of its own. Decided by the owner. |
+| `HilalPager` | `NoorPagerPill` | Replaced by `NoorCounterRow` (8.2) on the Mushaf page and in the Athkar reader; no screen uses the pill now. Decided by the owner, 2026-11-02. In the Mushaf, left = next page, as before. |
 | `HilalProgress` | `NoorProgressBar` | 4 dp rounded track in `surfaceSunken`, fill `window` (Night: `onWindow`). Not brass. Paired with a numeral percentage or "n of 604 pages". |
 | `HilalCompass` | Compass dial | See 8.1. |
 | `HilalToast` | | `radius-md`, `surfaceRaised`, `shadow2`. `success` / `danger` tones always carry a word or icon. |
@@ -284,6 +285,22 @@ Outer disc `surfaceRaised` + `shadow3`; an inset `surfaceSunken` ring + `shadowI
 
 Aligned (within 3°, released past 6°, as now): a `success` check and the live-region label "Facing the qibla", one vibration, a 250 ms fade. The mint ring and the blurred halo are dropped; sky-glow is ArchFrame-only. Keep `NoorArt.noMirror`-style handling: the compass never mirrors.
 
+### 8.2 Shared pieces: use these, do not redraw them
+
+Every screen builds from these widgets in `lib/generals/widgets/`. A new icon button, screen title, count or paper card takes the widget below, and a new look goes here first. Decided by the owner, 2026-11-02: the Athkar reader's language applies to the whole app, each piece on the surfaces named here (icon buttons, list icons and tabs on clouds; the title pill on search, location and reader titles; the page cut on paper cards and sheets; the counter on the Athkar reader and the Mushaf page controls). Proposed, to confirm: the sizes and details not fixed by the reader, namely the 40 and 48 dp puff split, the 52 dp cloud bank on cards and sheets, the sheet's `s5` inset, the active tab's treatment, and the 64 dp Mushaf counter without brass. `test/design_system_test.dart` fails if `IconButton(` returns to `lib/`.
+
+| For | Widget | Spec |
+|---|---|---|
+| Any tappable icon | `NoorCloudButton` | A `CloudMedallion` holding the icon at 22 dp, in `ink` unless the icon sets its own colour, `line` with no `onTap`. Puff 48 dp standing free (hero settings, reader back and bookmark), 40 dp in a row, a well or a pill (bell, stepper, date arrows, clear, trash, play). The target is 48 dp at both sizes. |
+| A list row's leading icon | `NoorCloudIcon` | The icon at 24 dp on a 40 dp puff. Small marks inside a line of text (a calendar beside a date, a location beside a distance) and icons inside a button or `NoorPill` stay bare. |
+| A screen title or a hero control | `NoorCartouche` | A `window` pill in a 4 dp `surfaceRaised` ring (3 dp plus a `line` seam in Night), `shadow2`, 56 dp, stars in `onWindowMuted` either side unless replaced. `NoorCartouche.title` is one line of `heading` at 20 in `onWindow`, held to 280 dp and centred, and sits beside a `NoorCloudButton` for back: Athkar reader, Mushaf top bar. Without `maxWidth` it fills the hero slot: search, location. `SurahCartouche` is the same pill in Amiri where a surah starts. |
+| Raised paper with content | `NoorPagePanel`, through `NoorCard` and `NoorSheet` | An inset `line` panel pressed into the paper (`s2` in, `radius-md`), a 14 dp star in `line` in each top corner, an optional folio between them ("3 / 31", numeral 15 in `inkMuted`), and a bank of clouds along the foot, 52 dp (72 dp in the Athkar reader, where the counter rises into it). Clouds are flat: back row `surfaceSunken` (`windowRaised` in Night), front row `surfaceRaised`, a `depthShadow` lip in Night. Content stops at the clouds' crowns, so no ornament touches a word. A short window drops the clouds, as the hero drops its art. It shrinks to its content, or fills a parent that fixes its size. Not for list groups, the night card, dialogs or the Mushaf page, which has its own frame. |
+| A count | `TasbihCloud` | A tasbih on a puff with the count at its centre, the large bead and tassel at the foot, the string running the way the language reads. Up to 33: said beads `ink`, the next `brass`, unsaid pearls with a `lineStrong` edge. Past 33: a `line` thread with an `ink` arc and a head dot, `brass` unless `accent: false`, for a screen whose brass is spent elsewhere. 132 dp when it can be tapped to count, 64 dp when it only shows a place. |
+| A count with previous and next | `NoorCounterRow` | `TasbihCloud` between two 48 dp `NoorCloudButton` chevrons standing on its foot, held close to it however wide the window. |
+| Between parts of a text | `NoorOrnament` | A 160 dp `line` rule broken by a 14 dp star. |
+
+Not on clouds: the compass, the `primary` button, and anything brass.
+
 ## 9. Screens
 
 Region map, with where each token-level tool is spent.
@@ -291,13 +308,33 @@ Region map, with where each token-level tool is spent.
 | Screen | Hero / window | `shadow3` | Brass |
 |---|---|---|---|
 | Prayers | `HilalArchFrame` with the wordmark and the next-prayer time (`displayXl` in Latin, `arabicDisplay` in ar) | the ArchFrame | next prayer |
-| Quran index | Title only, no ArchFrame | none (sheets only) | continue reading |
-| Quran page | No hero | the pager | bookmark |
+| Quran index | Sky header with the cut-paper mushaf, search overlapping its edge | none | the mushaf cover; continue reading |
+| Quran page | No hero | none | bookmark |
 | Athkar list | Title only | none | none |
-| Athkar reader | Card as the page, step bar on top, `HilalPager` below | the reading card and the pager (both appear in the mock) | repeat badge |
+| Athkar reader | Mushaf-cut sheet with a cloud bank, cartouche above, tasbih counter rising into the clouds | none | the next bead |
 | Qibla | Title, location pill, compass | the compass | qibla pointer |
 
 **Headers.** Hilal's `SkyHeader` exists only in the mocks (it is not in `bundle.js` or `tokens.json`). Title-only screens use a plain header on `surface`: `displayLg` / `arabicDisplay` title, optional single `bodySm` line. No sky halo, no art. The Prayers screen uses the real `ArchFrame`. This drops the old `NoorHero` art, the sunrise photos, and the Qibla skyline photo; the Quran hero art is retired too. Decided by the owner: plain headers.
+
+**Quran header (supersedes the above for this screen).** The Quran index keeps its sky header (`NoorHero`), its art following the Quran index mock's `SkyHeader` scene as layered cut paper: a far dune, the rehal, a brass cover, a block of leaves and the shared cloud base, each sheet of the book and rehal casting a shadow on the one behind (the clouds cast none). Rule 2 stretches here to the mock's page wash, a `surfaceRaised` → `paperShade` fill on the pages (`onWindowMuted` → `lineStrong` in Night). In Night the rehal and the back leaf are `lineStrong` at 55% over `window`, flattened to `#3f4450`. `flutter_svg` has no filters, so the shadows are baked into `hero_quran_paper.svg` and `hero_quran_night.svg`. Decided by the owner, 2026-11-02.
+
+**`NoorHero` join.** A `NoorHero` with art casts no shadow on the page, on any screen, and the front row of its cloud base is `surface` rather than `surfaceRaised`, so the clouds run into the body with no edge. In Night the back row is `windowRaised` rather than `surfaceSunken`, or the clouds would vanish into the sky. The Quran and Athkar art has no curls on that row: the search field would cut them to fragments. The flat band, which has no art (short windows, missing art), keeps `shadow3`: in Night it is what frames the `window` fill. Decided by the owner, 2026-11-02.
+
+**Prayers header (supersedes the region table and the plain-header note for this screen).** Prayers keeps the mock's sky band with the mosque, not an ArchFrame, and the next prayer stays on its own card. The art has no curls on its front cloud row, for the same reason as Quran and Athkar: the location pill would cut them to fragments. Every `NoorHero` with art is the same height, with or without a disc. Decided by the owner, 2026-11-02.
+
+**Settings button.** Decided by the owner, 2026-11-02: a 48 dp `NoorCloudButton` like every other icon button. This supersedes the earlier `windowRaised` disc, which replaced the mock's white paper disc. Art under it keeps that corner empty: the Prayers mosque has no minaret on that side, so the button clears the skyline on a notched phone without a taller band.
+
+**Next prayer card.** Decided by the owner, 2026-11-02: centred content, a bank of clouds along the foot, and a time that is no longer brass. Clouds stay below the text, never behind it. Brass on a window is forbidden in Paper (6.2), so the time is `onWindow` and the screen's brass is the next prayer's time in the list, as in the mock. Proposed, to confirm: the 56 sp numeral, the 4 dp `surfaceRaised` ring from the mock, flat cloud fills with the front row in the ring's paper, and no label above the time, since the countdown names the prayer. Decided by the owner: it animates out when the selected day is not today. Proposed, to confirm: it fades out, then the page closes up, 200 ms in all.
+
+**Day picker.** Decided by the owner, 2026-11-02: tapping the day opens a calendar. Proposed, to confirm: a `HilalSheet` holding Flutter's `CalendarDatePicker`, Gregorian, limited to the selected year as the day arrows are; choosing a day applies it and closes the sheet.
+
+**Reminders.** Decided by the owner, 2026-11-02: tapping a prayer opens a `HilalSheet` with its alarms and a stepper; rows no longer expand. A prayer still has two reminder slots (rule 6). The stepper's value is also a text field: a bare number keeps the direction and a leading minus means before the adhan.
+
+**Athkar list icons.** Decided by the owner, 2026-11-02: each category icon is a `NoorCloudIcon`, and the old mixed set (filled, stroked and traced art, two icons shared, sunrise and sunset alike at 24 dp) is replaced by one line set in `NoorGlyph`, with one icon per category. Proposed, to confirm: the drawings themselves.
+
+**Athkar reader (supersedes the mock's step bar, repeat badge and `HilalPager` for this screen).** Decided by the owner, 2026-11-02: back and title in a row (`NoorCloudButton`, `NoorCartouche.title`), the dhikr on a `NoorCard` with its folio and a 72 dp cloud bank, and a `NoorCounterRow` whose 132 dp counter rises 64 dp into the clouds. A tap anywhere on the card still counts and swiping still pages. A short window drops the clouds and keeps the same space for the counter.
+
+**Mushaf top bar and page controls.** Decided by the owner, 2026-11-02: tapping the page brings up `NoorCloudButton` back, `NoorCartouche.title` with the surah name and `NoorCloudButton` bookmark, and at the foot a `NoorCounterRow` with a `TasbihCloud` of the 604 pages. The top row keeps a `surfaceRaised` strip on `shadow1`, so the page's ribbon and first line never show between the puffs. Proposed, to confirm: a 64 dp counter, `accent: false` because the page's brass is the bookmark, whose top meets the page's text limit so it covers no ayah; the page number on the counter alone, dropped from the top row; the saved bookmark as a `brassSoft` disc on its puff.
 
 Everything else (list content, Quran text, dhikr text) sits on plain `surface` or `surfaceRaised`, never over art.
 
@@ -329,10 +366,11 @@ Values the mocks or code need that `tokens.json` does not define. The contract u
 4. **Geometry of ArchFrame, SkyHeader, Compass**: ring insets, arch curves, 280 dp dial, 13 dp ring inset, 98 dp hub. In the mock/bundle only.
 5. **Off-scale spacing in the mocks**: 6, 10, 14, 18, 20, 22, 28. Snap to the scale; if a screen then looks off, extend `HilalSpace`, do not hard-code.
 6. **44 dp icon discs, 60 dp nav height, 22 dp icons, 4 dp progress track**: mock/bundle values with no token.
-7. **Search field radius.** Decided by the owner: follow the token, `radius-sm` 8.
+7. **Search field radius.** Decided by the owner, 2026-11-02: a pill, `radius-pill`. This replaces the earlier `radius-sm` 8.
 8. **No warning/info colours, no tints.** Hilal has only `success` and `danger`. The old five icon tints are dropped.
 9. **No tabular/lining numeral feature data** for Cormorant.
 10. **Logo lockup sizes** (splash, header): not specified.
+11. **Shared piece sizes (8.2)**: puffs of 40, 48, 64 and 132 dp, a 56 dp cartouche, cloud banks of 52 and 72 dp. Design values with no token, listed here so they are not read as hard-coding by accident.
 
 ## 13. Copy
 
@@ -349,6 +387,7 @@ Do
 - Spend brass once per region, on the current thing.
 - Use Amiri for all Arabic, Latin faces only for Latin content, Western digits 0–9 in every locale.
 - Use only tokens.json values; list the rest in section 12.
+- Build icon buttons, list icons, screen titles, hero controls, counts and paper cards from the widgets in 8.2.
 
 Don't
 - Don't use a border to separate or elevate. `line` is a decorative rule and a Night seam, never a control's only edge. `lineStrong` is for controls.
@@ -359,6 +398,7 @@ Don't
 - Don't place art behind lists, prayer times, Quran text or dhikr text.
 - Don't nest cards, and don't raise a layer without a shadow.
 - Don't add colour tints for icon tiles.
+- Don't use a raw `IconButton`, a bare leading icon in a list row, or a hand-built title bar, counter or card.
 - Don't use letter-spacing or uppercase on Arabic.
 
 ## 15. Migration map (old → new)
@@ -366,7 +406,7 @@ Don't
 | Old | New |
 |---|---|
 | `NoorColors` / `noor_theme.dart` | `HilalTheme` (ThemeExtension), `context.hilal` |
-| `NoorTint`, icon tiles | removed; plain `ink` icons |
+| `NoorTint`, icon tiles | removed; `NoorCloudIcon` |
 | `paper`, `card` | `surface`, `surfaceRaised` |
 | `line` (card edge) | shadow; `line` only as decorative rule |
 | `ink`, `body`, `muted` | `ink`, `ink`, `inkMuted` (one body colour) |

@@ -92,12 +92,14 @@ class NoorListRow extends StatelessWidget {
 }
 
 /// One grouped paper list: `surface-raised`, `radius-md`, `shadow-1`, with a
-/// hairline `line` between rows. Not clipped, so a row's focus ring is not cut
-/// at the group's edge.
+/// hairline `line` between rows unless [divided] is off, for rows that carry
+/// their own wells. Not clipped, so a row's focus ring is not cut at the
+/// group's edge.
 class NoorListGroup extends StatelessWidget {
   final List<Widget> children;
+  final bool divided;
 
-  const NoorListGroup({super.key, required this.children});
+  const NoorListGroup({super.key, required this.children, this.divided = true});
 
   static BoxDecoration _decoration(NoorColors n) => BoxDecoration(
         color: n.card,
@@ -135,7 +137,8 @@ class NoorListGroup extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) SizedBox(height: 1, child: ColoredBox(color: n.line)),
+            if (divided && i > 0)
+              SizedBox(height: 1, child: ColoredBox(color: n.line)),
             children[i],
           ],
         ],

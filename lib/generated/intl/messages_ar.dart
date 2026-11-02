@@ -243,7 +243,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tagline_qibla": MessageLookupByLibrary.simpleMessage(
             "فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ — البقرة 144"),
         "tagline_quran": MessageLookupByLibrary.simpleMessage(
-            "إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9"),
+            "إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9"),
         "tasbeeh": MessageLookupByLibrary.simpleMessage("تسابيح"),
         "tips": MessageLookupByLibrary.simpleMessage("نصائح"),
         "today": MessageLookupByLibrary.simpleMessage("اليوم"),

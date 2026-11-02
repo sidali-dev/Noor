@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_cartouche.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_star_badge.dart';
+import 'package:noor/generals/widgets/noor_well.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:quran/quran.dart' as quran;
 
-/// The Mushaf page, as one sheet of paper on the ground: `surface-raised`, a
-/// thin brass hairline frame with an eight-point star in each corner, and at
-/// the foot a hairline rule with a star and the page number. [child] fills the
-/// page between the corner stars and the foot. Every ornament lives in the
-/// margin, none touches the text.
+/// The Mushaf page: one sheet of raised paper with a panel pressed into it,
+/// edged by a `line` hairline, a star in each corner and at the foot a hairline
+/// rule with a star and the page number. [child] fills the page between the
+/// corner stars and the foot. Every ornament lives in the margin, none touches
+/// the text. Brass is kept for [bookmarked], a ribbon hanging from the top edge.
 class MushafFrame extends StatelessWidget {
   final Widget child;
   final int pageNumber;
+  final bool bookmarked;
 
-  const MushafFrame({super.key, required this.child, required this.pageNumber});
+  /// False while the pager is up: it sits where the foot does, and repeats it.
+  final bool footVisible;
 
-  static const double _inset = NoorSpace.s3;
+  const MushafFrame({
+    super.key,
+    required this.child,
+    required this.pageNumber,
+    this.bookmarked = false,
+    this.footVisible = true,
+  });
+
+  static const double _inset = NoorSpace.s2;
   static const double _cornerStar = 14;
 
   @override
@@ -28,7 +43,7 @@ class MushafFrame extends StatelessWidget {
           left: left,
           right: right,
           child: IgnorePointer(
-            child: MushafStar(size: _cornerStar, color: n.brass),
+            child: NoorIcon(NoorGlyph.star, size: _cornerStar, color: n.line),
           ),
         );
 
@@ -37,7 +52,7 @@ class MushafFrame extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: n.card,
-        borderRadius: BorderRadius.circular(NoorRadius.md),
+        borderRadius: BorderRadius.circular(NoorRadius.lg),
         boxShadow: n.shadow2,
       ),
       child: Stack(
@@ -46,11 +61,10 @@ class MushafFrame extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(_inset),
               child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(NoorRadius.sm),
-                    border: Border.all(color: n.brass),
-                  ),
+                child: NoorWell(
+                  radius: NoorRadius.md,
+                  fill: n.card,
+                  borderColor: n.line,
                 ),
               ),
             ),
@@ -63,7 +77,15 @@ class MushafFrame extends StatelessWidget {
             bottom: near,
             left: near + _cornerStar + NoorSpace.s2,
             right: near + _cornerStar + NoorSpace.s2,
-            child: IgnorePointer(child: _Foot(pageNumber: pageNumber)),
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: footVisible ? 1 : 0,
+                duration:
+                    noorDuration(context, const Duration(milliseconds: 200)),
+                curve: Curves.easeOutCubic,
+                child: _Foot(pageNumber: pageNumber),
+              ),
+            ),
           ),
           // The text scrolls between the corner stars and the foot, so it
           // never passes under an ornament.
@@ -76,13 +98,24 @@ class MushafFrame extends StatelessWidget {
               child: child,
             ),
           ),
+          if (bookmarked)
+            PositionedDirectional(
+              top: 0,
+              end: NoorSpace.s7,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  size: const Size(14, 30),
+                  painter: _RibbonPainter(n.brass, n.depthShadow),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-/// A hairline `line` rule broken by a brass star, the page number under it.
+/// A hairline `line` rule broken by a star, the page number under it.
 class _Foot extends StatelessWidget {
   final int pageNumber;
 
@@ -102,7 +135,7 @@ class _Foot extends StatelessWidget {
           children: [
             rule,
             const SizedBox(width: NoorSpace.s2),
-            MushafStar(size: 14, color: n.brass, filled: true),
+            MushafStar(size: 14, color: n.line),
             const SizedBox(width: NoorSpace.s2),
             rule,
           ],
@@ -118,53 +151,69 @@ class _Foot extends StatelessWidget {
   }
 }
 
-/// The eight-point star ornament, [filled] or a hairline outline.
+/// The eight-point star ornament.
 class MushafStar extends StatelessWidget {
   final double size;
   final Color color;
-  final bool filled;
 
-  const MushafStar({
-    super.key,
-    required this.size,
-    required this.color,
-    this.filled = false,
-  });
+  const MushafStar({super.key, required this.size, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size.square(size),
-      painter: _StarPainter(color, filled),
+      painter: _StarPainter(color),
     );
   }
 }
 
 class _StarPainter extends CustomPainter {
   final Color color;
-  final bool filled;
 
-  _StarPainter(this.color, this.filled);
+  _StarPainter(this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawPath(
       noorStarPath(size.center(Offset.zero), size.width * 7 / 24),
-      Paint()
-        ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke
-        ..strokeWidth = 1.2
-        ..strokeJoin = StrokeJoin.round
-        ..color = color,
+      Paint()..color = color,
     );
   }
 
   @override
-  bool shouldRepaint(_StarPainter old) =>
-      old.color != color || old.filled != filled;
+  bool shouldRepaint(_StarPainter old) => old.color != color;
 }
 
-/// A `window` pill in a brass hairline ring, with a small star either side of
-/// the surah name, where a surah starts.
+/// The bookmark as a strip of brass paper hanging from the page's top edge.
+class _RibbonPainter extends CustomPainter {
+  final Color color;
+  final Color shadow;
+
+  _RibbonPainter(this.color, this.shadow);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width / 2, size.height - size.width / 2)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(
+      path.shift(const Offset(0, 1)),
+      Paint()
+        ..color = shadow
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1),
+    );
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_RibbonPainter old) =>
+      old.color != color || old.shadow != shadow;
+}
+
+/// The [NoorCartouche] where a surah starts, its name in Amiri.
 class SurahCartouche extends StatelessWidget {
   final String name;
 
@@ -172,70 +221,21 @@ class SurahCartouche extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final n = context.noor;
-    final star = MushafStar(size: 12, color: n.brass);
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 280),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: n.card,
-            borderRadius: BorderRadius.circular(NoorRadius.pill),
-            border: Border.all(color: n.brass),
-            boxShadow: n.shadow2,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(3),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: n.window,
-                borderRadius: BorderRadius.circular(NoorRadius.pill),
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: NoorSpace.s4,
-                    vertical: NoorSpace.s1,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      star,
-                      const SizedBox(width: NoorSpace.s3),
-                      Flexible(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            name,
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontFamily: 'Amiri',
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: n.onWindow,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: NoorSpace.s3),
-                      star,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+    return NoorCartouche.title(
+      name,
+      style: TextStyle(
+        fontFamily: 'Amiri',
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: context.noor.onWindow,
       ),
     );
   }
 }
 
-/// The ayah end marker, set inline in the verse text: a brass star outline
-/// with the verse number in Arabic-Indic digits. Sized from the text
-/// scale so it keeps its place on a 44 dp line at any setting.
+/// The ayah end marker, set inline in the verse text: a [CloudMedallion] with
+/// the verse number in Arabic-Indic digits. Sized from the text scale so it
+/// keeps its place on a 44 dp line at any setting.
 class AyahMarker extends StatelessWidget {
   final int number;
 
@@ -243,34 +243,20 @@ class AyahMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final n = context.noor;
-    final size = MediaQuery.textScalerOf(context).scale(30);
-
-    return SizedBox.square(
-      dimension: size,
-      child: CustomPaint(
-        painter: _StarPainter(n.brass, false),
-        child: Center(
-          child: SizedBox(
-            width: size * 0.6,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                // The package prefixes the end-of-ayah sign; the digits are
-                // its own numbering. Amiri, because the Quran font colours
-                // its digits.
-                quran.getVerseEndSymbol(number).substring(1),
-                textScaler: TextScaler.noScaling,
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
-                  color: n.ink,
-                ),
-              ),
-            ),
-          ),
+    return CloudMedallion(
+      // Wider would rewrap the verses and push a full page past its foot.
+      size: MediaQuery.textScalerOf(context).scale(30),
+      child: Text(
+        // The package prefixes the end-of-ayah sign; the digits are its own
+        // numbering. Amiri, because the Quran font colours its digits.
+        quran.getVerseEndSymbol(number).substring(1),
+        textScaler: TextScaler.noScaling,
+        style: TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          height: 1,
+          color: context.noor.ink,
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/features/quran/screens/read_quran_screen.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
@@ -42,14 +43,11 @@ Future<void> showBookmarksSheet(BuildContext context) {
               for (final page in bookmarks)
                 NoorListRow(
                   title: getLineTitle(page, context),
-                  trailing: IconButton(
+                  trailing: NoorCloudButton(
+                    size: 40,
                     tooltip: S.of(context).remove,
-                    icon: Icon(
-                      Iconsax.trash,
-                      color: context.noor.danger,
-                      size: 22,
-                    ),
-                    onPressed: () async {
+                    icon: Icon(Iconsax.trash, color: context.noor.danger),
+                    onTap: () async {
                       final list = List<int>.from(AppPrefs.bookmarks);
                       list.remove(page);
                       await AppPrefs.setBookmarks(list);

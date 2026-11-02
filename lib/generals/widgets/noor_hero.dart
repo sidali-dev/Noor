@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
-import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/settings_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -20,20 +20,20 @@ import 'package:noor/utils/theme/noor_theme.dart';
 @visibleForTesting
 const Map<String, List<(double, double, double)>> noorHeroStars = {
   NoorArt.heroQuran: [
-    (196, 30, 2.6), (230, 96, 2.6), (372, 52, 2.6), (262, 66, 2.6), //
-    (352, 24, 4.6), (214, 52, 4.6), (276, 22, 4.6),
+    (196, 30, 2.6), (203, 118, 2.6), (376, 70, 2.6), (262, 66, 2.6), //
+    (352, 24, 4.6), (306, 56, 4.6), (276, 22, 4.6),
   ],
   NoorArt.heroPrayers: [
-    (192, 36, 2.6), (222, 100, 2.6), (352, 104, 2.6), (262, 22, 2.6), //
-    (340, 30, 4.6), (208, 62, 4.6), (372, 78, 4.6),
+    (192, 36, 2.6), (222, 100, 2.6), (348, 126, 2.6), (262, 22, 2.6), //
+    (318, 24, 4.6), (208, 62, 4.6), (372, 126, 4.6),
   ],
   NoorArt.heroAthkar: [
     (176, 34, 2.6), (226, 22, 2.6), (260, 90, 2.6), (342, 112, 2.6), //
     (272, 26, 4.6), (378, 98, 4.6), (186, 64, 4.6),
   ],
   NoorArt.qiblaSkyline: [
-    (150, 20, 2.6), (244, 18, 2.6), (336, 44, 2.6), (60, 54, 2.6), //
-    (300, 26, 4.6), (108, 34, 4.6), (372, 24, 4.6),
+    (150, 20, 2.6), (244, 18, 2.6), (128, 30, 2.6), (270, 34, 2.6), //
+    (262, 10, 4.6), (8, 58, 4.6), (382, 62, 4.6),
   ],
 };
 
@@ -71,10 +71,10 @@ class _StarsPainter extends CustomPainter {
 }
 
 /// Hilal screen header: a night-sky band behind the status bar with the hero
-/// art, whose white cloud-scroll base is part of the art. The title block sits
-/// at the start, an optional settings disc at the end, and an optional
-/// [overlap] straddles the bottom edge. The band is the one shadow-box moment
-/// of the screen (`shadow-3`).
+/// art, whose page-coloured cloud-scroll base is part of the art. The title
+/// block sits at the start, an optional settings disc at the end, and an
+/// optional [overlap] straddles the bottom edge. With art the band casts no shadow, so
+/// it stays joined to the page; the flat band keeps `shadow-3`.
 ///
 /// The widget is `height` plus half the overlap tall, so the content that
 /// follows is not covered. In RTL the art mirrors with the layout, except the
@@ -159,8 +159,10 @@ class NoorHero extends StatelessWidget {
 
           // The title block sets the band's height (never below `height`), so
           // large text or a tall status bar grows the band instead of being
-          // clipped against the cloud.
+          // clipped against the cloud. The overlap's shadow falls past the
+          // bottom edge.
           return Stack(
+            clipBehavior: Clip.none,
             children: [
               Positioned(
                 top: 0,
@@ -170,7 +172,9 @@ class NoorHero extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: n.window,
-                    boxShadow: n.shadow3,
+                    // The art's cloud base runs into the page. A flat band has
+                    // no base, and in Night only the shadow frames it.
+                    boxShadow: hasArt ? null : n.shadow3,
                   ),
                   child: hasArt
                       ? Stack(
@@ -247,7 +251,11 @@ class NoorHero extends StatelessWidget {
                 PositionedDirectional(
                   top: contentTop + NoorSpace.s1,
                   end: gutter,
-                  child: _settingsDisc(context),
+                  child: NoorCloudButton(
+                    icon: const NoorIcon(NoorGlyph.settings),
+                    tooltip: S.of(context).settings,
+                    onTap: () => showSettingsSheet(context),
+                  ),
                 ),
               if (overlap != null)
                 PositionedDirectional(
@@ -271,33 +279,6 @@ class NoorHero extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
-  }
-
-  /// White paper disc: `surface-raised` with `shadow-1`, 48 dp target.
-  Widget _settingsDisc(BuildContext context) {
-    final n = context.noor;
-    final label = S.of(context).settings;
-
-    return Tooltip(
-      message: label,
-      child: NoorPressable(
-        onPressed: () => showSettingsSheet(context),
-        radius: NoorRadius.pill,
-        builder: (context, pressed) => AnimatedContainer(
-          duration: kNoorPressDuration,
-          curve: Curves.ease,
-          width: 48,
-          height: 48,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: n.card,
-            shape: BoxShape.circle,
-            boxShadow: pressed ? const [] : n.shadow1,
-          ),
-          child: NoorIcon(NoorGlyph.settings, color: n.ink, size: 22),
-        ),
       ),
     );
   }

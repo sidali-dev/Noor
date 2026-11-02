@@ -35,8 +35,11 @@ class AdhanRingScreen extends StatefulWidget {
 }
 
 class _AdhanRingScreenState extends State<AdhanRingScreen> {
-  /// Below this the screen scrolls: room for the arch, a note and two buttons.
-  static const double _minHeight = 480;
+  /// Below this the screen scrolls: room for the arch, the time, a note and two
+  /// buttons.
+  static const double _minHeight = 560;
+  static const double _maxNoteHeight = 120;
+  static const double _timeHeight = 72;
 
   @override
   void dispose() {
@@ -113,7 +116,10 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
                                       box.maxHeight / ArchFrame.aspect
                                   ? box.maxWidth
                                   : box.maxHeight / ArchFrame.aspect;
-                              return Center(
+                              // Spare height goes to the sky above the arch,
+                              // so the arch stays close to its time.
+                              return Align(
+                                alignment: Alignment.bottomCenter,
                                 // The active alarm screen is one of the loops
                                 // Hilal allows: the sky twinkles.
                                 child: NoorTwinkle(
@@ -124,7 +130,6 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
                                       unit: width / 240,
                                       names: names,
                                       title: title,
-                                      time: formattedTime,
                                     ),
                                   ),
                                 ),
@@ -132,13 +137,28 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
                             },
                           ),
                         ),
+                        const SizedBox(height: NoorSpace.s4),
+                        // Out of the arch, where it has room to be the largest
+                        // thing on the screen. Shrinks rather than scales.
+                        SizedBox(
+                          height: _timeHeight,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              formattedTime,
+                              textDirection: TextDirection.ltr,
+                              style: NoorText.numeral(context,
+                                  size: 64, color: n.onWindow),
+                            ),
+                          ),
+                        ),
                         // Reminders say how long until the prayer; keep the
                         // sentence, and let a long one scroll in its own box.
                         if (body.isNotEmpty) ...[
-                          const SizedBox(height: NoorSpace.s4),
+                          const SizedBox(height: NoorSpace.s1),
                           ConstrainedBox(
                             constraints:
-                                const BoxConstraints(maxHeight: _minHeight / 4),
+                                const BoxConstraints(maxHeight: _maxNoteHeight),
                             child: SingleChildScrollView(
                               child: Text(
                                 body,
@@ -174,31 +194,28 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
   }
 }
 
-/// The text in the arch's night window: one brass ornament, the Latin and
-/// Arabic names at equal weight, the time beneath. Scaled down as a block when
-/// a large text scale would not fit the window, never clipped.
+/// The names in the arch's night window: Latin and Arabic at equal weight, kept
+/// clear of the cloud scroll, which starts at artwork y = 168. Scaled down as a
+/// block when a large text scale would not fit the window, never clipped.
 class _ArchContent extends StatelessWidget {
   /// One ArchFrame artwork unit in dp.
   final double unit;
   final (String, String)? names;
   final String title;
-  final String time;
 
   const _ArchContent({
     required this.unit,
     required this.names,
     required this.title,
-    required this.time,
   });
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
     final names = this.names;
-    final time = this.time;
     return SizedBox(
       width: 150 * unit,
-      height: 130 * unit,
+      height: 100 * unit,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Column(
@@ -208,7 +225,7 @@ class _ArchContent extends StatelessWidget {
               Text(
                 names.$1,
                 textDirection: TextDirection.ltr,
-                style: NoorText.displayXl(context).copyWith(color: n.onWindow),
+                style: NoorText.displayLg(context).copyWith(color: n.onWindow),
               ),
               Text(
                 names.$2,
@@ -222,13 +239,6 @@ class _ArchContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: NoorText.display(context).copyWith(color: n.onWindow),
               ),
-            const SizedBox(height: NoorSpace.s2),
-            Text(
-              time,
-              textDirection: TextDirection.ltr,
-              style: NoorText.numeral(context, size: 40, color: n.onWindow)
-                  .copyWith(height: 44 / 40),
-            ),
           ],
         ),
       ),

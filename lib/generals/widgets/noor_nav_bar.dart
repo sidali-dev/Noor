@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -56,61 +57,26 @@ class NoorNavBar extends StatelessWidget {
           boxShadow: n.shadow1,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(NoorSpace.s2),
+          padding: const EdgeInsets.all(NoorSpace.s1),
           // Labels only: the icon and the tap target keep their size.
           child: MediaQuery.withClampedTextScaling(
             maxScaleFactor: 1.3,
             child: Material(
               type: MaterialType.transparency,
-              child: Stack(
+              child: Row(
                 children: [
-                  // One pill under the items; it slides to the chosen one.
-                  Positioned.fill(
-                    child: LayoutBuilder(
-                      builder: (context, box) {
-                        const gap = NoorSpace.s1;
-                        final w = (box.maxWidth - gap * (items.length - 1)) /
-                            items.length;
-                        return Stack(
-                          children: [
-                            AnimatedPositionedDirectional(
-                              key: const ValueKey('noor-nav-pill'),
-                              duration: duration,
-                              curve: kNoorSettleCurve,
-                              start: selectedIndex * (w + gap),
-                              width: w,
-                              top: 0,
-                              bottom: 0,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: n.isDark ? n.onWindow : n.window,
-                                  borderRadius:
-                                      BorderRadius.circular(NoorRadius.pill),
-                                  boxShadow: n.shadow1,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                  for (var i = 0; i < items.length; i++) ...[
+                    if (i > 0) const SizedBox(width: NoorSpace.s1),
+                    Expanded(
+                      child: _Item(
+                        svg: items[i].svg,
+                        label: items[i].label,
+                        selected: i == selectedIndex,
+                        duration: duration,
+                        onTap: () => onItemSelected(i),
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      for (var i = 0; i < items.length; i++) ...[
-                        if (i > 0) const SizedBox(width: NoorSpace.s1),
-                        Expanded(
-                          child: _Item(
-                            svg: items[i].svg,
-                            label: items[i].label,
-                            selected: i == selectedIndex,
-                            duration: duration,
-                            onTap: () => onItemSelected(i),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -139,9 +105,9 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    // Night inverts the active pill so it stays the strongest shape.
-    final onPill = n.isDark ? n.window : n.onWindow;
-    final color = selected ? onPill : n.muted;
+    // Night inverts the active puff so it stays the strongest shape.
+    final puff = n.isDark ? n.onWindow : n.window;
+    final onPuff = n.isDark ? n.window : n.onWindow;
 
     final labelStyle = NoorText.caption(context);
 
@@ -156,29 +122,39 @@ class _Item extends StatelessWidget {
         builder: (context, pressed) => Container(
           constraints: const BoxConstraints(minHeight: 48),
           padding: const EdgeInsets.symmetric(
-            vertical: NoorSpace.s2,
+            vertical: NoorSpace.s1,
             horizontal: NoorSpace.s1,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TweenAnimationBuilder<Color?>(
-                tween: ColorTween(end: color),
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: selected ? 1 : 0),
                 duration: duration,
                 curve: Curves.easeOutCubic,
-                builder: (context, c, _) => SvgPicture.asset(
-                  svg,
-                  width: 22,
-                  height: 22,
-                  colorFilter: ColorFilter.mode(c ?? color, BlendMode.srcIn),
+                builder: (context, t, _) => CloudMedallion(
+                  size: 40,
+                  front: Color.lerp(n.card, puff, t),
+                  shadows: selected ? n.shadow2 : n.shadow1,
+                  child: SvgPicture.asset(
+                    svg,
+                    width: 22,
+                    height: 22,
+                    colorFilter: ColorFilter.mode(
+                      Color.lerp(n.muted, onPuff, t)!,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: NoorSpace.s1),
               AnimatedDefaultTextStyle(
                 duration: duration,
                 curve: Curves.easeOutCubic,
-                style: labelStyle.copyWith(color: color),
+                style: labelStyle.copyWith(
+                  color: selected ? n.ink : n.muted,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

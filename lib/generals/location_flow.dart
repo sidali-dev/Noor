@@ -9,6 +9,7 @@ import 'package:noor/features/adhan/widgets/location_picker_sheet.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_radio.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
@@ -289,7 +290,7 @@ class _SourceRow extends StatelessWidget {
       checked: selected,
       inMutuallyExclusiveGroup: true,
       child: NoorListRow(
-        leading: Icon(icon, size: 24, color: n.ink),
+        leading: NoorCloudIcon(Icon(icon)),
         title: title,
         meta: subtitle,
         trailing: NoorRadioMark(selected: selected),

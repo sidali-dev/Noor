@@ -102,7 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm_location":
             MessageLookupByLibrary.simpleMessage("Confirm Location"),
         "continue_reading":
-            MessageLookupByLibrary.simpleMessage("Continue Reading"),
+            MessageLookupByLibrary.simpleMessage("Continue reading"),
         "country": MessageLookupByLibrary.simpleMessage("Country"),
         "dark_mode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
         "dhuhr": MessageLookupByLibrary.simpleMessage("Dhuhr"),
@@ -151,7 +151,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "keep_from_magnetic_title": MessageLookupByLibrary.simpleMessage(
             "Keep Away from Magnetic Interference"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
-        "last_read": MessageLookupByLibrary.simpleMessage("Last Read"),
+        "last_read": MessageLookupByLibrary.simpleMessage("Last read"),
         "location_failed": MessageLookupByLibrary.simpleMessage(
             "Couldn\'t find your location"),
         "location_needed": MessageLookupByLibrary.simpleMessage(
@@ -253,7 +253,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tagline_qibla": MessageLookupByLibrary.simpleMessage(
             "Turn your face toward the Sacred Mosque. — Al-Baqarah 2:144"),
         "tagline_quran": MessageLookupByLibrary.simpleMessage(
-            "Indeed, this Quran guides to what is most upright. — Al-Isra 17:9"),
+            "Indeed, this Quran guides to what is most upright. — Al-⁠Isra 17:9"),
         "tasbeeh": MessageLookupByLibrary.simpleMessage("Tasbeehs"),
         "tips": MessageLookupByLibrary.simpleMessage("Tips"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),

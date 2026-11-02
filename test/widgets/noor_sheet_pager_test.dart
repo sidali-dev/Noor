@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/generals/widgets/check_dialog.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
@@ -63,6 +65,41 @@ void main() {
       expect(find.text('content'), findsNothing);
       expect(closed, isTrue);
       expect(result, isNull);
+    });
+  });
+
+  group('NoorPagePanel', () {
+    Finder clouds() => find.byWidgetPredicate(
+        (w) => w is CustomPaint && w.painter is CloudBankPainter);
+
+    testWidgets('a card keeps its content clear of the clouds', (tester) async {
+      await tester.pumpWidget(_app(
+        const Locale('en'),
+        const NoorCard(child: SizedBox(key: ValueKey('c'), height: 40, width: 200)),
+      ));
+      final content = tester.getRect(find.byKey(const ValueKey('c')));
+      expect(content.bottom, lessThanOrEqualTo(tester.getTopLeft(clouds()).dy));
+    });
+
+    testWidgets('a sheet gives its clouds up to the keyboard', (tester) async {
+      Widget sheet(double keyboard) => _app(
+            const Locale('en'),
+            Builder(
+              builder: (c) => MediaQuery(
+                data: MediaQuery.of(c).copyWith(
+                  viewInsets: EdgeInsets.only(bottom: keyboard),
+                ),
+                child: const NoorSheet(title: 'Title', child: Text('content')),
+              ),
+            ),
+          );
+
+      await tester.pumpWidget(sheet(0));
+      expect(clouds(), findsOneWidget);
+
+      await tester.pumpWidget(sheet(300));
+      expect(clouds(), findsNothing);
+      expect(find.text('content'), findsOneWidget);
     });
   });
 

@@ -168,11 +168,15 @@ class AdhanController extends GetxController {
     }
   }
 
+  // By calendar day: a picked date is local midnight, where adding 24 hours
+  // lands on the wrong day across a DST change.
   void incrementDay() {
-    date.value = date.value.add(const Duration(days: 1));
+    final d = date.value;
+    date.value = DateTime(d.year, d.month, d.day + 1);
   }
 
   void decrementDay() {
-    date.value = date.value.subtract(const Duration(days: 1));
+    final d = date.value;
+    date.value = DateTime(d.year, d.month, d.day - 1);
   }
 }

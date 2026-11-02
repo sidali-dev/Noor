@@ -1,17 +1,17 @@
+import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/constants/image_strings.dart';
 
 typedef SStringGetter = String Function(S s);
 
 class AdhkarCategory {
   final int id;
   final SStringGetter title;
-  final String svgAsset;
+  final NoorGlyph glyph;
 
   const AdhkarCategory({
     required this.id,
     required this.title,
-    required this.svgAsset,
+    required this.glyph,
   });
 }
 
@@ -19,97 +19,97 @@ const List<AdhkarCategory> adhkarCategories = [
   AdhkarCategory(
     id: 1,
     title: _morningTitle,
-    svgAsset: SImageString.sunrise,
+    glyph: NoorGlyph.sunrise,
   ),
   AdhkarCategory(
     id: 2,
     title: _eveningTitle,
-    svgAsset: SImageString.sunset,
+    glyph: NoorGlyph.sunset,
   ),
   AdhkarCategory(
     id: 3,
     title: _prayerTitle,
-    svgAsset: SImageString.prayingMan,
+    glyph: NoorGlyph.prayerRug,
   ),
   AdhkarCategory(
     id: 4,
     title: _mosqueTitle,
-    svgAsset: SImageString.masjid,
+    glyph: NoorGlyph.mosque,
   ),
   AdhkarCategory(
     id: 5,
     title: _wakeUpTitle,
-    svgAsset: SImageString.alarm,
+    glyph: NoorGlyph.alarm,
   ),
   AdhkarCategory(
     id: 6,
     title: _sleepTitle,
-    svgAsset: SImageString.night,
+    glyph: NoorGlyph.moon,
   ),
   AdhkarCategory(
     id: 7,
     title: _afterPrayerTitle,
-    svgAsset: SImageString.prayingMan,
+    glyph: NoorGlyph.prayerDone,
   ),
   AdhkarCategory(
     id: 8,
     title: _tasbeehTitle,
-    svgAsset: SImageString.tasbih,
+    glyph: NoorGlyph.tasbih,
   ),
   AdhkarCategory(
     id: 9,
     title: _prophetDuaTitle,
-    svgAsset: SImageString.prophetName,
+    glyph: NoorGlyph.saying,
   ),
   AdhkarCategory(
     id: 10,
     title: _quranDuaTitle,
-    svgAsset: SImageString.quran,
+    glyph: NoorGlyph.book,
   ),
   AdhkarCategory(
     id: 11,
     title: _prophetsDuaTitle,
-    svgAsset: SImageString.group,
+    glyph: NoorGlyph.scroll,
   ),
   AdhkarCategory(
     id: 12,
     title: _generalAdhkarTitle,
-    svgAsset: SImageString.group,
+    glyph: NoorGlyph.star,
   ),
   AdhkarCategory(
     id: 13,
     title: _adhanAdhkarTitle,
-    svgAsset: SImageString.adhan,
+    glyph: NoorGlyph.minaret,
   ),
   AdhkarCategory(
     id: 14,
     title: _comprehensiveDuaTitle,
-    svgAsset: SImageString.list,
+    glyph: NoorGlyph.list,
   ),
   AdhkarCategory(
     id: 15,
     title: _wuduAdhkarTitle,
-    svgAsset: SImageString.wudu,
+    glyph: NoorGlyph.drop,
   ),
   AdhkarCategory(
     id: 16,
     title: _homeAdhkarTitle,
-    svgAsset: SImageString.home,
+    glyph: NoorGlyph.home,
   ),
   AdhkarCategory(
     id: 17,
     title: _wcAdhkarTitle,
-    svgAsset: SImageString.wc,
+    glyph: NoorGlyph.door,
   ),
   AdhkarCategory(
     id: 18,
     title: _mealAdhkarTitle,
-    svgAsset: SImageString.meal,
+    glyph: NoorGlyph.meal,
   ),
   AdhkarCategory(
     id: 19,
     title: _hajjAdhkarTitle,
-    svgAsset: SImageString.kaaba,
+    glyph: NoorGlyph.kaaba,
   ),
 ];
 

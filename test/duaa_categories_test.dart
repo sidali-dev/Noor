@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,9 +7,9 @@ import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_list_row.dart';
-import 'package:noor/generals/widgets/noor_progress_bar.dart';
 import 'package:noor/generals/widgets/noor_search_field.dart';
 import 'package:noor/features/duaa/model/adhkar_model.dart';
+import 'package:noor/generals/widgets/noor_tasbih.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -37,16 +36,9 @@ void main() {
     }
   });
 
-  test('every category has an asset path that exists on disk', () {
-    for (final cat in adhkarCategories) {
-      final file = File(cat.svgAsset);
-      expect(
-        file.existsSync(),
-        isTrue,
-        reason:
-            'Asset ${cat.svgAsset} for category ${cat.id} must exist on disk',
-      );
-    }
+  test('every category has its own icon, so none reads as another', () {
+    final glyphs = adhkarCategories.map((c) => c.glyph).toSet();
+    expect(glyphs.length, adhkarCategories.length);
   });
 
   group('Athkar list', () {
@@ -163,9 +155,12 @@ void main() {
     expect(find.text('فضل عظيم'), findsOneWidget);
 
     // Tap repetition button to decrement from 2 to 1
+    expect(tester.widget<TasbihCloud>(find.byType(TasbihCloud)).said, 0);
     await tester.tap(find.text('2'));
     await tester.pumpAndSettle();
     expect(find.text('1'), findsOneWidget);
+    // One repetition said is one bead moved along the string.
+    expect(tester.widget<TasbihCloud>(find.byType(TasbihCloud)).said, 1);
 
     // Tap repetition button to decrement to 0 and advance to next card
     await tester.tap(find.text('1'));
@@ -220,7 +215,7 @@ void main() {
 
           expect(tester.takeException(), isNull);
           expect(find.text('3'), findsOneWidget);
-          expect(find.byType(NoorProgressBar), findsOneWidget);
+          expect(find.byType(TasbihCloud), findsOneWidget);
         });
       }
     }

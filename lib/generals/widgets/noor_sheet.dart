@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
 import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -41,6 +42,8 @@ Future<T?> showNoorSheet<T>(
   );
 }
 
+/// Cut as a [NoorPagePanel]: the clouds stay below the scrolling content, and
+/// give way to the keyboard.
 class NoorSheet extends StatelessWidget {
   final String? title;
   final Widget child;
@@ -51,7 +54,7 @@ class NoorSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final n = context.noor;
     final mq = MediaQuery.of(context);
-    final bottomInset = mq.viewInsets.bottom + mq.padding.bottom + NoorSpace.s4;
+    final keyboard = mq.viewInsets.bottom > 0;
 
     final titleStyle = NoorText.title(context);
 
@@ -67,49 +70,57 @@ class NoorSheet extends StatelessWidget {
       // transparent here, so give the card its own above the paper.
       child: Material(
         type: MaterialType.transparency,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: NoorSpace.s3),
-            Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: n.lineStrong,
-                  borderRadius: BorderRadius.circular(NoorRadius.pill),
-                ),
-                child: const SizedBox(width: 36, height: 4),
-              ),
-            ),
-            const SizedBox(height: NoorSpace.s3),
-            if (title != null) ...[
-              Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: NoorSpace.s4,
-                  vertical: NoorSpace.s2,
-                ),
-                child: MediaQuery.withClampedTextScaling(
-                  maxScaleFactor: 1.3,
-                  child: Text(
-                    title!,
-                    style: titleStyle,
-                    textAlign: TextAlign.center,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: mq.padding.bottom),
+          child: NoorPagePanel(
+            cloudHeight: keyboard ? 0 : NoorPagePanel.standardCloudHeight,
+            contentTop: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: NoorSpace.s3),
+                Center(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: n.lineStrong,
+                      borderRadius: BorderRadius.circular(NoorRadius.pill),
+                    ),
+                    child: const SizedBox(width: 36, height: 4),
                   ),
                 ),
-              ),
-              const SizedBox(height: NoorSpace.s1),
-            ],
-            Flexible(
-              child: SingleChildScrollView(
-                padding: EdgeInsetsDirectional.only(
-                  start: NoorSpace.s4,
-                  end: NoorSpace.s4,
-                  top: NoorSpace.s1,
-                  bottom: bottomInset,
+                // Past the corner stars, title or not.
+                SizedBox(height: title == null ? NoorSpace.s4 : NoorSpace.s3),
+                if (title != null) ...[
+                  Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: NoorSpace.s6,
+                      vertical: NoorSpace.s2,
+                    ),
+                    child: MediaQuery.withClampedTextScaling(
+                      maxScaleFactor: 1.3,
+                      child: Text(
+                        title!,
+                        style: titleStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: NoorSpace.s1),
+                ],
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsetsDirectional.only(
+                      start: NoorSpace.s5,
+                      end: NoorSpace.s5,
+                      top: NoorSpace.s1,
+                      bottom: mq.viewInsets.bottom + NoorSpace.s4,
+                    ),
+                    child: child,
+                  ),
                 ),
-                child: child,
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

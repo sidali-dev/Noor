@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/quran/screens/read_quran_screen.dart';
 import 'package:noor/features/quran/widgets/mushaf_frame.dart';
+import 'package:noor/generals/widgets/noor_tasbih.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:quran/quran.dart' as quran;
@@ -49,6 +50,10 @@ void main() {
           ];
           expect(find.byType(AyahMarker), findsNWidgets(verses.length));
           expect(find.byType(SurahCartouche), findsNWidgets(starts));
+          // The page's brass is the bookmark, so the counter leaves it alone.
+          final counter = tester.widget<TasbihCloud>(find.byType(TasbihCloud));
+          expect(counter.said, page + 1);
+          expect(counter.accent, isFalse);
           expect(
             find.descendant(
               of: find.byType(MushafFrame),

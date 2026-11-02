@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
@@ -121,10 +122,9 @@ class _SoundRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final n = context.noor;
     final sound = Get.find<SoundPickerController>();
 
-    // Brass is the radio alone; the play disc is a sunken, ink-glyph control.
+    // Brass is the radio alone; play is an ink glyph on a puff.
     return Semantics(
       checked: selected,
       inMutuallyExclusiveGroup: true,
@@ -151,16 +151,10 @@ class _SoundRow extends StatelessWidget {
               if (selected)
                 Obx(() {
                   final playing = sound.playingPath.value == option.path;
-                  return IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: n.surfaceSunken,
-                      minimumSize: const Size(48, 48),
-                    ),
-                    icon: Icon(
-                      playing ? Iconsax.stop : Iconsax.play,
-                      color: n.ink,
-                    ),
-                    onPressed: () => sound.togglePreview(option.path),
+                  return NoorCloudButton(
+                    size: 40,
+                    icon: Icon(playing ? Iconsax.stop : Iconsax.play),
+                    onTap: () => sound.togglePreview(option.path),
                   );
                 }),
             ],

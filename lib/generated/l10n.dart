@@ -650,20 +650,20 @@ class S {
     );
   }
 
-  /// `Continue Reading`
+  /// `Continue reading`
   String get continue_reading {
     return Intl.message(
-      'Continue Reading',
+      'Continue reading',
       name: 'continue_reading',
       desc: '',
       args: [],
     );
   }
 
-  /// `Last Read`
+  /// `Last read`
   String get last_read {
     return Intl.message(
-      'Last Read',
+      'Last read',
       name: 'last_read',
       desc: '',
       args: [],
@@ -1400,10 +1400,10 @@ class S {
     );
   }
 
-  /// `Indeed, this Quran guides to what is most upright. — Al-Isra 17:9`
+  /// `Indeed, this Quran guides to what is most upright. — Al-⁠Isra 17:9`
   String get tagline_quran {
     return Intl.message(
-      'Indeed, this Quran guides to what is most upright. — Al-Isra 17:9',
+      'Indeed, this Quran guides to what is most upright. — Al-⁠Isra 17:9',
       name: 'tagline_quran',
       desc: '',
       args: [],
