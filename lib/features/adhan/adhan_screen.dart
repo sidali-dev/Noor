@@ -70,7 +70,11 @@ class _AdhanScreenState extends State<AdhanScreen> {
   void initState() {
     super.initState();
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      if (Get.isRegistered<AdhanController>()) {
+        Get.find<AdhanController>().rollPastIsha();
+      }
+      setState(() {});
     });
   }
 
@@ -272,9 +276,13 @@ class _AdhanScreenState extends State<AdhanScreen> {
                       );
                     }
 
-                    final isToday =
-                        _isSameDay(controller.date.value, DateTime.now());
-                    final next = isToday ? controller.nextPrayer() : null;
+                    // The card and the highlight belong to the day the next
+                    // prayer falls on: after Isha that is tomorrow's page.
+                    final upcoming = controller.nextPrayer();
+                    final next = upcoming != null &&
+                            _isSameDay(upcoming.at, controller.date.value)
+                        ? upcoming
+                        : null;
                     final hijri = _formatHijri(context, controller);
 
                     return NoorSettle(
@@ -282,8 +290,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         AnimatedSwitcher(
-                          duration:
-                              noorDuration(context, kNoorSettleDuration),
+                          duration: noorDuration(context, kNoorSettleDuration),
                           switchInCurve: kNoorSettleCurve,
                           switchOutCurve: Curves.easeIn,
                           layoutBuilder: (current, previous) => Stack(
@@ -365,19 +372,22 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
+                                            // Shrinks rather than cut to "Wedn…"
+                                            // at a large system font size.
                                             Flexible(
-                                              child: Text(
-                                                _formatDateTitle(
-                                                    context, controller),
-                                                style:
-                                                    NoorText.heading(context),
-                                                textAlign: TextAlign.center,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  _formatDateTitle(
+                                                      context, controller),
+                                                  style:
+                                                      NoorText.heading(context),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 1,
+                                                ),
                                               ),
                                             ),
-                                            const SizedBox(
-                                                width: NoorSpace.s1),
+                                            const SizedBox(width: NoorSpace.s1),
                                             NoorIcon(
                                               NoorGlyph.calendar,
                                               size: 14,
@@ -386,12 +396,14 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                           ],
                                         ),
                                         if (hijri != null)
-                                          Text(
-                                            hijri,
-                                            style: NoorText.bodySm(context),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              hijri,
+                                              style: NoorText.bodySm(context),
+                                              textAlign: TextAlign.center,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                       ],
                                     ),

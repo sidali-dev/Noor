@@ -66,3 +66,17 @@ int hizbStartPage(int hizb) {
   if (hizb > hizbStartPages.length) return hizbStartPages.last;
   return hizbStartPages[hizb - 1];
 }
+
+/// The hizb (1-60) a page falls in.
+int hizbOfPage(int page) {
+  final i = hizbStartPages.lastIndexWhere((start) => start <= page);
+  return i < 0 ? 1 : i + 1;
+}
+
+/// The first and last page of the juz (1-30) the page falls in: two hizbs each.
+(int, int) juzPagesOf(int page) {
+  final juz = (hizbOfPage(page) + 1) ~/ 2;
+  final first = hizbStartPages[2 * juz - 2];
+  final last = juz == 30 ? 604 : hizbStartPages[2 * juz] - 1;
+  return (first, last);
+}

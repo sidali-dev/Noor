@@ -34,12 +34,13 @@ class NextPrayerCard extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            height: _cloudHeight,
+            height: _cloudHeight + CloudBankPainter.headroom,
             child: CustomPaint(
               painter: CloudBankPainter(
                 back: n.isDark ? n.windowRaised : n.surfaceSunken,
                 front: n.card,
                 lip: n.isDark ? n.depthShadow : null,
+                shade: n.depthShadow,
               ),
             ),
           ),

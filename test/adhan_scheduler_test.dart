@@ -145,23 +145,23 @@ void main() {
     test('round trip and offset values', () {
       for (final prayer in Prayer.all) {
         for (var offset = 0; offset < 5; offset++) {
-          final adhanId = idFor(prayer.adhanId, offset);
-          expect(baseOf(adhanId), prayer.adhanId);
+          final adhanId = AdhanScheduler.idFor(prayer.adhanId, offset);
+          expect(AdhanScheduler.baseOf(adhanId), prayer.adhanId);
 
-          final alarm1 = idFor(prayer.alarmId1, offset);
-          expect(baseOf(alarm1), prayer.alarmId1);
+          final alarm1 = AdhanScheduler.idFor(prayer.alarmId1, offset);
+          expect(AdhanScheduler.baseOf(alarm1), prayer.alarmId1);
 
-          final alarm2 = idFor(prayer.alarmId2, offset);
-          expect(baseOf(alarm2), prayer.alarmId2);
+          final alarm2 = AdhanScheduler.idFor(prayer.alarmId2, offset);
+          expect(AdhanScheduler.baseOf(alarm2), prayer.alarmId2);
         }
       }
 
-      expect(idFor(1, 0), 1);
-      expect(idFor(1, 1), 10001);
-      expect(idFor(1, 2), 20001);
-      expect(idFor(101, 1), 10101);
-      expect(baseOf(20001), 1);
-      expect(baseOf(10101), 101);
+      expect(AdhanScheduler.idFor(1, 0), 1);
+      expect(AdhanScheduler.idFor(1, 1), 10001);
+      expect(AdhanScheduler.idFor(1, 2), 20001);
+      expect(AdhanScheduler.idFor(101, 1), 10101);
+      expect(AdhanScheduler.baseOf(20001), 1);
+      expect(AdhanScheduler.baseOf(10101), 101);
     });
   });
 
@@ -389,7 +389,7 @@ void main() {
   // works if settings built like sync() builds them survive storage unchanged.
   test('alarm settings round-trip through storage JSON unchanged', () {
     final settings = AlarmSettings(
-      id: idFor(1, 2),
+      id: AdhanScheduler.idFor(1, 2),
       dateTime: DateTime(2026, 4, 15, 5, 0),
       assetAudioPath: 'assets/audio/adhan.mp3',
       loopAudio: false,

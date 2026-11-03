@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:geolocator/geolocator.dart';
@@ -22,7 +20,6 @@ import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class QiblaScreen extends StatefulWidget {
   const QiblaScreen({super.key});
@@ -31,17 +28,13 @@ class QiblaScreen extends StatefulWidget {
   State<QiblaScreen> createState() => _QiblaScreenState();
 }
 
-class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
+class _QiblaScreenState extends State<QiblaScreen> {
   late final QiblaController _controller;
-  late final Future<bool?> _deviceSupport;
-  double? _distanceKm;
 
   @override
   void initState() {
     super.initState();
-    // Create controller once
     _controller = Get.put(QiblaController());
-    WidgetsBinding.instance.addObserver(this);
 
     // Ensure AdhanController is registered for LocationPill
     if (!Get.isRegistered<AdhanController>()) {
@@ -53,44 +46,12 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
         ? Get.find<LocationController>()
         : Get.put(LocationController());
     locationController.getLocation();
-
-    // Check device sensor support
-    _deviceSupport = FlutterQiblah.androidDeviceSensorSupport();
-
-    // Fetch distance to Kaaba
-    _fetchDistance();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     Get.delete<QiblaController>();
     super.dispose();
-  }
-
-  // Back from system settings after enabling GPS or the permission.
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _controller.restartCheckLocationStatus();
-      _fetchDistance();
-    }
-  }
-
-  Future<void> _fetchDistance() async {
-    final double? distance = await _controller.distanceToKaabaKm();
-    if (mounted) {
-      setState(() => _distanceKm = distance);
-    }
-  }
-
-  Future<void> _requestPermission() async {
-    if (await Permission.location.isDenied) {
-      await Permission.location.request();
-    }
-    if (await Permission.location.isPermanentlyDenied) {
-      await openAppSettings();
-    }
   }
 
   Widget _scroll(Widget child) => SingleChildScrollView(
@@ -110,13 +71,14 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // The night skyline is the hero's art; it is in NoorArt.noMirror,
-          // so it keeps its place in RTL.
+          // The Kaaba stands at the end of the band, so the verse takes the
+          // first 40%.
           NoorHero(
             art: NoorArt.qiblaSkyline,
             settings: true,
             title: S.of(context).nav_qibla,
             subtitle: S.of(context).tagline_qibla,
+            textShare: 0.4,
             overlap: const LocationPill(),
           ),
           Expanded(
@@ -136,90 +98,55 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBody() {
-    return FutureBuilder<bool?>(
-      future: _deviceSupport,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Obx(() {
+      final context = this.context;
+      final c = _controller;
+      switch (c.status.value) {
+        case QiblaStatus.checking:
           return _buildCalmSpinner();
-        }
-
-        // No button on these two: the sensor check runs once, so a retry would
-        // only rebuild the same result.
-        if (snapshot.hasError) {
+        // No button on these two: the sensor is checked again on resume, but a
+        // retry here would only rebuild the same result.
+        case QiblaStatus.sensorError:
           return _scroll(EmptyState(
             danger: true,
             icon: NoorGlyph.alert,
             message: S.of(context).compass_error,
           ));
-        }
-
-        // If sensor unsupported
-        if (snapshot.data == false) {
+        case QiblaStatus.sensorMissing:
           return _scroll(EmptyState(
             icon: NoorGlyph.compass,
             message: S.of(context).sensor_not_supported,
           ));
-        }
-
-        // Sensor supported: stream location status
-        return StreamBuilder<LocationStatus>(
-          stream: _controller.stream,
-          initialData: _controller.last,
-          builder: (context, locationSnapshot) {
-            if (locationSnapshot.hasError) {
-              return _scroll(EmptyState(
-                danger: true,
-                icon: NoorGlyph.alert,
-                message: S.of(context).location_failed,
-                actionLabel: S.of(context).try_again,
-                onAction: () => _controller.restartCheckLocationStatus(),
-              ));
-            }
-
-            final LocationStatus? status = locationSnapshot.data;
-            if (status == null) {
-              return _buildCalmSpinner();
-            }
-
-            // GPS signal is off
-            if (!status.enabled) {
-              return _scroll(EmptyState(
-                icon: Iconsax.location_slash,
-                message: S.of(context).gps_off,
-                actionLabel: S.of(context).open_settings,
-                // The resume observer re-checks on return.
-                onAction: Geolocator.openLocationSettings,
-              ));
-            }
-
-            // Permission check
-            switch (status.status) {
-              case LocationPermission.always:
-              case LocationPermission.whileInUse:
-                return _buildActiveCompass();
-
-              case LocationPermission.denied:
-              case LocationPermission.deniedForever:
-                return _scroll(EmptyState(
-                  icon: Iconsax.location_slash,
-                  message: S.of(context).enable_location_permission,
-                  actionLabel: status.status == LocationPermission.deniedForever
-                      ? S.of(context).open_settings
-                      : S.of(context).try_again,
-                  onAction: () async {
-                    await _requestPermission();
-                    await _controller.restartCheckLocationStatus();
-                    _fetchDistance();
-                  },
-                ));
-
-              default:
-                return _buildCalmSpinner();
-            }
-          },
-        );
-      },
-    );
+        case QiblaStatus.failed:
+          return _scroll(EmptyState(
+            danger: true,
+            icon: NoorGlyph.alert,
+            message: S.of(context).location_failed,
+            actionLabel: S.of(context).try_again,
+            onAction: () => c.refreshStatus(ask: true),
+          ));
+        case QiblaStatus.gpsOff:
+          return _scroll(EmptyState(
+            icon: Iconsax.location_slash,
+            message: S.of(context).gps_off,
+            actionLabel: S.of(context).open_settings,
+            // Resuming from settings re-checks.
+            onAction: Geolocator.openLocationSettings,
+          ));
+        case QiblaStatus.denied:
+        case QiblaStatus.deniedForever:
+          return _scroll(EmptyState(
+            icon: Iconsax.location_slash,
+            message: S.of(context).enable_location_permission,
+            actionLabel: c.status.value == QiblaStatus.deniedForever
+                ? S.of(context).open_settings
+                : S.of(context).try_again,
+            onAction: c.allowLocation,
+          ));
+        case QiblaStatus.ready:
+          return _buildActiveCompass();
+      }
+    });
   }
 
   Widget _buildCalmSpinner() => const LoadingState();
@@ -232,10 +159,14 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
     return StreamBuilder<QiblahDirection>(
       stream: FlutterQiblah.qiblahStream,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting ||
-            !snapshot.hasData) {
-          return _buildCalmSpinner();
+        if (snapshot.hasError) {
+          return _scroll(EmptyState(
+            danger: true,
+            icon: NoorGlyph.alert,
+            message: S.of(context).compass_error,
+          ));
         }
+        if (!snapshot.hasData) return _buildCalmSpinner();
 
         final QiblahDirection qiblahDirection = snapshot.data!;
         final compass = QiblaCompass(
@@ -243,11 +174,11 @@ class _QiblaScreenState extends State<QiblaScreen> with WidgetsBindingObserver {
           qiblah: qiblahDirection.qiblah,
         );
         final card = NoorSettle(
-          child: QiblaDirectionCard(
-            offset: qiblahDirection.offset,
-            distanceKm: _distanceKm,
-            onCalibrate: () => showQiblaCalibrationSheet(context),
-          ),
+          child: Obx(() => QiblaDirectionCard(
+                offset: qiblahDirection.offset,
+                distanceKm: _controller.distanceKm.value,
+                onCalibrate: () => showQiblaCalibrationSheet(context),
+              )),
         );
 
         return LayoutBuilder(

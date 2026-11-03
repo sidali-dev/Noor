@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -10,9 +9,10 @@ import 'package:noor/utils/theme/noor_theme.dart';
 
 /// Hilal TabBar: a flat `surface-raised` strip with `shadow-1`, floating
 /// `s4` above the bottom safe area and `s4` in from the sides of the content
-/// column ([NoorLayout]). The active item
-/// is a `window` pill (moon-white in Night) that slides between items; the
-/// others are `ink-muted`.
+/// column ([NoorLayout]). The active tab is cut out of it as a window: a pill
+/// of night sky (`window`; moon-white `onWindow` in Night) holding its icon
+/// and label in the opposite colour. The others are `ink-muted` on the strip.
+/// Every icon is in the Kaaba's navy and cream on a round plate.
 ///
 /// The widget's own height includes the safe area and the floating gap, so
 /// `Scaffold` reserves exactly the room the bar covers. Items are laid out in
@@ -35,9 +35,9 @@ class NoorNavBar extends StatelessWidget {
     final s = S.of(context);
 
     final items = [
-      (svg: SImageString.quran, label: s.nav_quran),
-      (svg: SImageString.adhan, label: s.nav_prayers),
-      (svg: SImageString.prayingHands, label: s.nav_adhkar),
+      (svg: SImageString.navQuran, label: s.nav_quran),
+      (svg: SImageString.navMosque, label: s.nav_prayers),
+      (svg: SImageString.navTasbih, label: s.nav_adhkar),
       (svg: SImageString.kaaba, label: s.nav_qibla),
     ];
 
@@ -57,7 +57,7 @@ class NoorNavBar extends StatelessWidget {
           boxShadow: n.shadow1,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(NoorSpace.s1),
+          padding: const EdgeInsets.all(NoorSpace.s2),
           // Labels only: the icon and the tap target keep their size.
           child: MediaQuery.withClampedTextScaling(
             maxScaleFactor: 1.3,
@@ -102,14 +102,19 @@ class _Item extends StatelessWidget {
     required this.onTap,
   });
 
+  // Every icon is drawn in its own colours on a round plate, the Kaaba's way;
+  // it is contained in the 22 x 18 the Kaaba takes.
+  static const double _icon = 22;
+  static const double _iconHeight = 18;
+  static const double _slot = 28;
+
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    // Night inverts the active puff so it stays the strongest shape.
-    final puff = n.isDark ? n.onWindow : n.window;
-    final onPuff = n.isDark ? n.window : n.onWindow;
-
     final labelStyle = NoorText.caption(context);
+    // The window and what is drawn on it swap in Night, as every window does.
+    final pill = n.isDark ? n.onWindow : n.window;
+    final onPill = n.isDark ? n.window : n.onWindow;
 
     return Semantics(
       selected: selected,
@@ -118,52 +123,79 @@ class _Item extends StatelessWidget {
       excludeSemantics: true,
       child: NoorPressable(
         onPressed: onTap,
-        radius: NoorRadius.pill,
-        builder: (context, pressed) => Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.symmetric(
-            vertical: NoorSpace.s1,
-            horizontal: NoorSpace.s1,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(end: selected ? 1 : 0),
-                duration: duration,
-                curve: Curves.easeOutCubic,
-                builder: (context, t, _) => CloudMedallion(
-                  size: 40,
-                  front: Color.lerp(n.card, puff, t),
-                  shadows: selected ? n.shadow2 : n.shadow1,
-                  child: SvgPicture.asset(
-                    svg,
-                    width: 22,
-                    height: 22,
-                    colorFilter: ColorFilter.mode(
-                      Color.lerp(n.muted, onPuff, t)!,
-                      BlendMode.srcIn,
+        radius: NoorRadius.md,
+        builder: (context, pressed) => TweenAnimationBuilder<double>(
+          tween: Tween(end: selected ? 1 : 0),
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          builder: (context, t, _) {
+            final color = Color.lerp(n.muted, onPill, t)!;
+            return Container(
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.symmetric(
+                vertical: NoorSpace.s1,
+                horizontal: NoorSpace.s1,
+              ),
+              decoration: BoxDecoration(
+                color: pill.withValues(alpha: t),
+                borderRadius: BorderRadius.circular(NoorRadius.md),
+                boxShadow: selected ? n.shadow1 : null,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox.square(
+                    dimension: _slot,
+                    child: Center(
+                      child: _Plate(
+                        // Dark on dark otherwise: the art stands on paper,
+                        // light enough to read on every state.
+                        color: Color.lerp(
+                          n.isDark ? n.onWindowMuted : n.card,
+                          n.onWindow,
+                          t,
+                        )!,
+                        child: SvgPicture.asset(
+                          svg,
+                          width: _icon,
+                          height: _iconHeight,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Text(
+                    label,
+                    style: labelStyle.copyWith(
+                      color: color,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              AnimatedDefaultTextStyle(
-                duration: duration,
-                curve: Curves.easeOutCubic,
-                style: labelStyle.copyWith(
-                  color: selected ? n.ink : n.muted,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                child: Text(label),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
+}
+
+class _Plate extends StatelessWidget {
+  final Color color;
+  final Widget child;
+
+  const _Plate({required this.color, required this.child});
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        child: SizedBox.square(
+          dimension: _Item._slot,
+          child: Center(child: child),
+        ),
+      );
 }

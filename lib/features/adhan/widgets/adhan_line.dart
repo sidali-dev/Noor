@@ -34,8 +34,9 @@ extension PrayerUI on Prayer {
       : NoorGlyph.sun;
 }
 
-/// One prayer in the day's list: its name, its time (the screen's brass when it
-/// is next), the adhan bell, and a tap that opens its reminders sheet.
+/// One prayer in the day's list: its sun or moon (a flat mark, not a control),
+/// its name, its time (the screen's brass when it is next), the adhan bell on
+/// a puff, and a tap that opens its reminders sheet.
 class AdhanLine extends StatelessWidget {
   final Prayer prayer;
   final String time;
@@ -82,7 +83,13 @@ class AdhanLine extends StatelessWidget {
           ),
           child: Row(
             children: [
-              NoorCloudIcon(NoorIcon(prayer.glyph)),
+              // Flat, so it reads as a marker; the bell is the puff you press.
+              SizedBox.square(
+                dimension: 40,
+                child: Center(
+                  child: NoorIcon(prayer.glyph, size: 26, color: n.muted),
+                ),
+              ),
               const SizedBox(width: NoorSpace.s3),
               Expanded(
                 child: stacked

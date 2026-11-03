@@ -6,7 +6,8 @@ import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A number on a puff of Hilal's cloud scroll: a back row (`surface-sunken`,
 /// `line` in Night) under a `surface-raised` front row, whose cut edge is a
-/// crisp 1 dp lip. The whole puff casts one `shadow-1`.
+/// crisp 1 dp lip. The whole puff casts one `shadow-1`, and the front row
+/// shades the back one a little, so the two read as stacked sheets.
 class CloudMedallion extends StatelessWidget {
   final double size;
   final Widget child;
@@ -14,15 +15,18 @@ class CloudMedallion extends StatelessWidget {
   /// Replaces `shadow-1`, for a puff that is a control rather than a marker.
   final List<BoxShadow>? shadows;
 
-  /// Replaces the `surface-raised` front row, for the one puff that is chosen.
-  final Color? front;
+  /// 0 to 1: how much the puff glows, for the one that is chosen or pressed.
+  /// A soft halo of the window colour (moon-white in Night) round the outside;
+  /// the rows keep their own paper, which is what made a filled puff read as a
+  /// flower.
+  final double glow;
 
   const CloudMedallion({
     super.key,
     required this.size,
     required this.child,
     this.shadows,
-    this.front,
+    this.glow = 0,
   });
 
   @override
@@ -34,8 +38,11 @@ class CloudMedallion extends StatelessWidget {
       child: CustomPaint(
         painter: _CloudPainter(
           back: n.isDark ? n.line : n.surfaceSunken,
-          front: front ?? n.card,
+          front: n.card,
           lip: n.isDark ? n.depthShadow : n.line,
+          shade: n.depthShadow,
+          glow: (n.isDark ? n.onWindow : n.window)
+              .withValues(alpha: _glowAlpha * glow),
           shadows: shadows ?? n.shadow1,
         ),
         child: Center(
@@ -47,6 +54,9 @@ class CloudMedallion extends StatelessWidget {
       ),
     );
   }
+
+  // Strong enough to see on raised paper, soft enough not to contrast with it.
+  static const double _glowAlpha = 0.32;
 }
 
 /// An icon button on a puff: 48 dp standing free, 40 dp in a row, a well or a
@@ -80,6 +90,7 @@ class NoorCloudButton extends StatelessWidget {
         alignment: Alignment.center,
         child: CloudMedallion(
           size: size,
+          glow: pressed ? 1 : 0,
           child: IconTheme.merge(
             data: IconThemeData(
               size: 22,
@@ -117,12 +128,16 @@ class _CloudPainter extends CustomPainter {
   final Color back;
   final Color front;
   final Color lip;
+  final Color shade;
+  final Color glow;
   final List<BoxShadow> shadows;
 
   _CloudPainter({
     required this.back,
     required this.front,
     required this.lip,
+    required this.shade,
+    required this.glow,
     required this.shadows,
   });
 
@@ -164,6 +179,14 @@ class _CloudPainter extends CustomPainter {
     final k = size.width / 100;
     canvas.scale(k);
     // The tokens are in dp, the canvas is in units.
+    if (glow.a > 0) {
+      canvas.drawPath(
+        _outline,
+        Paint()
+          ..color = glow
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5 / k),
+      );
+    }
     for (final s in shadows) {
       canvas.drawPath(
         _outline.shift(s.offset / k),
@@ -173,6 +196,12 @@ class _CloudPainter extends CustomPainter {
       );
     }
     canvas.drawPath(_backRow, Paint()..color = back);
+    canvas.drawPath(
+      _frontRow.shift(Offset(0, -0.5 / k)),
+      Paint()
+        ..color = shade.withValues(alpha: shade.a * 0.6)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 1.5 / k),
+    );
     canvas.drawPath(_frontRow.shift(Offset(0, 1 / k)), Paint()..color = lip);
     canvas.drawPath(_frontRow, Paint()..color = front);
   }
@@ -182,24 +211,31 @@ class _CloudPainter extends CustomPainter {
       old.back != back ||
       old.front != front ||
       old.lip != lip ||
+      old.shade != shade ||
+      old.glow != glow ||
       old.shadows != shadows;
 }
 
-/// The `cloud-scroll` motif (`hilal-design-system/assets/Motifs`) in flat fills,
-/// each row repeated at its own step across the card. The front row is the
-/// card's frame paper, so ring and clouds read as one sheet. No blur and no
-/// curls: at this size they read as a smudge. [lip] is a crisp edge over the
-/// back row, for Night, where the two rows are nearly the same colour.
+/// The `cloud-scroll` motif (`hilal-design-system/assets/Motifs`) as two
+/// layers of cut paper, each row repeated at its own step across the card. The
+/// front row is the card's frame paper, so ring and clouds read as one sheet.
+/// The depth is soft shadow, not outline: the back row throws one onto the
+/// ground behind it and the front row onto the back row, as stacked sheets do.
+/// No curls: at this size they read as a smudge. [lip] is a crisp edge over the
+/// back row, for Night, where the two rows are nearly the same colour. [shade]
+/// is the shadow colour, `depthShadow`.
 class CloudBankPainter extends CustomPainter {
   CloudBankPainter({
     required this.back,
     required this.front,
     required this.lip,
+    required this.shade,
   });
 
   final Color back;
   final Color front;
   final Color? lip;
+  final Color shade;
 
   // (x, y, r) in the motif's viewBox, without the end puffs that close the
   // motif at its edges: here the rows run on.
@@ -224,6 +260,14 @@ class CloudBankPainter extends CustomPainter {
   static const _bottom = 62.0;
   static const _frontBase = 50.0; // Solid paper below this.
 
+  /// Room above the back row for its shadow: give the painter this much more
+  /// height than the clouds need, and the clouds keep their size.
+  static const double headroom = 6;
+
+  // Shadow blur in dp, and its strength against [shade]'s own alpha.
+  static const _sigma = 3.0;
+  static const _strength = 0.7;
+
   static Path _row(
     List<(double, double, double)> row,
     double step,
@@ -241,33 +285,44 @@ class CloudBankPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final scale = size.height / (_bottom - _top);
+    final scale = (size.height - headroom) / (_bottom - _top);
     final repeats = (size.width / (_frontStep * scale)).ceil();
-    final front = _row(_frontRow, _frontStep, repeats)
+    final backRow = _row(_backRow, _backStep, repeats);
+    final frontRow = _row(_frontRow, _frontStep, repeats)
       ..addRect(Rect.fromLTRB(
         _motifCentre - size.width / scale,
         _frontBase - _top,
         _motifCentre + size.width / scale,
         _bottom,
       ));
+    // The sigma is in dp, the canvas in motif units.
+    Paint shadow() => Paint()
+      ..color = shade.withValues(alpha: shade.a * _strength)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, _sigma / scale);
 
     canvas
       ..save()
       ..clipRect(Offset.zero & size)
-      ..translate(size.width / 2, 0)
+      ..translate(size.width / 2, headroom)
       ..scale(scale)
       ..translate(-_motifCentre, 0)
-      ..drawPath(_row(_backRow, _backStep, repeats), Paint()..color = back);
+      ..drawPath(backRow.shift(const Offset(0, -2)), shadow())
+      ..drawPath(backRow, Paint()..color = back)
+      ..drawPath(frontRow.shift(const Offset(0, -1)), shadow());
     final lip = this.lip;
     if (lip != null) {
-      canvas.drawPath(front.shift(Offset(0, -1 / scale)), Paint()..color = lip);
+      canvas.drawPath(
+          frontRow.shift(Offset(0, -1 / scale)), Paint()..color = lip);
     }
     canvas
-      ..drawPath(front, Paint()..color = this.front)
+      ..drawPath(frontRow, Paint()..color = front)
       ..restore();
   }
 
   @override
   bool shouldRepaint(CloudBankPainter old) =>
-      old.back != back || old.front != front || old.lip != lip;
+      old.back != back ||
+      old.front != front ||
+      old.lip != lip ||
+      old.shade != shade;
 }

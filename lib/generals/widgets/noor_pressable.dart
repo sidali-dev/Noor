@@ -61,6 +61,9 @@ class _NoorPressableState extends State<NoorPressable> {
         button: true,
         enabled: enabled,
         child: GestureDetector(
+          // The whole box takes the tap, not just what it paints: padding and
+          // the gap between a row's icon and text are part of the tile.
+          behavior: HitTestBehavior.opaque,
           onTapDown: enabled ? (_) => _setPressed(true) : null,
           onTapUp: enabled ? (_) => _setPressed(false) : null,
           onTapCancel: enabled ? () => _setPressed(false) : null,

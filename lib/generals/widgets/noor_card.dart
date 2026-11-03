@@ -14,6 +14,8 @@ enum NoorCardTone { paper, night }
 /// in each top corner, an optional [folio] between them and a bank of clouds
 /// along the foot. [child] keeps clear of all of it, so no ornament touches a
 /// word. A short window has no room for the clouds, as the hero drops its art.
+/// With [cloudsAtTop] the bank hangs from the head instead (a sheet's) and the
+/// stars give way to it.
 /// It shrinks to [child], or fills a parent that fixes its size.
 class NoorPagePanel extends StatelessWidget {
   final Widget child;
@@ -25,12 +27,15 @@ class NoorPagePanel extends StatelessWidget {
   /// Replaces the room kept for the stars, for a child that minds them itself.
   final double? contentTop;
 
+  final bool cloudsAtTop;
+
   const NoorPagePanel({
     super.key,
     required this.child,
     this.folio,
     this.cloudHeight = standardCloudHeight,
     this.contentTop,
+    this.cloudsAtTop = false,
   });
 
   static const double standardCloudHeight = 52;
@@ -68,8 +73,7 @@ class NoorPagePanel extends StatelessWidget {
             ),
           ),
         ),
-        corner(left: _near),
-        corner(right: _near),
+        if (!cloudsAtTop) ...[corner(left: _near), corner(right: _near)],
         if (folio != null)
           Positioned(
             top: _near - 2,
@@ -84,11 +88,14 @@ class NoorPagePanel extends StatelessWidget {
           ),
         Padding(
           padding: EdgeInsets.only(
-            top: contentTop ??
-                (folio == null
-                    ? _near + _star + NoorSpace.s1
-                    : NoorSpace.s7 - NoorSpace.s1),
-            bottom: clouds ? cloudHeight + _inset + 1 : _inset,
+            top: cloudsAtTop
+                ? (clouds ? cloudHeight + _inset + 1 : _near) +
+                    (contentTop ?? 0)
+                : contentTop ??
+                    (folio == null
+                        ? _near + _star + NoorSpace.s1
+                        : NoorSpace.s7 - NoorSpace.s1),
+            bottom: clouds && !cloudsAtTop ? cloudHeight + _inset + 1 : _inset,
           ),
           child: child,
         ),
@@ -97,18 +104,24 @@ class NoorPagePanel extends StatelessWidget {
           Positioned(
             left: _inset + 1,
             right: _inset + 1,
-            bottom: _inset + 1,
-            height: cloudHeight,
+            top: cloudsAtTop ? _inset + 1 : null,
+            bottom: cloudsAtTop ? null : _inset + 1,
+            height: cloudHeight + CloudBankPainter.headroom,
             child: IgnorePointer(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(NoorRadius.md - 1),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(NoorRadius.md - 1),
                 ),
-                child: CustomPaint(
-                  painter: CloudBankPainter(
-                    back: n.isDark ? n.windowRaised : n.surfaceSunken,
-                    front: n.card,
-                    lip: n.isDark ? n.depthShadow : null,
+                // Hung from the head: the same bank, turned over.
+                child: Transform.flip(
+                  flipY: cloudsAtTop,
+                  child: CustomPaint(
+                    painter: CloudBankPainter(
+                      back: n.isDark ? n.windowRaised : n.surfaceSunken,
+                      front: n.card,
+                      lip: n.isDark ? n.depthShadow : null,
+                      shade: n.depthShadow,
+                    ),
                   ),
                 ),
               ),

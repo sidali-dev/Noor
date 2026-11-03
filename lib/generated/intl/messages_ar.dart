@@ -180,7 +180,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "no_internet": MessageLookupByLibrary.simpleMessage(
             "لا يوجد اتصال. أعد المحاولة عند عودة الإنترنت."),
         "no_results": MessageLookupByLibrary.simpleMessage("لا نتائج"),
-        "noor": MessageLookupByLibrary.simpleMessage("نور الإيمان"),
         "notifications_off": MessageLookupByLibrary.simpleMessage(
             "اسمح بالإشعارات ليصلك الأذان"),
         "open_adhkar": MessageLookupByLibrary.simpleMessage("إفتح الأذكار"),

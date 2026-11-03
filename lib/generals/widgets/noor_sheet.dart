@@ -8,9 +8,10 @@ import 'package:noor/utils/theme/noor_theme.dart';
 // Sheets round the top corners to `radius-lg` ([NoorSheet]); dialogs round all
 // four ([NoorDialogCard]). Neither clips, so the shadow is never cut.
 
-/// Shows a bottom sheet: a handle, an optional [title] in the display face
-/// (`titleOf` is re-evaluated when the locale changes), then [builder]'s
-/// content. It drags down to dismiss.
+/// Shows a bottom sheet: clouds along its head, an optional [title] in the
+/// display face (`titleOf` is re-evaluated when the locale changes), then
+/// [builder]'s content. It drags down to dismiss, from anywhere above its
+/// scrolling content.
 Future<T?> showNoorSheet<T>(
   BuildContext context, {
   String? title,
@@ -42,13 +43,15 @@ Future<T?> showNoorSheet<T>(
   );
 }
 
-/// Cut as a [NoorPagePanel]: the clouds stay below the scrolling content, and
-/// give way to the keyboard.
+/// Cut as a [NoorPagePanel] with its clouds hung from the head, above the
+/// scrolling content; they give way to the keyboard.
 class NoorSheet extends StatelessWidget {
   final String? title;
   final Widget child;
 
   const NoorSheet({super.key, this.title, required this.child});
+
+  static const double _cloudHeight = 44;
 
   @override
   Widget build(BuildContext context) {
@@ -73,23 +76,13 @@ class NoorSheet extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.padding.bottom),
           child: NoorPagePanel(
-            cloudHeight: keyboard ? 0 : NoorPagePanel.standardCloudHeight,
-            contentTop: 0,
+            cloudsAtTop: true,
+            cloudHeight: keyboard ? 0 : _cloudHeight,
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: NoorSpace.s3),
-                Center(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: n.lineStrong,
-                      borderRadius: BorderRadius.circular(NoorRadius.pill),
-                    ),
-                    child: const SizedBox(width: 36, height: 4),
-                  ),
-                ),
-                // Past the corner stars, title or not.
-                SizedBox(height: title == null ? NoorSpace.s4 : NoorSpace.s3),
+                const SizedBox(height: NoorSpace.s2),
                 if (title != null) ...[
                   Padding(
                     padding: const EdgeInsetsDirectional.symmetric(

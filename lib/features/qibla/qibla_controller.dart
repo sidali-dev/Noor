@@ -1,18 +1,28 @@
-import 'dart:async';
-
+import 'package:flutter/widgets.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
-class QiblaController extends GetxController {
-  final StreamController<LocationStatus> _locationStreamController =
-      StreamController<LocationStatus>.broadcast();
+/// Where the compass stands: one state at a time, so the screen only maps it
+/// to a view.
+enum QiblaStatus {
+  checking,
+  sensorMissing,
+  sensorError,
+  gpsOff,
+  denied,
+  deniedForever,
+  failed,
+  ready,
+}
 
-  Stream<LocationStatus> get stream => _locationStreamController.stream;
+class QiblaController extends GetxController with WidgetsBindingObserver {
+  final status = QiblaStatus.checking.obs;
 
-  /// Latest status, so a late listener (the broadcast stream drops events
-  /// nobody listened to) doesn't wait on a spinner forever.
-  LocationStatus? last;
+  /// Null until known, or when it can't be had; the card then hides the row.
+  final distanceKm = Rxn<double>();
+
+  bool _busy = false;
 
   static const double kaabaLatitude = 21.4225;
   static const double kaabaLongitude = 39.8262;
@@ -20,69 +30,88 @@ class QiblaController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    checkLocationStatus();
+    WidgetsBinding.instance.addObserver(this);
+    refreshStatus(ask: true);
   }
 
   @override
   void onClose() {
-    _locationStreamController.close();
+    WidgetsBinding.instance.removeObserver(this);
     FlutterQiblah().dispose();
     super.onClose();
   }
 
-  Future<void> checkLocationStatus() async {
+  // Back from system settings after enabling GPS or the permission.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) refreshStatus();
+  }
+
+  /// Checks the sensor, GPS and permission in that order. [ask] shows the
+  /// system permission prompt when it is still undecided; it never reopens
+  /// once the user has chosen "don't ask again".
+  Future<void> refreshStatus({bool ask = false}) async {
+    if (_busy) return;
+    _busy = true;
+    // Keep the compass on screen while a resume re-checks behind it.
+    if (status.value != QiblaStatus.ready) status.value = QiblaStatus.checking;
     try {
-      final locationStatus = await FlutterQiblah.checkLocationStatus();
-      if (locationStatus.enabled &&
-          locationStatus.status == LocationPermission.denied) {
-        await FlutterQiblah.requestPermissions();
-        _emit(await FlutterQiblah.checkLocationStatus());
-      } else {
-        _emit(locationStatus);
-      }
-    } catch (e) {
-      if (!_locationStreamController.isClosed) {
-        _locationStreamController.sink.addError(e);
-      }
+      status.value = await _resolve(ask);
+      if (status.value == QiblaStatus.ready) await _fetchDistance();
+    } catch (_) {
+      status.value = QiblaStatus.failed;
+    } finally {
+      _busy = false;
     }
   }
 
-  Future<void> restartCheckLocationStatus() async {
+  Future<QiblaStatus> _resolve(bool ask) async {
     try {
-      _emit(await FlutterQiblah.checkLocationStatus());
-    } catch (e) {
-      if (!_locationStreamController.isClosed) {
-        _locationStreamController.sink.addError(e);
+      if (await FlutterQiblah.androidDeviceSensorSupport() == false) {
+        return QiblaStatus.sensorMissing;
       }
+    } catch (_) {
+      return QiblaStatus.sensorError;
     }
+    if (!await Geolocator.isLocationServiceEnabled()) return QiblaStatus.gpsOff;
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied && ask) {
+      permission = await Geolocator.requestPermission();
+    }
+    return switch (permission) {
+      LocationPermission.always ||
+      LocationPermission.whileInUse =>
+        QiblaStatus.ready,
+      LocationPermission.deniedForever => QiblaStatus.deniedForever,
+      _ => QiblaStatus.denied,
+    };
   }
 
-  void _emit(LocationStatus s) {
-    last = s;
-    if (!_locationStreamController.isClosed) {
-      _locationStreamController.sink.add(s);
-    }
-  }
+  /// The permission view's button: ask again, or go to settings once asking
+  /// no longer shows a prompt.
+  Future<void> allowLocation() => status.value == QiblaStatus.deniedForever
+      ? Geolocator.openAppSettings()
+      : refreshStatus(ask: true);
 
-  Future<double?> distanceToKaabaKm() async {
+  Future<void> _fetchDistance() async {
     try {
-      // With GPS off, getCurrentPosition pops a Play Services dialog on every call.
-      if (!await Geolocator.isLocationServiceEnabled()) return null;
       Position? position = await Geolocator.getLastKnownPosition();
       position ??= await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           timeLimit: Duration(seconds: 5),
         ),
       );
-      final double distanceInMeters = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        kaabaLatitude,
-        kaabaLongitude,
-      );
-      return (distanceInMeters / 1000).roundToDouble();
+      distanceKm.value = (Geolocator.distanceBetween(
+                position.latitude,
+                position.longitude,
+                kaabaLatitude,
+                kaabaLongitude,
+              ) /
+              1000)
+          .roundToDouble();
     } catch (_) {
-      return null;
+      distanceKm.value = null;
     }
   }
 }

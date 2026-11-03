@@ -64,13 +64,6 @@ class _SplashScreenState extends State<SplashScreen>
     final ctx = context;
     final reduce = MediaQuery.disableAnimationsOf(ctx);
 
-    // A failed precache is skipped, never fatal.
-    Future<void> image(String base) => precacheImage(
-          AssetImage(NoorArt.of(ctx, base)),
-          ctx,
-          onError: (_, __) {},
-        );
-
     if (!reduce) _twinkle.repeat();
 
     // The mark settles in once it is decoded, so it never pops.
@@ -89,7 +82,6 @@ class _SplashScreenState extends State<SplashScreen>
         FlutterError.reportError(FlutterErrorDetails(exception: e, stack: s));
       }),
       markArt,
-      ...NoorArt.heroes.map(image),
     ]);
 
     if (!mounted) return;
@@ -164,18 +156,7 @@ class _SplashScreenState extends State<SplashScreen>
                     _settled(
                       from: _settleWords,
                       to: _settleFrame + _settleWords,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'نور الإيمان',
-                            textDirection: TextDirection.rtl,
-                            style: NoorText.arabicDisplay(context),
-                          ),
-                          const SizedBox(height: NoorSpace.s1),
-                          _wordmark(context),
-                        ],
-                      ),
+                      child: _wordmark(context),
                     ),
                   ],
                 ),

@@ -29,4 +29,20 @@ void main() {
       expect(hizbStartPage(61), 591);
     });
   });
+
+  test('hizbOfPage and juzPagesOf cover every page, two hizbs to a juz', () {
+    expect(hizbOfPage(1), 1);
+    expect(hizbOfPage(11), 2);
+    expect(hizbOfPage(604), 60);
+    expect(juzPagesOf(1), (1, 21));
+    expect(juzPagesOf(22), (22, 41));
+    expect(juzPagesOf(604), (582, 604));
+    var expectedFirst = 1;
+    for (var p = 1; p <= 604; p++) {
+      final (first, last) = juzPagesOf(p);
+      expect(p, inInclusiveRange(first, last));
+      if (p == first) expect(first, expectedFirst);
+      if (p == last) expectedFirst = last + 1;
+    }
+  });
 }

@@ -113,6 +113,7 @@ class _DuaaScreenState extends State<DuaaScreen> {
           children: [
             NoorHero(
               art: NoorArt.heroAthkar,
+              settings: true,
               title: s.nav_adhkar,
               subtitle: s.tagline_adhkar,
               overlap: NoorSearchField(

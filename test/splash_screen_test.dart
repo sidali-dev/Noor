@@ -28,7 +28,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('shell'), findsNothing);
     expect(find.text('FAITH'), findsOneWidget);
-    expect(find.text('نور الإيمان'), findsOneWidget);
     expect(find.byType(ArchFrame), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
 

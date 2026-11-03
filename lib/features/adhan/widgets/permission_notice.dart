@@ -1,5 +1,6 @@
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_well.dart';
@@ -46,6 +47,8 @@ class _PermissionNoticeState extends State<PermissionNotice>
       final notifications = await Permission.notification.isGranted;
       final alarms =
           !Alarm.android || await Permission.scheduleExactAlarm.isGranted;
+      // Granted from settings: nothing was scheduled while it was off.
+      if (notifications && !_notifications) AdhanScheduler.sync();
       if (mounted) {
         setState(() {
           _notifications = notifications;

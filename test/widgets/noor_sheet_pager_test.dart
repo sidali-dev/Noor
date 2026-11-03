@@ -31,8 +31,7 @@ Widget _app(Locale locale, Widget child) {
 
 void main() {
   group('NoorSheet', () {
-    testWidgets('dismisses when the handle area is swiped down',
-        (tester) async {
+    testWidgets('dismisses when its title area is swiped down', (tester) async {
       var closed = false;
       Object? result = 'pending';
 
@@ -75,7 +74,8 @@ void main() {
     testWidgets('a card keeps its content clear of the clouds', (tester) async {
       await tester.pumpWidget(_app(
         const Locale('en'),
-        const NoorCard(child: SizedBox(key: ValueKey('c'), height: 40, width: 200)),
+        const NoorCard(
+            child: SizedBox(key: ValueKey('c'), height: 40, width: 200)),
       ));
       final content = tester.getRect(find.byKey(const ValueKey('c')));
       expect(content.bottom, lessThanOrEqualTo(tester.getTopLeft(clouds()).dy));

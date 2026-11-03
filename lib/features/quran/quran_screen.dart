@@ -50,6 +50,7 @@ class QuranScreen extends StatelessWidget {
                 children: [
                   NoorHero(
                     art: NoorArt.heroQuran,
+                    settings: true,
                     title: S.of(context).nav_quran,
                     subtitle: S.of(context).tagline_quran,
                     overlap: NoorSearchField(
@@ -114,63 +115,50 @@ class QuranScreen extends StatelessWidget {
     final readCount = QuranProgress.readCount;
     final overallFraction = QuranProgress.overallFraction;
 
+    // A window into the sky, like the next-prayer card: what it holds is drawn
+    // in moon-white, and the styles here resolve above the card.
+    final muted = NoorText.bodySm(context).copyWith(color: n.onWindowMuted);
+
     return NoorCard(
+      tone: NoorCardTone.night,
+      padding: const EdgeInsets.fromLTRB(
+        NoorSpace.s5,
+        NoorSpace.s5,
+        NoorSpace.s5,
+        NoorSpace.s4,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(S.of(context).last_read, style: NoorText.bodySm(context)),
+          Text(S.of(context).last_read, style: muted),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Expanded(
-                child: Text(surahName, style: NoorText.title(context)),
+                child: Text(
+                  surahName,
+                  style: NoorText.title(context).copyWith(color: n.onWindow),
+                ),
               ),
               const SizedBox(width: NoorSpace.s3),
-              Text(
-                "${S.of(context).page} $page",
-                style: NoorText.bodySm(context),
-              ),
+              Text("${S.of(context).page} $page", style: muted),
             ],
           ),
           const SizedBox(height: NoorSpace.s3),
-          NoorProgressBar(value: overallFraction, showPercent: false),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  S.of(context).pages_read(readCount, 604),
-                  style: NoorText.bodySm(context),
-                ),
-              ),
-              const SizedBox(width: NoorSpace.s3),
-              Flexible(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: n.muted,
-                    minimumSize: const Size(48, 48),
-                    padding: EdgeInsets.zero,
-                  ),
-                  onPressed: () => _showResetProgressSheet(context, controller),
-                  child: Text(
-                    S.of(context).reset_progress,
-                    textAlign: TextAlign.end,
-                    style: NoorText.bodySm(context).copyWith(
-                      decoration: TextDecoration.underline,
-                      decorationColor: n.muted,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          NoorProgressBar(
+            value: overallFraction,
+            showPercent: false,
+            onWindow: true,
           ),
-          const SizedBox(height: NoorSpace.s1),
+          Text(S.of(context).pages_read(readCount, 604), style: muted),
+          const SizedBox(height: NoorSpace.s3),
           Row(
             children: [
               Expanded(
                 child: NoorButton(
                   label: S.of(context).continue_reading,
+                  variant: NoorButtonVariant.onWindow,
                   onPressed: () {
                     Get.to(() => ReadQuranScreen(pageIndex: page - 1));
                   },
@@ -178,9 +166,16 @@ class QuranScreen extends StatelessWidget {
               ),
               const SizedBox(width: NoorSpace.s2),
               NoorCloudButton(
-                icon: const NoorIcon(NoorGlyph.bookmark),
+                // The puff is paper; the card's own ink would be moon-white.
+                icon: NoorIcon(NoorGlyph.bookmark, color: n.ink),
                 tooltip: S.of(context).bookmarks,
                 onTap: () => showBookmarksSheet(context),
+              ),
+              const SizedBox(width: NoorSpace.s2),
+              NoorCloudButton(
+                icon: NoorIcon(NoorGlyph.reset, color: n.ink),
+                tooltip: S.of(context).reset_progress,
+                onTap: () => _showResetProgressSheet(context, controller),
               ),
             ],
           ),

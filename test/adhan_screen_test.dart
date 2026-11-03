@@ -48,7 +48,8 @@ Widget _buildTestApp({
     builder: (context, app) => MediaQuery(
       // Reduce Motion: the hero's star twinkle loops and would hang pumpAndSettle.
       data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(scale), disableAnimations: reduceMotion),
+          textScaler: TextScaler.linear(scale),
+          disableAnimations: reduceMotion),
       child: app!,
     ),
     home: Scaffold(
@@ -58,7 +59,7 @@ Widget _buildTestApp({
 }
 
 Map<String, dynamic> _createMockCalendarData(int year,
-    {bool hijriMonth = true}) {
+    {bool hijriMonth = true, String isha = '23:59'}) {
   final dataJson = <String, dynamic>{};
   for (var month = 1; month <= 12; month++) {
     dataJson[month.toString()] = List.generate(31, (i) {
@@ -70,7 +71,7 @@ Map<String, dynamic> _createMockCalendarData(int year,
           'Asr': '16:00',
           'Sunset': '18:50',
           'Maghrib': '19:00',
-          'Isha': '20:30',
+          'Isha': isha,
           'Imsak': '04:50',
           'Midnight': '00:00',
           'Firstthird': '22:00',
@@ -103,8 +104,9 @@ Map<String, dynamic> _createMockCalendarData(int year,
 TextEditingController _reminderField(WidgetTester tester) =>
     tester.widget<TextField>(find.byType(TextField)).controller!;
 
-Future<AdhanController> _loadCalendar(DateTime now) async {
-  final mockJson = _createMockCalendarData(now.year);
+Future<AdhanController> _loadCalendar(DateTime now,
+    {Map<String, dynamic>? json}) async {
+  final mockJson = json ?? _createMockCalendarData(now.year);
   await AppPrefs.setLocation('Algeria', 'Algiers', 'Algiers');
   await AppPrefs.setPrayerYearJson(now.year, jsonEncode(mockJson));
   final controller = Get.find<AdhanController>();
@@ -310,6 +312,41 @@ void main() {
     expect(find.byType(NextPrayerCard), findsNothing);
   });
 
+  testWidgets('After Isha the page moves on to tomorrow and its Fajr', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime.now();
+    // Every prayer is long past, whatever the hour of the test run.
+    final json = _createMockCalendarData(now.year, isha: '00:00');
+    for (final month in (json['data'] as Map).values) {
+      for (final day in month as List) {
+        (day['timings'] as Map).updateAll((_, __) => '00:00');
+      }
+    }
+    final controller = await _loadCalendar(now, json: json);
+    controller.date.value = now;
+    // Tomorrow's Fajr is the next prayer unless it is Dec 31 or 00:00 sharp.
+    if (now.month == 12 && now.day == 31) return;
+
+    await tester.pumpWidget(_buildTestApp(child: const AdhanScreen()));
+    await tester.pumpAndSettle();
+    controller.rollPastIsha();
+    await tester.pumpAndSettle();
+
+    expect(controller.date.value, DateTime(now.year, now.month, now.day + 1));
+    expect(find.byType(NextPrayerCard), findsOneWidget);
+
+    // Back on today: its prayers are done, so nothing is highlighted.
+    controller.decrementDay();
+    await tester.pumpAndSettle();
+    expect(find.byType(NextPrayerCard), findsNothing);
+    controller.rollPastIsha();
+    expect(controller.date.value.day, now.day);
+  });
+
   testWidgets('The next prayer card animates out when leaving today',
       (tester) async {
     tester.view.physicalSize = const Size(390, 1400);
@@ -355,8 +392,8 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final field = find.byType(TextField);
-    NoorButton button() =>
-        tester.widget<NoorButton>(find.widgetWithText(NoorButton, 'Set new alarm'));
+    NoorButton button() => tester
+        .widget<NoorButton>(find.widgetWithText(NoorButton, 'Set new alarm'));
 
     // The words open the field too.
     await tester.tap(find.text('min after adhan'));
@@ -498,5 +535,25 @@ void main() {
     // stopPreview() leaves a 300 ms timer.
     await tester.pump(const Duration(milliseconds: 400));
     handle.dispose();
+  });
+
+  testWidgets('the play triangle points the way the page reads',
+      (tester) async {
+    for (final (locale, mirrored) in [
+      (const Locale('en'), false),
+      (const Locale('ar'), true),
+    ]) {
+      await tester.pumpWidget(const SizedBox()); // a fresh app per locale
+      await tester.pumpWidget(
+          _buildTestApp(child: const SoundPickerSheet(), locale: locale));
+      await tester.pumpAndSettle();
+
+      final flips = tester
+          .widgetList<Transform>(find.descendant(
+              of: find.byType(NoorCloudButton),
+              matching: find.byType(Transform)))
+          .where((t) => t.transform.storage[0] == -1);
+      expect(flips.isNotEmpty, mirrored, reason: '$locale');
+    }
   });
 }

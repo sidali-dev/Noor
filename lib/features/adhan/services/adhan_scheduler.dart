@@ -46,9 +46,6 @@ class PlannedAlarm {
 
 typedef AlarmPlan = ({List<PlannedAlarm> alarmsToSet, List<int> idsToCancel});
 
-int idFor(int baseId, int dayOffset) => baseId + dayOffset * 10000;
-int baseOf(int id) => id % 10000;
-
 class AdhanScheduler {
   AdhanScheduler._();
 
@@ -70,7 +67,7 @@ class AdhanScheduler {
   /// - [getCalendar]: lookup for cached prayer calendar by year.
   /// - [isPrayerEnabled]: checks if a prayer is enabled.
   /// - [reminders]: active reminders for a prayer.
-  /// - [windowDays]: rolling window in days (default: 3).
+  /// - [windowDays]: rolling window in days.
   static AlarmPlan planAlarms({
     required DateTime now,
     required PrayerTime? Function(int year) getCalendar,
@@ -122,7 +119,7 @@ class AdhanScheduler {
 
         final datum = dayList[dayIndex];
         final timeStr = prayer.timeFromTimings(datum.timings);
-        final prayerTime = _parseTiming(targetDate, timeStr);
+        final prayerTime = parseTiming(targetDate, timeStr);
         if (prayerTime == null) continue;
 
         if (enabled && prayerTime.isAfter(now)) {
@@ -170,7 +167,8 @@ class AdhanScheduler {
     return (alarmsToSet: alarmsToSet, idsToCancel: idsToCancel);
   }
 
-  static DateTime? _parseTiming(DateTime date, String timeString) {
+  /// "HH:mm (TZ)" as given by the API, on [date]; null when unreadable.
+  static DateTime? parseTiming(DateTime date, String timeString) {
     try {
       final clean = timeString.trim().split(RegExp(r'\s+')).first;
       final parts = clean.split(':');

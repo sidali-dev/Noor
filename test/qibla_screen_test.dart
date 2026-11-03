@@ -148,6 +148,31 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('the rim turns success when aligned, with no chip',
+        (tester) async {
+      final success = NoorTheme.light().extension<NoorColors>()!.success;
+      Color? rim() => ((tester
+              .widget<AnimatedContainer>(find.byType(AnimatedContainer).first)
+              .decoration) as BoxDecoration)
+          .border
+          ?.top
+          .color;
+
+      Future<void> pump(double qiblah) async {
+        await tester.pumpWidget(_buildTestApp(
+          locale: const Locale('en'),
+          child: QiblaCompass(direction: 40, qiblah: qiblah),
+        ));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+
+      await pump(1);
+      expect(rim(), success);
+      expect(find.text('Facing the qibla'), findsNothing);
+      await pump(105);
+      expect(rim(), isNot(success));
+    });
+
     for (final scale in [1.3, 2.0]) {
       for (final loc in ['ar', 'fr', 'en']) {
         for (final dark in [false, true]) {

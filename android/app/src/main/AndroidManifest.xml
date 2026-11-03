@@ -25,9 +25,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:windowSoftInputMode="adjustResize"
-            android:hardwareAccelerated="true"
-            android:showWhenLocked="false"
-            android:turnScreenOn="false">
+            android:hardwareAccelerated="true">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -39,6 +37,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- The alarm plugin opens this activity for a ringing adhan; the
+                 action tells MainActivity it may show over the lock screen. -->
+            <intent-filter>
+                <action android:name="com.gdelataillade.alarm.action.RING"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

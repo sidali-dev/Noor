@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
-import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
@@ -29,13 +28,12 @@ Widget _app(Widget home, {Locale locale = const Locale('en')}) =>
 Finder _label(String label) =>
     find.descendant(of: find.byType(NoorNavBar), matching: find.text(label));
 
-/// The colour of the puff above [label].
-Color? _puff(WidgetTester tester, String label) => tester
-    .widget<CloudMedallion>(find.descendant(
-      of: find.ancestor(of: _label(label), matching: find.byType(Column)).first,
-      matching: find.byType(CloudMedallion),
-    ))
-    .front;
+/// How much the window pill behind [label] is cut out: its fill's alpha.
+double _pill(WidgetTester tester, String label) {
+  final tab = tester.widget<Container>(
+      find.ancestor(of: _label(label), matching: find.byType(Container)).first);
+  return ((tab.decoration! as BoxDecoration).color!).a;
+}
 
 void main() {
   // The ring screen's "Open Adhkar" does Get.offAll(SBottomNavigation(pageIndex: 2))
@@ -66,7 +64,7 @@ void main() {
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
   });
 
-  testWidgets('tapping a tab selects it and turns its puff to the window',
+  testWidgets('tapping a tab selects it and its window pill opens',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     SharedPrefService.resetForTest();
@@ -81,24 +79,22 @@ void main() {
 
     await tester.pumpWidget(_app(const SBottomNavigation()));
     await tester.pump(const Duration(milliseconds: 100));
-    final window = NoorColors.light.window;
-    final paper = NoorColors.light.card;
-    expect(_puff(tester, 'Quran'), window);
-    expect(_puff(tester, 'Athkar'), paper);
+    expect(_pill(tester, 'Quran'), 1);
+    expect(_pill(tester, 'Athkar'), 0);
 
     // Athkar, not Qibla: Qibla starts the compass sensor.
     await tester.tap(_label('Athkar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Mid-change: the puff is on its way, neither paper nor window yet.
-    expect(_puff(tester, 'Athkar'), isNot(anyOf(paper, window)));
+    // Mid-change: the pill is on its way, neither off nor full yet.
+    expect(_pill(tester, 'Athkar'), inExclusiveRange(0, 1));
 
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
-    expect(_puff(tester, 'Athkar'), window);
-    expect(_puff(tester, 'Quran'), paper);
+    expect(_pill(tester, 'Athkar'), 1);
+    expect(_pill(tester, 'Quran'), 0);
   });
 
   testWidgets('only the shown tab keeps its hero twinkling', (tester) async {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/quran/data/quran_progress.dart';
+import 'package:noor/features/quran/hizb_pages.dart';
 import 'package:noor/features/quran/quran_screen_controller.dart';
 import 'package:noor/features/quran/widgets/mushaf_frame.dart';
 import 'package:noor/generals/widgets/noor_cartouche.dart';
@@ -176,10 +177,9 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     final surahName =
         isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
 
-    // The page number is on the counter below, up at the same moment. The
-    // strip keeps the page's ribbon and first line out from between the puffs.
-    return Container(
-      decoration: BoxDecoration(color: n.card, boxShadow: n.shadow1),
+    // The puffs and the title float over the page: no strip behind them, so
+    // the text shows between and around them.
+    return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: NoorLayout.gutter(context),
         vertical: NoorSpace.s1,
@@ -220,20 +220,52 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     );
   }
 
+  // The counter's top meets the page's text limit; the snackbar rises above it.
+  static const double _counterSize = 64;
+
+  void _showHizb(BuildContext context, int pageNumber) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final hizb = hizbOfPage(pageNumber);
+    final surahId =
+        quran.getPageData(hizbStartPage(hizb)).first["surah"] as int;
+    final name =
+        isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          padding: EdgeInsets.zero,
+          duration: const Duration(seconds: 2),
+          margin: EdgeInsets.only(
+            left: NoorLayout.gutter(context),
+            right: NoorLayout.gutter(context),
+            bottom: _counterSize + 2 * NoorSpace.s4,
+          ),
+          content: NoorCartouche.title('${S.of(context).hizb} $hizb · $name'),
+        ),
+      );
+  }
+
   Widget _buildBottomBar(BuildContext context, int pageNumber) {
     final page = S.of(context).page;
     final hasPrev = _currentPage > 0;
     final hasNext = _currentPage < quran.totalPagesCount - 1;
+    final (first, last) = juzPagesOf(pageNumber);
     // The row sits in the reader's RTL Directionality, so "previous" is at
     // the start (right) and "next" at the end (left): left = next page (U7).
     // The page's brass is the bookmark, so the thread has none of its own.
     return NoorCounterRow(
       counter: TasbihCloud(
-        size: 64,
+        size: _counterSize,
         accent: false,
-        total: quran.totalPagesCount,
-        said: pageNumber,
+        // The thread runs to the end of the juz, not of the Mushaf.
+        total: last - first + 1,
+        said: pageNumber - first + 1,
         label: '$pageNumber',
+        onTap: () => _showHizb(context, pageNumber),
       ),
       previousTooltip: '$page ${pageNumber - 1}',
       nextTooltip: '$page ${pageNumber + 1}',

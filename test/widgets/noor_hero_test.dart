@@ -109,14 +109,36 @@ void main() {
         tester.getRect(find.byTooltip('Settings')).right, closeTo(390 - 16, 1));
   });
 
-  testWidgets('NoorHero never mirrors NoorArt.noMirror pieces', (tester) async {
-    await pumpHero(
-      tester,
-      const Locale('ar'),
-      const NoorHero(art: NoorArt.qiblaSkyline, title: 'القبلة'),
-    );
+  testWidgets('NoorHero keeps the Qibla Kaaba upright, at the end of the band',
+      (tester) async {
+    const hero = NoorHero(art: NoorArt.qiblaSkyline, title: 'Qibla');
+    final kaaba = find.byKey(const ValueKey('noor-hero-upright'));
+
+    await pumpHero(tester, const Locale('en'), hero);
+    final ltr = tester.getRect(kaaba);
+    expect(ltr.center.dx, greaterThan(390 / 2));
+
+    await pumpHero(tester, const Locale('ar'), hero);
+    final rtl = tester.getRect(kaaba);
+    expect(rtl.center.dx, lessThan(390 / 2));
+    expect(rtl.width, closeTo(ltr.width, 0.01));
+    // The art behind it mirrors; the Kaaba is not inside that flip.
     expect(
-        tester.widget<Transform>(find.byKey(_artKey)).transform.storage[0], 1);
+        tester.widget<Transform>(find.byKey(_artKey)).transform.storage[0], -1);
+    expect(find.descendant(of: find.byKey(_artKey), matching: kaaba),
+        findsNothing);
+  });
+
+  testWidgets('NoorHero lays the Quran and mosque objects at the end, upright',
+      (tester) async {
+    for (final art in [NoorArt.heroQuran, NoorArt.heroPrayers]) {
+      final hero = NoorHero(art: art, title: 'x');
+      final object = find.byKey(const ValueKey('noor-hero-upright'));
+      await pumpHero(tester, const Locale('en'), hero);
+      expect(tester.getRect(object).center.dx, greaterThan(390 / 2));
+      await pumpHero(tester, const Locale('ar'), hero);
+      expect(tester.getRect(object).center.dx, lessThan(390 / 2));
+    }
   });
 
   testWidgets('NoorHero uses the night art in Night', (tester) async {

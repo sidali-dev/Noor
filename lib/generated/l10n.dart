@@ -410,16 +410,6 @@ class S {
     );
   }
 
-  /// `Faith`
-  String get noor {
-    return Intl.message(
-      'Faith',
-      name: 'noor',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Close`
   String get close {
     return Intl.message(

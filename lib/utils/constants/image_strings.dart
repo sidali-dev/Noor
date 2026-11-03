@@ -4,27 +4,14 @@ import 'package:noor/utils/theme/noor_theme.dart';
 class SImageString {
   SImageString._();
 
-  static const String sunrise = "assets/images/svg/sunrise.svg";
-  static const String sunset = "assets/images/svg/sunset.svg";
-  static const String prayingMan = "assets/images/svg/praying_man.svg";
-  static const String masjid = "assets/images/svg/masjid.svg";
-  static const String alarm = "assets/images/svg/alarm.svg";
-  static const String night = "assets/images/svg/night.svg";
-  static const String prayingHands = "assets/images/svg/praying_hands.svg";
-  static const String adhan = "assets/images/svg/adhan.svg";
-  static const String group = "assets/images/svg/group.svg";
-  static const String home = "assets/images/svg/home.svg";
   static const String kaaba = "assets/images/svg/kaaba.svg";
-  static const String list = "assets/images/svg/list.svg";
-  static const String meal = "assets/images/svg/meal.svg";
-  static const String prophetName = "assets/images/svg/prophet_name.svg";
-  static const String quran = "assets/images/svg/quran.svg";
-  static const String tasbih = "assets/images/svg/tasbih.svg";
-  static const String wc = "assets/images/svg/wc.svg";
-  static const String wudu = "assets/images/svg/wudu.svg";
+  // The nav icons: the Kaaba's two navy faces and cream band, in other shapes.
+  static const String navQuran = "assets/images/svg/nav_quran.svg";
+  static const String navMosque = "assets/images/svg/nav_mosque.svg";
+  static const String navTasbih = "assets/images/svg/nav_tasbih.svg";
 }
 
-/// Illustrated art. Load only through [of]; never by raw path.
+/// Illustrated art. Load the hero art only through [svgOf]; never by raw path.
 abstract final class NoorArt {
   static const String heroPrayers = 'assets/images/art/hero_prayers';
   static const String heroQuran = 'assets/images/art/hero_quran';
@@ -39,9 +26,14 @@ abstract final class NoorArt {
   static const String pageCorner = 'assets/images/ornaments/page_corner.svg';
   static const String divider = 'assets/images/ornaments/divider.svg';
 
-  /// Pieces that contain writing or must keep their orientation: never
-  /// mirrored in RTL (U2). No hero has writing; the skyline is never mirrored.
-  static const Set<String> noMirror = {qiblaSkyline};
+  /// The Kaaba of the Qibla header, drawn over the skyline art. It carries
+  /// writing, so it is never mirrored in RTL (U2): [NoorHero] places it at the
+  /// end of the band instead.
+  static const String qiblaKaaba = 'assets/images/art/qibla_kaaba.svg';
+
+  /// Raster objects laid over the Prayers and Quran heroes by [NoorHero].
+  static const String objectMosque = 'assets/images/art/object_mosque.webp';
+  static const String objectQuran = 'assets/images/art/object_quran.webp';
 
   /// Bases precached by the custom splash.
   static const List<String> heroes = [
@@ -50,10 +42,6 @@ abstract final class NoorArt {
     heroAthkar,
     qiblaSkyline,
   ];
-
-  // ponytail: always light until the _dark.webp files exist; then return
-  // c.noor.isDark ? '${base}_dark.webp' : '${base}_light.webp'.
-  static String of(BuildContext c, String base) => '${base}_light.webp';
 
   /// The Hilal vector art: sky, moon, stars and the cloud-scroll base, drawn
   /// in the active theme's window and paper colours. Used by [NoorHero].

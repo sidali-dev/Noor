@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 Widget _app(ThemeData theme, Widget child) => MaterialApp(
@@ -44,5 +45,25 @@ void main() {
     expect(d.color, NoorColors.light.window);
     expect(d.border, isNull);
     expect(d.boxShadow, NoorColors.light.shadow2);
+  });
+
+  testWidgets('a tile with no paint of its own takes taps on its empty space',
+      (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(_app(
+      NoorTheme.light(),
+      SizedBox(
+        width: 300,
+        child: NoorPressable(
+          onPressed: () => taps++,
+          radius: 0,
+          builder: (_, __) =>
+              const Row(children: [Text('a'), Spacer(), Text('b')]),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(NoorPressable)); // centre: the gap
+    expect(taps, 1);
   });
 }

@@ -24,7 +24,7 @@ class AdhanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initController(DateTime.now().year);
+    initController(DateTime.now().year).then((_) => rollPastIsha());
   }
 
   /// Returns the RxBool for a given prayer key.
@@ -95,6 +95,25 @@ class AdhanController extends GetxController {
   /// Timings for the currently selected [date].
   Timings? get selectedTimings => timingsFor(date.value);
 
+  DateTime? _rolledFrom;
+
+  /// Once today's last prayer has passed, moves the page on to tomorrow, whose
+  /// Fajr is the next prayer. Once a day, so stepping back to today stays put.
+  // shortcut: stays on Dec 31, the calendar holds one year; when it spans two,
+  // drop the year check.
+  void rollPastIsha() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final next = nextPrayer(now);
+    if (next == null || !next.isTomorrow || _rolledFrom == today) return;
+    if (next.at.year != now.year) return;
+    _rolledFrom = today;
+    final d = date.value;
+    if (DateTime(d.year, d.month, d.day) == today) {
+      date.value = DateTime(now.year, now.month, now.day + 1);
+    }
+  }
+
   /// Calculates the next upcoming prayer from [from] (defaults to DateTime.now()).
   ({Prayer prayer, DateTime at, bool isTomorrow})? nextPrayer(
       [DateTime? from]) {
@@ -104,7 +123,7 @@ class AdhanController extends GetxController {
     if (todayTimings != null) {
       for (final prayer in Prayer.all) {
         final timeStr = prayer.timeFromTimings(todayTimings);
-        final pTime = _parseTiming(now, timeStr);
+        final pTime = AdhanScheduler.parseTiming(now, timeStr);
         if (pTime != null && pTime.isAfter(now)) {
           return (prayer: prayer, at: pTime, isTomorrow: false);
         }
@@ -117,7 +136,7 @@ class AdhanController extends GetxController {
     if (tomorrowTimings != null) {
       for (final prayer in Prayer.all) {
         final timeStr = prayer.timeFromTimings(tomorrowTimings);
-        final pTime = _parseTiming(tomorrow, timeStr);
+        final pTime = AdhanScheduler.parseTiming(tomorrow, timeStr);
         if (pTime != null) {
           return (prayer: prayer, at: pTime, isTomorrow: true);
         }
@@ -125,20 +144,6 @@ class AdhanController extends GetxController {
     }
 
     return null;
-  }
-
-  static DateTime? _parseTiming(DateTime targetDate, String timeString) {
-    try {
-      final clean = timeString.trim().split(RegExp(r'\s+')).first;
-      final parts = clean.split(':');
-      if (parts.length < 2) return null;
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
-      return DateTime(
-          targetDate.year, targetDate.month, targetDate.day, hour, minute);
-    } catch (_) {
-      return null;
-    }
   }
 
   Future<void> initController(int year) async {

@@ -5,7 +5,9 @@ import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A 4 dp `line` track with a `brass` fill that grows from the start, and a
 /// small numeral percentage after it unless [showPercent] is false. Brass is
-/// the one warm note, so keep to a single bar per region.
+/// the one warm note, so keep to a single bar per region. [onWindow] is for a
+/// bar on a `window` ground: a moon-white track and a brass-tinted fill that
+/// stay readable on it in both themes.
 class NoorProgressBar extends StatelessWidget {
   final double value;
   final double height;
@@ -15,12 +17,15 @@ class NoorProgressBar extends StatelessWidget {
   /// in a narrow slot such as a list row's trailing edge.
   final bool percentBelow;
 
+  final bool onWindow;
+
   const NoorProgressBar({
     super.key,
     required this.value,
     this.height = 4,
     this.showPercent = true,
     this.percentBelow = false,
+    this.onWindow = false,
   });
 
   @override
@@ -32,13 +37,15 @@ class NoorProgressBar extends StatelessWidget {
         ? Duration.zero
         : const Duration(milliseconds: 200);
     final pct = '${(clamped * 100).round()}%';
+    final track = onWindow ? n.onWindow.withValues(alpha: 0.2) : n.line;
+    final fill = onWindow ? (n.isDark ? n.brass : n.brassSoft) : n.brass;
 
     final bar = ClipRRect(
       borderRadius: radius,
       child: Container(
         height: height,
         width: double.infinity,
-        color: n.line,
+        color: track,
         child: TweenAnimationBuilder<double>(
           duration: duration,
           curve: Curves.easeOutCubic,
@@ -56,7 +63,7 @@ class NoorProgressBar extends StatelessWidget {
                   height: height,
                   child: DecoratedBox(
                     decoration:
-                        BoxDecoration(color: n.brass, borderRadius: radius),
+                        BoxDecoration(color: fill, borderRadius: radius),
                   ),
                 ),
               ),

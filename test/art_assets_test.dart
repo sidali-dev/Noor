@@ -5,29 +5,14 @@ import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 
 void main() {
-  // Dark variants are not checked yet.
-  const kb = 1024;
-  final webp = {
-    NoorArt.heroPrayers: 200 * kb,
-    NoorArt.heroQuran: 200 * kb,
-    NoorArt.heroAthkar: 200 * kb,
-    NoorArt.qiblaSkyline: 200 * kb,
-  };
-
-  for (final e in webp.entries) {
-    test('${e.key}_light.webp exists and fits ${e.value ~/ kb} KB', () {
-      final f = File('${e.key}_light.webp');
-      expect(f.existsSync(), isTrue, reason: '${f.path} is missing');
-      expect(f.lengthSync(), lessThanOrEqualTo(e.value));
-    });
-  }
-
   for (final p in [
     NoorArt.markPaper,
     NoorArt.markNight,
     NoorArt.surahCartouche,
     NoorArt.pageCorner,
     NoorArt.divider,
+    NoorArt.objectMosque,
+    NoorArt.objectQuran,
     'assets/logo/app_icon.png',
     'assets/logo/app_icon_foreground.png',
   ]) {

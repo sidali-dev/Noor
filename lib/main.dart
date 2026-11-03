@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,13 +43,19 @@ void main() async {
 /// work setup run alongside instead: Alarm.init re-arms every stored alarm.
 Future<void> _startup() async {
   unawaited(AdhanScheduler.init());
-  unawaited(_registerBackgroundSync());
+  // Workmanager's iOS side needs AppDelegate wiring this app does not have;
+  // there the alarm plugin's own background fetch tops the window up.
+  if (Platform.isAndroid) unawaited(_registerBackgroundSync());
 
   await AdhkarData.init();
 }
 
 Future<void> _registerBackgroundSync() async {
-  await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask("adhan scheduler", scheduleAdhan,
-      frequency: const Duration(hours: 12));
+  try {
+    await Workmanager().initialize(callbackDispatcher);
+    await Workmanager().registerPeriodicTask("adhan scheduler", scheduleAdhan,
+        frequency: const Duration(hours: 12));
+  } catch (_) {
+    // Best effort: the alarms still re-sync on every launch.
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:noor/features/quran/hizb_pages.dart';
 import 'package:noor/features/quran/screens/read_quran_screen.dart';
 import 'package:noor/features/quran/widgets/mushaf_frame.dart';
 import 'package:noor/generals/widgets/noor_tasbih.dart';
@@ -52,7 +53,10 @@ void main() {
           expect(find.byType(SurahCartouche), findsNWidgets(starts));
           // The page's brass is the bookmark, so the counter leaves it alone.
           final counter = tester.widget<TasbihCloud>(find.byType(TasbihCloud));
-          expect(counter.said, page + 1);
+          // The count runs to the end of the juz, not of the Mushaf.
+          final (jFirst, jLast) = juzPagesOf(page + 1);
+          expect(counter.said, page + 2 - jFirst);
+          expect(counter.total, jLast - jFirst + 1);
           expect(counter.accent, isFalse);
           expect(
             find.descendant(
@@ -76,6 +80,14 @@ void main() {
           // Chrome on: top bar + pager.
           await tester.tap(find.byType(ReadQuranScreen));
           await tester.pump(const Duration(milliseconds: 300));
+          expect(tester.takeException(), isNull);
+
+          // The counter names the hizb in a snackbar.
+          await tester.tap(find.byType(TasbihCloud));
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.byType(SnackBar), findsOneWidget);
+          expect(find.textContaining('${hizbOfPage(page + 1)}'), findsWidgets);
+          await tester.pump(const Duration(seconds: 3));
           expect(tester.takeException(), isNull);
         });
       }

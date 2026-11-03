@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 92" width="90" height="92">
+<defs>
+<linearGradient id="kl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#09131b"/><stop offset="1" stop-color="#060c12"/></linearGradient>
+<linearGradient id="kr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#263641"/><stop offset="1" stop-color="#071017"/></linearGradient>
+</defs>
+<path fill="url(#kr)" d="M45 76L39 92H51Z"/>
+<circle cx="45.0" cy="10.0" r="6.3" fill="url(#kl)"/>
+<circle cx="60.0" cy="14.0" r="6.3" fill="url(#kr)"/>
+<circle cx="71.0" cy="25.0" r="6.3" fill="url(#kl)"/>
+<circle cx="75.0" cy="40.0" r="6.3" fill="url(#kr)"/>
+<circle cx="71.0" cy="55.0" r="6.3" fill="url(#kl)"/>
+<circle cx="60.0" cy="66.0" r="6.3" fill="url(#kr)"/>
+<circle cx="45.0" cy="70.0" r="7.5" fill="#f5f2eb" stroke="#09131b" stroke-width="1.6"/>
+<circle cx="30.0" cy="66.0" r="6.3" fill="url(#kr)"/>
+<circle cx="19.0" cy="55.0" r="6.3" fill="url(#kl)"/>
+<circle cx="15.0" cy="40.0" r="6.3" fill="url(#kr)"/>
+<circle cx="19.0" cy="25.0" r="6.3" fill="url(#kl)"/>
+<circle cx="30.0" cy="14.0" r="6.3" fill="url(#kr)"/>
+</svg>

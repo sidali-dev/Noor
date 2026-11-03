@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/adhan_ring_screen.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
@@ -75,7 +76,8 @@ class SBottomNavigation extends StatelessWidget {
 }
 
 class SBottomNavigationController extends GetxController {
-  static StreamSubscription<AlarmSettings>? _subscription;
+  StreamSubscription<dynamic>? _subscription;
+  final Set<int> _shown = {};
 
   final Rx<int> selectedIndex = 0.obs;
   final Set<int> visited = {};
@@ -84,12 +86,26 @@ class SBottomNavigationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Alarm.android) {
-      Permission.notification.request();
-      Permission.scheduleExactAlarm.request();
+    if (Alarm.android) _askPermissions();
+    // Alarm.ringing replays the current set, so an alarm that began ringing
+    // before this controller existed (a cold start from the lock screen) still
+    // opens its screen. The old ringStream is a plain broadcast and lost it.
+    _subscription = Alarm.ringing.listen((ringing) {
+      _shown.retainAll({for (final a in ringing.alarms) a.id});
+      for (final alarm in ringing.alarms) {
+        if (_shown.add(alarm.id)) navigateToRingScreen(alarm);
+      }
+    });
+  }
+
+  /// One request at a time: permission_handler rejects overlapping ones. The
+  /// first launch could not schedule anything before the grant, so sync after.
+  Future<void> _askPermissions() async {
+    final granted = (await Permission.notification.request()).isGranted;
+    if (!await Permission.scheduleExactAlarm.isGranted) {
+      await Permission.scheduleExactAlarm.request();
     }
-    // ignore: deprecated_member_use
-    _subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
+    if (granted) await AdhanScheduler.sync();
   }
 
   Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {

@@ -185,7 +185,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "no_internet": MessageLookupByLibrary.simpleMessage(
             "No connection. Try again when you\'re online."),
         "no_results": MessageLookupByLibrary.simpleMessage("No results"),
-        "noor": MessageLookupByLibrary.simpleMessage("Faith"),
         "notifications_off": MessageLookupByLibrary.simpleMessage(
             "Allow notifications so the adhan can ring"),
         "open_adhkar": MessageLookupByLibrary.simpleMessage("Open Athkar"),

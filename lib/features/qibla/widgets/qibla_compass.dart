@@ -2,9 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:noor/generals/widgets/noor_icon.dart';
-import 'package:noor/generals/widgets/noor_star_badge.dart';
 import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 // Hilal draws the dial in a 300 unit box shown at 280 dp. Shapes in box units
@@ -14,10 +13,10 @@ const double _maxSize = 280;
 
 /// A compass cut from paper: a raised disc around a sunken well, the dial
 /// (72 ticks, a long one every 15 degrees, N/E/S/W in the display face) and a
-/// `window` hub. The dial turns with the phone so N stays north; the brass
-/// arrow and star are the one signal. Turn until the arrow meets the fixed
-/// heading tick at the top: the rim ring then turns brass with a soft halo and
-/// the phone vibrates once.
+/// `window` hub holding a prayer rug. The dial turns with the phone so N stays
+/// north; the brass arrow and the Kaaba on its tip are the one signal. Turn
+/// until the Kaaba meets the fixed heading tick at the top: the rim then turns
+/// `success` and the phone vibrates once.
 ///
 /// [direction] is the phone's heading and [qiblah] is heading minus the qibla
 /// bearing, both in degrees (`flutter_qiblah`), so `-qiblah` is where the
@@ -107,14 +106,25 @@ class _QiblaCompassState extends State<QiblaCompass> {
                 clipBehavior: Clip.none,
                 children: [
                   // The disc and the well are circles, so they never turn.
-                  SizedBox.square(
-                    dimension: size,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: n.card,
-                        shape: BoxShape.circle,
-                        boxShadow: n.shadow3,
+                  // Facing the qibla turns the rim `success`: the state is also in
+                  // the live-region label, so it is not colour alone.
+                  AnimatedContainer(
+                    duration: noorDuration(
+                      context,
+                      const Duration(milliseconds: 250),
+                    ),
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: _aligned
+                          ? Color.lerp(n.card, n.success, 0.22)
+                          : n.card,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _aligned ? n.success : Colors.transparent,
+                        width: 4 * k,
                       ),
+                      boxShadow: n.shadow3,
                     ),
                   ),
                   CustomPaint(
@@ -139,29 +149,14 @@ class _QiblaCompassState extends State<QiblaCompass> {
                       ),
                     ),
                   ),
-                  // The rim ring: a `line` hairline that turns brass with a
-                  // soft halo while aligned. A circle looks the same at any
-                  // heading, so this layer never rotates.
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(end: _aligned ? 1.0 : 0.0),
-                    duration: MediaQuery.disableAnimationsOf(context)
-                        ? Duration.zero
-                        : const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, t, _) => CustomPaint(
-                      size: box,
-                      painter: _RingPainter(
-                        rest: n.line,
-                        brass: n.brass,
-                        t: t,
-                      ),
-                    ),
-                  ),
-                  Transform.rotate(
-                    angle: -_rad(qiblah),
-                    child: CustomPaint(
-                      size: box,
-                      painter: _ArrowPainter(color: n.brass),
+                  // The arrow turns with the qibla; the Kaaba on its tip is
+                  // painted upright at the turned position.
+                  CustomPaint(
+                    size: box,
+                    painter: _ArrowPainter(
+                      angle: -_rad(qiblah),
+                      brass: n.brass,
+                      ground: n.surfaceSunken,
                     ),
                   ),
                   // Fixed heading tick: the top of the phone.
@@ -181,10 +176,13 @@ class _QiblaCompassState extends State<QiblaCompass> {
                         ),
                         child: Center(
                           child: ExcludeSemantics(
-                            child: NoorIcon(
-                              NoorGlyph.moon,
-                              color: n.onWindow,
-                              size: 30 * k,
+                            child: CustomPaint(
+                              size: Size(30 * k, 42 * k),
+                              painter: _RugPainter(
+                                ground: n.windowRaised,
+                                edge: n.onWindowMuted,
+                                mihrab: n.onWindow,
+                              ),
                             ),
                           ),
                         ),
@@ -297,58 +295,58 @@ class _DialPainter extends CustomPainter {
       old.tick != tick || old.letter != letter || old.north != north;
 }
 
-/// The ring on the disc's rim. At [t] 0 a `line` hairline; at 1 a brass ring
-/// with a soft blurred halo, the only blur on the screen.
-class _RingPainter extends CustomPainter {
-  final Color rest;
-  final Color brass;
-  final double t;
+/// The Kaaba cut from paper in a 60 x 60 box: front, side and top faces in an
+/// oblique view, a band round the top and the door.
+List<Offset> _poly(List<(double, double)> p) =>
+    [for (final (x, y) in p) Offset(x, y)];
 
-  const _RingPainter({
-    required this.rest,
-    required this.brass,
-    required this.t,
-  });
+final _kaabaFront = _poly([(0, 10), (38, 10), (38, 60), (0, 60)]);
+final _kaabaSide = _poly([(38, 10), (60, 4), (60, 54), (38, 60)]);
+final _kaabaTop = _poly([(0, 10), (22, 4), (60, 4), (38, 10)]);
+final _kaabaBands = [
+  _poly([(0, 18), (38, 18), (38, 24), (0, 24)]),
+  _poly([(38, 18), (60, 12), (60, 18), (38, 24)]),
+];
+final _kaabaDoor = _poly([(24, 34), (32, 34), (32, 52), (24, 52)]);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Offset c = size.center(Offset.zero);
-    final double k = size.width / _maxSize;
-    // Mid-way along the 13 dp paper rim, so the halo stays on the disc.
-    final double r = size.width / 2 - 6.5 * k;
+/// A brass Kaaba of [size] centred on [at]: the faces are brass at three
+/// strengths over [ground], and the bands and door are cut out to it.
+void _paintKaaba(
+  Canvas canvas,
+  Offset at,
+  double size,
+  Color brass,
+  Color ground,
+) {
+  void face(List<Offset> p, Color c) =>
+      canvas.drawPath(Path()..addPolygon(p, true), Paint()..color = c);
 
-    if (t > 0) {
-      canvas.drawCircle(
-        c,
-        r,
-        Paint()
-          ..color = brass.withValues(alpha: 0.5 * t)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 6 * k
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4 * k),
-      );
-    }
-    canvas.drawCircle(
-      c,
-      r,
-      Paint()
-        ..color = Color.lerp(rest, brass, t)!
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = (1 + t) * k,
-    );
+  canvas
+    ..save()
+    ..translate(at.dx - size / 2, at.dy - size / 2)
+    ..scale(size / 60);
+  face(_kaabaFront, brass);
+  face(_kaabaSide, Color.lerp(brass, ground, 0.3)!);
+  face(_kaabaTop, Color.lerp(brass, ground, 0.5)!);
+  for (final band in _kaabaBands) {
+    face(band, ground);
   }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter old) =>
-      old.t != t || old.rest != rest || old.brass != brass;
+  face(_kaabaDoor, ground);
+  canvas.restore();
 }
 
-/// The brass arrow to the qibla, drawn pointing at 12, with the brass star
-/// where it meets the ticks.
+/// The brass arrow to the qibla, turned [angle] radians from 12, with the
+/// Kaaba on its tip where it meets the ticks. The Kaaba stays upright.
 class _ArrowPainter extends CustomPainter {
-  final Color color;
+  final double angle;
+  final Color brass;
+  final Color ground;
 
-  const _ArrowPainter({required this.color});
+  const _ArrowPainter({
+    required this.angle,
+    required this.brass,
+    required this.ground,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -356,23 +354,100 @@ class _ArrowPainter extends CustomPainter {
     final double s = size.width / _box;
     final double k = size.width / _maxSize;
 
-    canvas.drawPath(
-      Path()
-        ..moveTo(c.dx, c.dy - 80 * s)
-        ..lineTo(c.dx + 12 * s, c.dy)
-        ..lineTo(c.dx, c.dy - 8 * s)
-        ..lineTo(c.dx - 12 * s, c.dy)
-        ..close(),
-      Paint()..color = color,
-    );
-    canvas.drawPath(
-      noorStarPath(Offset(c.dx, c.dy - 128 * s), 9 * k),
-      Paint()..color = color,
+    canvas
+      ..save()
+      ..translate(c.dx, c.dy)
+      ..rotate(angle)
+      ..drawPath(
+        Path()
+          ..moveTo(0, -80 * s)
+          ..lineTo(12 * s, 0)
+          ..lineTo(0, -8 * s)
+          ..lineTo(-12 * s, 0)
+          ..close(),
+        Paint()..color = brass,
+      )
+      ..restore();
+
+    // Clear of the N/E/S/W letters inside and the heading tick outside.
+    _paintKaaba(
+      canvas,
+      c + Offset(math.sin(angle), -math.cos(angle)) * 116 * s,
+      24 * k,
+      brass,
+      ground,
     );
   }
 
   @override
-  bool shouldRepaint(covariant _ArrowPainter old) => old.color != color;
+  bool shouldRepaint(covariant _ArrowPainter old) =>
+      old.angle != angle || old.brass != brass || old.ground != ground;
+}
+
+/// A prayer rug on the hub, in 30 x 42 units: fringed ends, a border and a
+/// pointed mihrab arch. `window` colours only, so it never competes with the
+/// brass arrow.
+class _RugPainter extends CustomPainter {
+  final Color ground;
+  final Color edge;
+  final Color mihrab;
+
+  const _RugPainter({
+    required this.ground,
+    required this.edge,
+    required this.mihrab,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / 30);
+    final line = Paint()
+      ..color = edge
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1;
+
+    for (var i = 0; i < 6; i++) {
+      final x = 3 + i * 4.8;
+      canvas
+        ..drawLine(Offset(x, 0.5), Offset(x, 3), line)
+        ..drawLine(Offset(x, 39), Offset(x, 41.5), line);
+    }
+    final body = RRect.fromRectAndRadius(
+      const Rect.fromLTRB(0, 3, 30, 39),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(body, Paint()..color = ground);
+    canvas.drawRRect(body, line);
+    line.strokeWidth = 0.8;
+    canvas.drawRect(const Rect.fromLTRB(3, 6, 27, 36), line);
+
+    canvas
+      ..drawPath(
+        Path()
+          ..moveTo(8, 36)
+          ..lineTo(8, 22)
+          ..quadraticBezierTo(8, 14, 15, 9.5)
+          ..quadraticBezierTo(22, 14, 22, 22)
+          ..lineTo(22, 36)
+          ..close(),
+        Paint()..color = mihrab,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(11.5, 36)
+          ..lineTo(11.5, 23.5)
+          ..quadraticBezierTo(11.5, 18.5, 15, 16)
+          ..quadraticBezierTo(18.5, 18.5, 18.5, 23.5)
+          ..lineTo(18.5, 36)
+          ..close(),
+        Paint()..color = ground,
+      );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RugPainter old) =>
+      old.ground != ground || old.edge != edge || old.mihrab != mihrab;
 }
 
 /// The fixed ink tick at the top of the dial: where the phone points.

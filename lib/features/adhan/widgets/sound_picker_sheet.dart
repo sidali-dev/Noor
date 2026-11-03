@@ -153,7 +153,15 @@ class _SoundRow extends StatelessWidget {
                   final playing = sound.playingPath.value == option.path;
                   return NoorCloudButton(
                     size: 40,
-                    icon: Icon(playing ? Iconsax.stop : Iconsax.play),
+                    // The triangle points the way the page reads, so it turns
+                    // left in RTL; the stop square is symmetric.
+                    icon: playing
+                        ? const Icon(Iconsax.stop)
+                        : Transform.flip(
+                            flipX:
+                                Directionality.of(context) == TextDirection.rtl,
+                            child: const Icon(Iconsax.play),
+                          ),
                     onTap: () => sound.togglePreview(option.path),
                   );
                 }),

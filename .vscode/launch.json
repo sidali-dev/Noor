@@ -6,7 +6,7 @@
     "configurations": [
 
         {
-            "name": "noor",
+            "name": "faith",
             "request": "launch",
             "type": "dart"
         }

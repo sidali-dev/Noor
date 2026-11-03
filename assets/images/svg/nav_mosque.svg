@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 90" width="110" height="90">
+<defs>
+<linearGradient id="kl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#09131b"/><stop offset="1" stop-color="#060c12"/></linearGradient>
+<linearGradient id="kr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#263641"/><stop offset="1" stop-color="#071017"/></linearGradient>
+</defs>
+<path fill="url(#kl)" d="M9 34H21V88H9Z"/>
+<path fill="url(#kr)" d="M8 34L15 17L22 34Z"/>
+<path fill="url(#kl)" d="M89 34H101V88H89Z"/>
+<path fill="url(#kr)" d="M88 34L95 17L102 34Z"/>
+<path fill="url(#kl)" d="M26 58H55V88H26Z"/>
+<path fill="url(#kr)" d="M55 58H84V88H55Z"/>
+<path fill="url(#kl)" d="M31 58A24 24 0 0 1 55 34V58Z"/>
+<path fill="url(#kr)" d="M55 34A24 24 0 0 1 79 58V58H55Z"/>
+<path fill="#f5f2eb" d="M9 48H21V54H9ZM89 48H101V54H89ZM26 62H84V68H26ZM48 88V79A7 7 0 0 1 62 79V88ZM54.2 24H55.8V35H54.2Z"/>
+<circle fill="#f5f2eb" cx="55" cy="22" r="3"/>
+<circle fill="#f5f2eb" cx="15" cy="14" r="2.5"/>
+<circle fill="#f5f2eb" cx="95" cy="14" r="2.5"/>
+</svg>
