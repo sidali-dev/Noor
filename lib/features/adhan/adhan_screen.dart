@@ -343,79 +343,74 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                   ],
                                 ),
                         ),
+                        // A capsule, like the two puffs it holds; the 4 dp the
+                        // 48 dp targets leave beside each puff is the 8 dp
+                        // that sits above and below it.
                         NoorWell(
-                          radius: NoorRadius.md,
-                          child: Row(
-                            children: [
-                              NoorCloudButton(
-                                size: 40,
-                                onTap: () =>
-                                    _onPreviousDay(context, controller),
-                                icon: const Icon(chevronBack),
-                              ),
-                              Expanded(
-                                child: NoorPressable(
-                                  onPressed: () =>
-                                      _pickDate(context, controller),
-                                  radius: NoorRadius.sm,
-                                  builder: (context, pressed) => Container(
-                                    // Transparent, not absent: the whole slot
-                                    // takes the tap.
-                                    color: Colors.transparent,
-                                    constraints:
-                                        const BoxConstraints(minHeight: 56),
-                                    alignment: Alignment.center,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            // Shrinks rather than cut to "Wedn…"
-                                            // at a large system font size.
-                                            Flexible(
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(
-                                                  _formatDateTitle(
-                                                      context, controller),
-                                                  style:
-                                                      NoorText.heading(context),
-                                                  textAlign: TextAlign.center,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: NoorSpace.s1),
-                                            NoorIcon(
-                                              NoorGlyph.calendar,
-                                              size: 14,
-                                              color: n.muted,
-                                            ),
-                                          ],
-                                        ),
-                                        if (hijri != null)
+                          radius: NoorRadius.pill,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: NoorSpace.s1,
+                            ),
+                            child: Row(
+                              children: [
+                                NoorCloudButton(
+                                  size: 40,
+                                  onTap: () =>
+                                      _onPreviousDay(context, controller),
+                                  shadows: n.shadowCrisp,
+                                  icon: const Icon(chevronBack),
+                                ),
+                                Expanded(
+                                  child: NoorPressable(
+                                    onPressed: () =>
+                                        _pickDate(context, controller),
+                                    radius: NoorRadius.pill,
+                                    builder: (context, pressed) => Container(
+                                      // Transparent, not absent: the whole slot
+                                      // takes the tap.
+                                      color: Colors.transparent,
+                                      constraints:
+                                          const BoxConstraints(minHeight: 56),
+                                      alignment: Alignment.center,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // Shrinks rather than cut to "Wedn…" at a
+                                          // large system font size.
                                           FittedBox(
                                             fit: BoxFit.scaleDown,
                                             child: Text(
-                                              hijri,
-                                              style: NoorText.bodySm(context),
+                                              _formatDateTitle(
+                                                  context, controller),
+                                              style: NoorText.heading(context),
                                               textAlign: TextAlign.center,
                                               maxLines: 1,
                                             ),
                                           ),
-                                      ],
+                                          if (hijri != null)
+                                            FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                hijri,
+                                                style: NoorText.bodySm(context),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 1,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              NoorCloudButton(
-                                size: 40,
-                                onTap: () => _onNextDay(context, controller),
-                                icon: const Icon(chevron),
-                              ),
-                            ],
+                                NoorCloudButton(
+                                  size: 40,
+                                  onTap: () => _onNextDay(context, controller),
+                                  shadows: n.shadowCrisp,
+                                  icon: const Icon(chevron),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: NoorSpace.s5),

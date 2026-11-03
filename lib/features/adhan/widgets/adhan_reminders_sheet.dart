@@ -70,10 +70,8 @@ class _AdhanRemindersSheetState extends State<AdhanRemindersSheet> {
 
   /// Keyboards in Arabic may type Arabic-Indic digits.
   static int _amountOf(String text) =>
-      int.tryParse(text
-          .replaceFirst(RegExp('^[-+]'), '')
-          .replaceAllMapped(RegExp('[٠-٩]'),
-              (m) => '${m[0]!.codeUnitAt(0) - 0x0660}')) ??
+      int.tryParse(text.replaceFirst(RegExp('^[-+]'), '').replaceAllMapped(
+          RegExp('[٠-٩]'), (m) => '${m[0]!.codeUnitAt(0) - 0x0660}')) ??
       0;
 
   int get _typedSign => _field.text.startsWith('-')

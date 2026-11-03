@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/baked_paint.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A pressed-in `surface-sunken` well: the fill, `shadow-inset` drawn inside
@@ -34,6 +35,7 @@ class NoorWell extends StatelessWidget {
         fill: fill ?? n.surfaceSunken,
         shadows: n.inset,
         border: borderColor ?? (border ? n.lineStrong : null),
+        pixelRatio: MediaQuery.devicePixelRatioOf(context),
       ),
       child: child,
     );
@@ -46,15 +48,27 @@ class _WellPainter extends CustomPainter {
     required this.fill,
     required this.shadows,
     required this.border,
+    required this.pixelRatio,
   });
 
   final double radius;
   final Color fill;
   final List<BoxShadow> shadows;
   final Color? border;
+  final double pixelRatio;
 
+  // Everything is clipped to the well, so nothing spills and there is no
+  // padding.
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) => BakedPaint.shared.paint(
+        canvas,
+        size,
+        key: [_WellPainter, radius, fill, border, ...shadows],
+        ratio: pixelRatio,
+        draw: _draw,
+      );
+
+  void _draw(Canvas canvas, Size size) {
     final rrect = RRect.fromRectAndRadius(
       Offset.zero & size,
       Radius.circular(math.min(radius, size.shortestSide / 2)),
@@ -96,5 +110,6 @@ class _WellPainter extends CustomPainter {
       radius != old.radius ||
       fill != old.fill ||
       border != old.border ||
-      shadows != old.shadows;
+      shadows != old.shadows ||
+      pixelRatio != old.pixelRatio;
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:noor/generals/preload_svgs.dart';
 import 'package:noor/generals/widgets/arch_frame.dart';
 import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -82,6 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
         FlutterError.reportError(FlutterErrorDetails(exception: e, stack: s));
       }),
       markArt,
+      preloadSvgs(ctx),
     ]);
 
     if (!mounted) return;

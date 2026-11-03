@@ -41,6 +41,7 @@ class NextPrayerCard extends StatelessWidget {
                 front: n.card,
                 lip: n.isDark ? n.depthShadow : null,
                 shade: n.depthShadow,
+                pixelRatio: MediaQuery.devicePixelRatioOf(context),
               ),
             ),
           ),

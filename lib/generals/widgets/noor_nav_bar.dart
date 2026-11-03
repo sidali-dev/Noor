@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
-/// Hilal TabBar: a flat `surface-raised` strip with `shadow-1`, floating
-/// `s4` above the bottom safe area and `s4` in from the sides of the content
-/// column ([NoorLayout]). The active tab is cut out of it as a window: a pill
-/// of night sky (`window`; moon-white `onWindow` in Night) holding its icon
-/// and label in the opposite colour. The others are `ink-muted` on the strip.
-/// Every icon is in the Kaaba's navy and cream on a round plate.
+/// Hilal TabBar, cut like the text field ([NoorCartouche]): a capsule of raised
+/// `surface-raised` paper with `shadow-2`, floating `s4` above the bottom safe
+/// area and `s4` in from the sides of the content column ([NoorLayout]), holding
+/// a pressed-in capsule trough ([NoorWell]). The selector is one window raised
+/// out of the trough, a capsule of night sky (`window`; moon-white `onWindow` in
+/// Night) on `shadow-1`, that slides to the chosen tab; its icon and label take
+/// the opposite colour as it arrives. The others lie in the trough as
+/// `ink-muted`. Every icon is in the Kaaba's navy and cream on a round plate.
 ///
 /// The widget's own height includes the safe area and the floating gap, so
 /// `Scaffold` reserves exactly the room the bar covers. Items are laid out in
-/// source order and mirror with the ambient [Directionality].
+/// source order and mirror with the ambient [Directionality], and the selector
+/// slides the same way round.
 class NoorNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
@@ -27,7 +31,8 @@ class NoorNavBar extends StatelessWidget {
     required this.onItemSelected,
   });
 
-  static const _select = Duration(milliseconds: 220);
+  static const _select = Duration(milliseconds: 300);
+  static const _pill = BorderRadius.all(Radius.circular(NoorRadius.pill));
 
   @override
   Widget build(BuildContext context) {
@@ -53,31 +58,73 @@ class NoorNavBar extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: n.card,
-          borderRadius: BorderRadius.circular(NoorRadius.lg),
-          boxShadow: n.shadow1,
+          borderRadius: _pill,
+          boxShadow: n.shadow2,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(NoorSpace.s2),
+          padding: const EdgeInsets.all(NoorSpace.s1),
           // Labels only: the icon and the tap target keep their size.
           child: MediaQuery.withClampedTextScaling(
             maxScaleFactor: 1.3,
             child: Material(
               type: MaterialType.transparency,
-              child: Row(
-                children: [
-                  for (var i = 0; i < items.length; i++) ...[
-                    if (i > 0) const SizedBox(width: NoorSpace.s1),
-                    Expanded(
-                      child: _Item(
-                        svg: items[i].svg,
-                        label: items[i].label,
-                        selected: i == selectedIndex,
-                        duration: duration,
-                        onTap: () => onItemSelected(i),
-                      ),
-                    ),
-                  ],
-                ],
+              child: NoorWell(
+                radius: NoorRadius.pill,
+                child: Padding(
+                  padding: const EdgeInsets.all(NoorSpace.s1),
+                  child: LayoutBuilder(
+                    builder: (context, box) {
+                      final count = items.length;
+                      const gap = NoorSpace.s1;
+                      final itemWidth =
+                          (box.maxWidth - (count - 1) * gap) / count;
+                      return Stack(
+                        children: [
+                          // The selector: one capsule that travels, so the
+                          // choice is a movement and not a swap.
+                          Positioned.fill(
+                            child: AnimatedAlign(
+                              duration: duration,
+                              curve: Curves.easeOutCubic,
+                              alignment: AlignmentDirectional(
+                                -1 + 2 * selectedIndex / (count - 1),
+                                0,
+                              ),
+                              child: FractionallySizedBox(
+                                widthFactor: itemWidth / box.maxWidth,
+                                heightFactor: 1,
+                                child: DecoratedBox(
+                                  key: const ValueKey('nav-selector'),
+                                  decoration: BoxDecoration(
+                                    color: n.isDark ? n.onWindow : n.window,
+                                    borderRadius: _pill,
+                                    boxShadow: n.shadow1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              for (var i = 0; i < count; i++) ...[
+                                if (i > 0) const SizedBox(width: gap),
+                                Expanded(
+                                  child: _Item(
+                                    svg: items[i].svg,
+                                    label: items[i].label,
+                                    selected: i == selectedIndex,
+                                    duration: duration,
+                                    onTap: () => onItemSelected(i),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -113,7 +160,6 @@ class _Item extends StatelessWidget {
     final n = context.noor;
     final labelStyle = NoorText.caption(context);
     // The window and what is drawn on it swap in Night, as every window does.
-    final pill = n.isDark ? n.onWindow : n.window;
     final onPill = n.isDark ? n.window : n.onWindow;
 
     return Semantics(
@@ -123,7 +169,7 @@ class _Item extends StatelessWidget {
       excludeSemantics: true,
       child: NoorPressable(
         onPressed: onTap,
-        radius: NoorRadius.md,
+        radius: NoorRadius.pill,
         builder: (context, pressed) => TweenAnimationBuilder<double>(
           tween: Tween(end: selected ? 1 : 0),
           duration: duration,
@@ -135,11 +181,6 @@ class _Item extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                 vertical: NoorSpace.s1,
                 horizontal: NoorSpace.s1,
-              ),
-              decoration: BoxDecoration(
-                color: pill.withValues(alpha: t),
-                borderRadius: BorderRadius.circular(NoorRadius.md),
-                boxShadow: selected ? n.shadow1 : null,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

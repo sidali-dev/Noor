@@ -116,6 +116,22 @@ enum NoorGlyph {
     'M18 3.5c-2.2 1.3-3.5 4-3.5 7.5v2.5H18',
     'M18 3.5v17',
   ]),
+  // The prayers, drawn after SF Symbols' moon.haze, sun.haze and moon.stars: one
+  // mark for each hour of the day. Sunrise, Dhuhr and Maghrib use [sunrise],
+  // [sun] and [sunset] above.
+  moonHaze([
+    'M14.45 3.54a5.6 5.6 0 1 0 3.01 7.91A4.55 4.55 0 0 1 14.45 3.54z',
+    'M5 17.5h14M8 21h8',
+  ]),
+  sunHaze([
+    'M8 13.5a4 4 0 0 1 8 0',
+    'M12 5v2.5M6.34 7.84l1.42 1.42M17.66 7.84l-1.42 1.42M3.5 13.5H6M18 13.5h2.5',
+    'M5 17h14M8 20.5h8',
+  ]),
+  moonStars([
+    'M14.06 6.18a7 7 0 1 0 3.76 9.89A5.69 5.69 0 0 1 14.06 6.18z',
+    'M19 3l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z',
+  ]),
   kaaba([
     'M12 3.5l8 3.5v10l-8 3.5-8-3.5V7z',
     'M4 7l8 3.5L20 7',
@@ -127,6 +143,17 @@ enum NoorGlyph {
 
   final List<String> paths;
 }
+
+/// The stroke width every [NoorIcon] in the app uses (none passes its own).
+const noorIconStroke = 1.6;
+
+/// The SVG of [glyph]. [NoorIcon] and the splash preload both build it here:
+/// flutter_svg caches by this string, so the two must match exactly.
+String noorIconSvg(NoorGlyph glyph, double strokeWidth) =>
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+    'fill="none" stroke="#000" stroke-width="$strokeWidth" '
+    'stroke-linecap="round" stroke-linejoin="round">'
+    '${[for (final d in glyph.paths) '<path d="$d"/>'].join()}</svg>';
 
 /// A Hilal line icon: 24 px grid, 1.6 stroke, round caps and joins. Colour and
 /// size come from the ambient [IconTheme] (so it works inside `NoorButton`)
@@ -146,7 +173,7 @@ class NoorIcon extends StatelessWidget {
     super.key,
     this.size,
     this.color,
-    this.strokeWidth = 1.6,
+    this.strokeWidth = noorIconStroke,
     this.semanticLabel,
   });
 
@@ -156,18 +183,13 @@ class NoorIcon extends StatelessWidget {
     final side = size ?? theme.size ?? 24;
     final fg = color ?? theme.color ?? context.noor.ink;
 
-    final svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
-        'fill="none" stroke="#000" stroke-width="$strokeWidth" '
-        'stroke-linecap="round" stroke-linejoin="round">'
-        '${[for (final d in glyph.paths) '<path d="$d"/>'].join()}</svg>';
-
     // Like [Icon]: a square that centres the glyph, so a tight parent (a disc,
     // a 56 dp box) cannot stretch it.
     return SizedBox.square(
       dimension: side,
       child: Center(
         child: SvgPicture.string(
-          svg,
+          noorIconSvg(glyph, strokeWidth),
           width: side,
           height: side,
           colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),

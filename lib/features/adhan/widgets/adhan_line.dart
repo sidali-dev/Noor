@@ -28,10 +28,17 @@ extension PrayerUI on Prayer {
     }
   }
 
-  /// As in the Prayer times mock: the sun by day, the moon from sunset.
-  NoorGlyph get glyph => this == Prayer.maghrib || this == Prayer.isha
-      ? NoorGlyph.moon
-      : NoorGlyph.sun;
+  /// Each prayer has its own mark, so the list reads at a glance: the moon
+  /// before dawn, the sunrise, the high sun, the low afternoon sun, the sunset,
+  /// the night.
+  NoorGlyph get glyph => switch (this) {
+        Prayer.fajr => NoorGlyph.moonHaze,
+        Prayer.chourouk => NoorGlyph.sunrise,
+        Prayer.dhuhr => NoorGlyph.sun,
+        Prayer.asr => NoorGlyph.sunHaze,
+        Prayer.maghrib => NoorGlyph.sunset,
+        Prayer.isha => NoorGlyph.moonStars,
+      };
 }
 
 /// One prayer in the day's list: its sun or moon (a flat mark, not a control),

@@ -28,12 +28,10 @@ Widget _app(Widget home, {Locale locale = const Locale('en')}) =>
 Finder _label(String label) =>
     find.descendant(of: find.byType(NoorNavBar), matching: find.text(label));
 
-/// How much the window pill behind [label] is cut out: its fill's alpha.
-double _pill(WidgetTester tester, String label) {
-  final tab = tester.widget<Container>(
-      find.ancestor(of: _label(label), matching: find.byType(Container)).first);
-  return ((tab.decoration! as BoxDecoration).color!).a;
-}
+/// Where the one selector capsule is, against where [label] is.
+double _gap(WidgetTester tester, String label) =>
+    tester.getCenter(find.byKey(const ValueKey('nav-selector'))).dx -
+    tester.getCenter(_label(label)).dx;
 
 void main() {
   // The ring screen's "Open Adhkar" does Get.offAll(SBottomNavigation(pageIndex: 2))
@@ -64,7 +62,7 @@ void main() {
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
   });
 
-  testWidgets('tapping a tab selects it and its window pill opens',
+  testWidgets('tapping a tab selects it and the selector slides to it',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     SharedPrefService.resetForTest();
@@ -79,22 +77,23 @@ void main() {
 
     await tester.pumpWidget(_app(const SBottomNavigation()));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(_pill(tester, 'Quran'), 1);
-    expect(_pill(tester, 'Athkar'), 0);
+    expect(_gap(tester, 'Quran'), closeTo(0, 0.5));
+    expect(_gap(tester, 'Athkar').abs(), greaterThan(50));
 
     // Athkar, not Qibla: Qibla starts the compass sensor.
     await tester.tap(_label('Athkar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Mid-change: the pill is on its way, neither off nor full yet.
-    expect(_pill(tester, 'Athkar'), inExclusiveRange(0, 1));
+    // Mid-change: the selector is on its way, not on Quran or Athkar yet.
+    expect(_gap(tester, 'Athkar').abs(), inExclusiveRange(1, 150));
+    expect(_gap(tester, 'Quran').abs(), greaterThan(1));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
-    expect(_pill(tester, 'Athkar'), 1);
-    expect(_pill(tester, 'Quran'), 0);
+    expect(_gap(tester, 'Athkar'), closeTo(0, 0.5));
+    expect(_gap(tester, 'Quran').abs(), greaterThan(50));
   });
 
   testWidgets('only the shown tab keeps its hero twinkling', (tester) async {

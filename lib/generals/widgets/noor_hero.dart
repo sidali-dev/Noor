@@ -297,6 +297,8 @@ class NoorHero extends StatelessWidget {
                                     front: n.paper,
                                     lip: n.isDark ? n.depthShadow : null,
                                     shade: n.depthShadow,
+                                    pixelRatio:
+                                        MediaQuery.devicePixelRatioOf(context),
                                   ),
                                 ),
                               ),

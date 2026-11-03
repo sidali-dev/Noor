@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/baked_paint.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
@@ -44,6 +45,7 @@ class CloudMedallion extends StatelessWidget {
           glow: (n.isDark ? n.onWindow : n.window)
               .withValues(alpha: _glowAlpha * glow),
           shadows: shadows ?? n.shadow1,
+          pixelRatio: MediaQuery.devicePixelRatioOf(context),
         ),
         child: Center(
           child: SizedBox(
@@ -68,12 +70,17 @@ class NoorCloudButton extends StatelessWidget {
   final VoidCallback? onTap;
   final double size;
 
+  /// Replaces the puff's `shadow-1`, for one that must stand off the surface
+  /// it sits in, such as a well.
+  final List<BoxShadow>? shadows;
+
   const NoorCloudButton({
     super.key,
     required this.icon,
     required this.onTap,
     this.tooltip,
     this.size = 48,
+    this.shadows,
   });
 
   @override
@@ -90,6 +97,7 @@ class NoorCloudButton extends StatelessWidget {
         alignment: Alignment.center,
         child: CloudMedallion(
           size: size,
+          shadows: shadows,
           glow: pressed ? 1 : 0,
           child: IconTheme.merge(
             data: IconThemeData(
@@ -131,6 +139,7 @@ class _CloudPainter extends CustomPainter {
   final Color shade;
   final Color glow;
   final List<BoxShadow> shadows;
+  final double pixelRatio;
 
   _CloudPainter({
     required this.back,
@@ -139,6 +148,7 @@ class _CloudPainter extends CustomPainter {
     required this.shade,
     required this.glow,
     required this.shadows,
+    required this.pixelRatio,
   });
 
   // On a 100-unit box, shared by every marker on the page. Six puffs a row:
@@ -175,7 +185,21 @@ class _CloudPainter extends CustomPainter {
       Path.combine(PathOperation.union, _backRow, _frontRow);
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) => BakedPaint.shared.paint(
+        canvas,
+        size,
+        key: [back, front, lip, shade, glow, ...shadows],
+        ratio: pixelRatio,
+        // Shadows and glow spill past the box, to offset + 3 sigma (dp). The
+        // glow is 5 dp, and the inner shade (1.5 dp, 3 sigma = 4.5) fits in 5.
+        pad: shadows.fold(
+          glow.a > 0 ? 15.0 : 5.0,
+          (pad, s) => math.max(pad, s.offset.distance + 3 * s.blurSigma),
+        ),
+        draw: _draw,
+      );
+
+  void _draw(Canvas canvas, Size size) {
     final k = size.width / 100;
     canvas.scale(k);
     // The tokens are in dp, the canvas is in units.
@@ -213,7 +237,8 @@ class _CloudPainter extends CustomPainter {
       old.lip != lip ||
       old.shade != shade ||
       old.glow != glow ||
-      old.shadows != shadows;
+      old.shadows != shadows ||
+      old.pixelRatio != pixelRatio;
 }
 
 /// The `cloud-scroll` motif (`hilal-design-system/assets/Motifs`) as two
@@ -230,12 +255,14 @@ class CloudBankPainter extends CustomPainter {
     required this.front,
     required this.lip,
     required this.shade,
+    required this.pixelRatio,
   });
 
   final Color back;
   final Color front;
   final Color? lip;
   final Color shade;
+  final double pixelRatio;
 
   // (x, y, r) in the motif's viewBox, without the end puffs that close the
   // motif at its edges: here the rows run on.
@@ -283,8 +310,17 @@ class CloudBankPainter extends CustomPainter {
     return path;
   }
 
+  // Clipped to its box, so nothing spills and there is no padding.
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) => BakedPaint.shared.paint(
+        canvas,
+        size,
+        key: [CloudBankPainter, back, front, lip, shade],
+        ratio: pixelRatio,
+        draw: _draw,
+      );
+
+  void _draw(Canvas canvas, Size size) {
     final scale = (size.height - headroom) / (_bottom - _top);
     final repeats = (size.width / (_frontStep * scale)).ceil();
     final backRow = _row(_backRow, _backStep, repeats);
@@ -324,5 +360,6 @@ class CloudBankPainter extends CustomPainter {
       old.back != back ||
       old.front != front ||
       old.lip != lip ||
-      old.shade != shade;
+      old.shade != shade ||
+      old.pixelRatio != pixelRatio;
 }
