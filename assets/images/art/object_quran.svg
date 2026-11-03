@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 117" width="140" height="117">
+<defs><linearGradient id="kl" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="106"><stop offset="0" stop-color="#09131b"/><stop offset="1" stop-color="#060c12"/></linearGradient><linearGradient id="kr" gradientUnits="userSpaceOnUse" x1="18" y1="4" x2="121" y2="106"><stop offset="0" stop-color="#263641"/><stop offset="1" stop-color="#071017"/></linearGradient></defs>
+<g opacity="0.1" transform="translate(4 2)" fill="#000"><path d="M6 12L18 4H115V89H121V99H113V106H8V99H0V89H6Z"/></g>
+<g opacity="0.07" transform="translate(8 4)" fill="#000"><path d="M6 12L18 4H115V89H121V99H113V106H8V99H0V89H6Z"/></g>
+<g opacity="0.05" transform="translate(12 6)" fill="#000"><path d="M6 12L18 4H115V89H121V99H113V106H8V99H0V89H6Z"/></g>
+<path fill="url(#kl)" d="M6 12L18 4V82L6 90Z"/>
+<path fill="url(#kr)" d="M18 4H110V82H18Z"/>
+<path fill="#f5f2eb" d="M110 4H115V82H110Z"/>
+<path fill="#0b1620" fill-opacity=".35" d="M110 14H115V14.8H110ZM110 24H115V24.8H110ZM110 34H115V34.8H110ZM110 44H115V44.8H110ZM110 54H115V54.8H110ZM110 64H115V64.8H110ZM110 74H115V74.8H110Z"/>
+<path fill="#f5f2eb" d="M6 90L18 82H115V89H6Z"/>
+<path fill="none" stroke="#f5f2eb" stroke-width="1.6" d="M24 10H104V76H24Z"/>
+<path fill="none" stroke="#f5f2eb" stroke-width=".7" d="M28 14H100V72H28Z"/>
+<path fill="#f5f2eb" d="M45 24H83V62H45ZM64 16L91 43L64 70L37 43Z"/>
+<circle cx="64" cy="43" r="13" fill="#0b1620"/>
+<circle cx="64" cy="43" r="9" fill="none" stroke="#f5f2eb" stroke-width="1.2"/>
+<circle cx="64" cy="43" r="3.6" fill="#f5f2eb"/>
+<path fill="#f5f2eb" d="M26 7.5L30.5 12L26 16.5L21.5 12ZM102 7.5L106.5 12L102 16.5L97.5 12ZM26 69.5L30.5 74L26 78.5L21.5 74ZM102 69.5L106.5 74L102 78.5L97.5 74Z"/>
+<path fill="url(#kr)" d="M0 89H121V99H0Z"/>
+<path fill="#f5f2eb" d="M0 92.5H121V94H0Z"/>
+<path fill="url(#kl)" d="M8 99H113V106H8Z"/>
+</svg>

@@ -32,8 +32,8 @@ abstract final class NoorArt {
   static const String qiblaKaaba = 'assets/images/art/qibla_kaaba.svg';
 
   /// Raster objects laid over the Prayers and Quran heroes by [NoorHero].
-  static const String objectMosque = 'assets/images/art/object_mosque.webp';
-  static const String objectQuran = 'assets/images/art/object_quran.webp';
+  static const String objectMosque = 'assets/images/art/object_mosque.svg';
+  static const String objectQuran = 'assets/images/art/object_quran.svg';
 
   /// Bases precached by the custom splash.
   static const List<String> heroes = [

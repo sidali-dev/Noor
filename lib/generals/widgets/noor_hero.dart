@@ -37,16 +37,16 @@ const Map<String, List<(double, double, double)>> noorHeroStars = {
   ],
 };
 
-/// Art that keeps its orientation: the SVG or webp and its rect in the
+/// Art that keeps its orientation: the SVG and its rect in the
 /// 390 x 240 space, laid over the mirrored art at the same end of the band.
 const Map<String, (String, Rect)> _upright = {
   NoorArt.heroQuran: (
     NoorArt.objectQuran,
-    Rect.fromLTWH(204, 84, 160, 113.6),
+    Rect.fromLTWH(216, 84, 140, 117),
   ),
   NoorArt.heroPrayers: (
     NoorArt.objectMosque,
-    Rect.fromLTWH(187, 104, 194, 97),
+    Rect.fromLTWH(193, 80, 182, 121),
   ),
   NoorArt.qiblaSkyline: (
     NoorArt.qiblaKaaba,
@@ -267,22 +267,11 @@ class NoorHero extends StatelessWidget {
                                                 width: upright.$2.width * scale,
                                                 height:
                                                     upright.$2.height * scale,
-                                                child:
-                                                    upright.$1.endsWith('.webp')
-                                                        ? _raster(
-                                                            upright.$1,
-                                                            n.isDark
-                                                                ? Colors.black
-                                                                : n.window,
-                                                            n.isDark ? 2.4 : 1,
-                                                            rtl ? -3 : 3,
-                                                            scale,
-                                                          )
-                                                        : SvgPicture.asset(
-                                                            upright.$1,
-                                                            key: const ValueKey(
-                                                                'noor-hero-upright'),
-                                                          ),
+                                                child: SvgPicture.asset(
+                                                  upright.$1,
+                                                  key: const ValueKey(
+                                                      'noor-hero-upright'),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -366,47 +355,6 @@ class NoorHero extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
-  }
-
-  /// A raster object with the stepped shadow the vector ones cast on the niche
-  /// wall: three offset copies of its silhouette, nearest the darkest. [dx] is
-  /// negative in RTL, where the moon, and so the light, is on the other side.
-  static Widget _raster(
-    String asset,
-    Color tint,
-    double strength,
-    double dx,
-    double scale,
-  ) {
-    Widget image() => Image.asset(
-          asset,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.medium,
-        );
-    // Apart from the stars' twinkle, so the filters do not recomposite on it.
-    return RepaintBoundary(
-      child: Stack(
-        clipBehavior: Clip.none,
-        fit: StackFit.expand,
-        children: [
-          for (final (k, a) in const [(1.0, .05), (.62, .06), (.3, .08)])
-            Transform.translate(
-              offset: Offset(dx * k * scale, 5 * k * scale),
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  tint.withValues(alpha: a * strength),
-                  BlendMode.srcIn,
-                ),
-                child: image(),
-              ),
-            ),
-          KeyedSubtree(
-            key: const ValueKey('noor-hero-upright'),
-            child: image(),
-          ),
-        ],
       ),
     );
   }
