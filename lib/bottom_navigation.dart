@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/adhan_ring_screen.dart';
@@ -40,28 +41,56 @@ class SBottomNavigation extends StatelessWidget {
 
     return Scaffold(
       extendBody: true,
-      // Tabs are built on first visit and then kept, so switching is a repaint
-      // (the nav circle animates smoothly) and tabs keep their state. Qibla
-      // is mounted only while shown, so the compass sensor is not left running.
+      // Tabs are kept once built, so switching is a repaint (the nav circle
+      // animates smoothly) and tabs keep their state. Prayers and Athkar are
+      // built and painted once early, unseen, in idle time
+      // ([SBottomNavigationController.onReady]): a first build and paint cost
+      // over 100 ms, which a first visit would otherwise spend inside the
+      // switch. Qibla is mounted only while shown, so the compass sensor is not
+      // left running.
       body: Obx(() {
         final i = controller.selectedIndex.value;
         controller.visited.add(i);
+        final warmed = controller.warmed;
+        final warming = controller.warming.value;
         const tabs = [
           QuranScreen(),
           AdhanScreen(),
           DuaaScreen(),
           QiblaScreen(),
         ];
-        return IndexedStack(
-          index: i,
-          sizing: StackFit.expand,
+        return Stack(
+          fit: StackFit.expand,
           children: [
-            for (var k = 0; k < tabs.length; k++)
-              controller.visited.contains(k) && (k != 3 || k == i)
-                  // IndexedStack keeps hidden tabs alive but still ticking;
-                  // only the shown tab may run animations.
-                  ? TickerMode(enabled: k == i, child: tabs[k])
-                  : const SizedBox.shrink(),
+            // A tab warming up goes first: under the shown tab, which hides it.
+            for (final k in [
+              if (warming != null) warming,
+              for (var k = 0; k < tabs.length; k++)
+                if (k != warming) k,
+            ])
+              KeyedSubtree(
+                key: ValueKey(k),
+                child: Offstage(
+                  offstage: k != i && k != warming,
+                  child: ExcludeFocus(
+                    excluding: k != i,
+                    child: ExcludeSemantics(
+                      excluding: k != i,
+                      child: IgnorePointer(
+                        ignoring: k != i,
+                        child: (controller.visited.contains(k) ||
+                                    warmed.contains(k) ||
+                                    k == warming) &&
+                                (k != 3 || k == i)
+                            // Kept-alive tabs would otherwise keep ticking;
+                            // only the shown tab may run animations.
+                            ? TickerMode(enabled: k == i, child: tabs[k])
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
       }),
@@ -81,6 +110,16 @@ class SBottomNavigationController extends GetxController {
 
   final Rx<int> selectedIndex = 0.obs;
   final Set<int> visited = {};
+
+  /// Tabs mounted ahead of a visit; see [onReady]. An Rx set, so the body
+  /// rebuilds when one is added (adding to [visited] there would be mid-build).
+  final RxSet<int> warmed = <int>{}.obs;
+
+  /// The tab being painted under the shown one, for one frame.
+  final warming = RxnInt();
+  static const _warmOrder = [1, 2];
+  static const _warmGap = Duration(milliseconds: 300);
+  Timer? _warmTimer;
   bool initialIndexApplied = false;
 
   @override
@@ -95,6 +134,35 @@ class SBottomNavigationController extends GetxController {
       for (final alarm in ringing.alarms) {
         if (_shown.add(alarm.id)) navigateToRingScreen(alarm);
       }
+    });
+  }
+
+  /// After the first frame, builds and paints the tabs the user will most likely
+  /// open next, one at a time and never while something animates. The paint is what bakes a tab's blurred clouds and wells
+  /// ([BakedPaint]) and readies the GPU for its art and text; a first visit
+  /// would otherwise do both inside the switch.
+  @override
+  void onReady() {
+    super.onReady();
+    _warmTimer = Timer(_warmGap, _warmNext);
+  }
+
+  void _warmNext() {
+    final next = _warmOrder
+        .where((k) => !visited.contains(k) && !warmed.contains(k))
+        .firstOrNull;
+    if (next == null) return;
+    // Not scheduleTask(Priority.idle): while an animation holds such a task
+    // back, the scheduler re-queues itself without pause and spins the UI thread.
+    if (SchedulerBinding.instance.transientCallbackCount > 0) {
+      _warmTimer = Timer(_warmGap, _warmNext);
+      return;
+    }
+    warming.value = next;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      warmed.add(next);
+      warming.value = null;
+      _warmTimer = Timer(_warmGap, _warmNext);
     });
   }
 
@@ -114,6 +182,7 @@ class SBottomNavigationController extends GetxController {
 
   @override
   void onClose() {
+    _warmTimer?.cancel();
     _subscription?.cancel();
     super.onClose();
   }

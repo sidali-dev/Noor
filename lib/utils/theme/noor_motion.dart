@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 // Hilal motion (hilal-design-system/README.md, "Motion"). tokens.json has no
@@ -19,6 +21,8 @@ const kNoorPressDistance = 1.0;
 
 /// Fades [child] in from 0 while it rises into place, once, when it first
 /// builds. Under `MediaQuery.disableAnimationsOf` it is [child], unchanged.
+/// Built off-stage (`TickerMode` off) it starts settled: nobody saw it enter,
+/// and at opacity 0 its child would not paint when the shell warms the tab up.
 ///
 /// The rise is paint-only (no relayout).
 class NoorSettle extends StatelessWidget {
@@ -43,7 +47,7 @@ class NoorSettle extends StatelessWidget {
     if (MediaQuery.disableAnimationsOf(context)) return child;
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
+      tween: Tween(begin: TickerMode.valuesOf(context).enabled ? 0 : 1, end: 1),
       duration: duration,
       curve: kNoorSettleCurve,
       builder: (context, t, child) => Opacity(
@@ -68,9 +72,11 @@ double noorTwinkleOpacity(double t, int i) {
   return 0.85 + 0.15 * (1 - (2 * p - 1).abs());
 }
 
-/// Owns the looping twinkle controller. [builder] gets null under Reduce
-/// Motion (a still sky). The ticker follows `TickerMode`, so the loop stops
-/// while the screen is off-stage, and it is disposed with the widget.
+/// Owns the looping twinkle value. [builder] gets null under Reduce Motion (a
+/// still sky). A 10 Hz timer steps the value, not a Ticker: a Ticker schedules
+/// a frame every vsync (60 fps) for a change too slow to see. The timer runs
+/// only while the screen is on-stage (`TickerMode`), the app is in the
+/// foreground and Reduce Motion is off, and it is cancelled with the widget.
 class NoorTwinkle extends StatefulWidget {
   const NoorTwinkle({super.key, required this.builder});
 
@@ -82,29 +88,70 @@ class NoorTwinkle extends StatefulWidget {
 }
 
 class _NoorTwinkleState extends State<NoorTwinkle>
-    with SingleTickerProviderStateMixin {
-  late final _controller =
-      AnimationController(vsync: this, duration: kNoorTwinkleCycle);
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+  static const _step = Duration(milliseconds: 100);
+
+  // Never started: only its value is set, so it is a plain Animation<double>.
+  late final AnimationController _value;
+  Timer? _timer;
+  late bool _foreground = _isForeground(WidgetsBinding.instance.lifecycleState);
+
+  // Inactive (a system dialog over the app) still draws; paused/hidden do not.
+  static bool _isForeground(AppLifecycleState? s) =>
+      s == null ||
+      s == AppLifecycleState.resumed ||
+      s == AppLifecycleState.inactive;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = AnimationController(vsync: this);
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _controller.stop();
-    } else if (!_controller.isAnimating) {
-      _controller.repeat();
+    _sync();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = _isForeground(state);
+    _sync();
+  }
+
+  // Resuming continues from the current value, so the sky does not jump.
+  void _sync() {
+    final run = _foreground &&
+        TickerMode.valuesOf(context).enabled &&
+        !MediaQuery.disableAnimationsOf(context);
+    if (!run) {
+      _timer?.cancel();
+      _timer = null;
+    } else {
+      // shortcut: steps by the nominal 100 ms, not the clock, so a stalled
+      // isolate slows the twinkle a little; fine for a 8 s ambient loop.
+      _timer ??= Timer.periodic(
+        _step,
+        (_) => _value.value = (_value.value +
+                _step.inMilliseconds / kNoorTwinkleCycle.inMilliseconds) %
+            1,
+      );
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    _value.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => widget.builder(
         context,
-        MediaQuery.disableAnimationsOf(context) ? null : _controller,
+        MediaQuery.disableAnimationsOf(context) ? null : _value,
       );
 }

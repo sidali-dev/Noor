@@ -53,6 +53,20 @@ void main() {
       expect(_opacityOf(tester, find.text('x')), 1);
     });
 
+    testWidgets('built off-stage it starts settled and never fades',
+        (tester) async {
+      Widget app({required bool on}) => _app(
+          TickerMode(enabled: on, child: const NoorSettle(child: Text('x'))));
+
+      await tester.pumpWidget(app(on: false));
+      expect(_opacityOf(tester, find.text('x')), 1);
+
+      await tester.pumpWidget(app(on: true));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(_opacityOf(tester, find.text('x')), 1);
+      await _idle(tester);
+    });
+
     testWidgets('is the bare child under Reduce Motion', (tester) async {
       await tester
           .pumpWidget(_app(const NoorSettle(child: Text('x')), reduce: true));
@@ -66,21 +80,32 @@ void main() {
           builder: (_, t) => Text(t == null ? 'still' : 'loop'),
         );
 
-    testWidgets('loops, and stops when hidden or unmounted', (tester) async {
-      await tester.pumpWidget(_app(twinkle()));
-      expect(find.text('loop'), findsOneWidget);
-      expect(tester.binding.transientCallbackCount, greaterThan(0));
+    testWidgets('advances while active and stops when TickerMode is off',
+        (tester) async {
+      Animation<double>? anim;
+      Widget app({required bool on}) => _app(TickerMode(
+            enabled: on,
+            child: NoorTwinkle(builder: (_, t) {
+              anim = t;
+              return const SizedBox();
+            }),
+          ));
 
-      await tester
-          .pumpWidget(_app(TickerMode(enabled: false, child: twinkle())));
-      await tester.pump();
-      await _idle(tester);
+      await tester.pumpWidget(app(on: true));
+      await tester.pump(const Duration(seconds: 1));
+      final v = anim!.value;
+      expect(v, closeTo(1 / 8, 0.02));
+      expect(tester.binding.transientCallbackCount, 0); // no per-frame ticker
 
-      await tester.pumpWidget(_app(twinkle()));
-      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpWidget(app(on: false));
+      await tester.pump(const Duration(seconds: 1));
+      expect(anim!.value, v);
 
-      await tester.pumpWidget(_app(const SizedBox()));
-      await _idle(tester);
+      await tester.pumpWidget(app(on: true)); // resumes from v, no jump
+      await tester.pump(const Duration(seconds: 1));
+      expect(anim!.value, closeTo(v + 1 / 8, 0.02));
+
+      await tester.pumpWidget(_app(const SizedBox())); // cancels the timer
     });
 
     testWidgets('is still under Reduce Motion, and live changes apply',
@@ -91,10 +116,9 @@ void main() {
 
       await tester.pumpWidget(_app(twinkle()));
       expect(find.text('loop'), findsOneWidget);
-      expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pumpWidget(_app(twinkle(), reduce: true));
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 1)); // timer is cancelled
       expect(find.text('still'), findsOneWidget);
       await _idle(tester);
     });

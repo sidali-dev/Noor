@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
+import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/generated/l10n.dart';
@@ -60,6 +61,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
+    Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
   });
 
   testWidgets('tapping a tab selects it and the selector slides to it',
@@ -94,6 +96,7 @@ void main() {
     expect(Get.find<SBottomNavigationController>().selectedIndex.value, 2);
     expect(_gap(tester, 'Athkar'), closeTo(0, 0.5));
     expect(_gap(tester, 'Quran').abs(), greaterThan(50));
+    Get.delete<SBottomNavigationController>();
   });
 
   testWidgets('only the shown tab keeps its hero twinkling', (tester) async {
@@ -111,7 +114,7 @@ void main() {
     await tester.pumpWidget(_app(const SBottomNavigation()));
     await tester.pump(const Duration(milliseconds: 100));
 
-    // IndexedStack keeps visited tabs alive; their tickers must be muted.
+    // Visited tabs are kept alive; their tickers must be muted.
     int running() => find
         .byType(NoorTwinkle, skipOffstage: false)
         .evaluate()
@@ -130,6 +133,101 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(running(), 1);
+    Get.delete<SBottomNavigationController>();
+  });
+
+  testWidgets('Prayers and Athkar are built off-stage in idle time, Qibla not',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    SharedPrefService.resetForTest();
+    await tester.runAsync(() async {
+      await SharedPrefService.init();
+      await AdhkarData.init();
+    });
+    tester.view.physicalSize = const Size(840, 1870);
+    tester.view.devicePixelRatio = 2.1;
+    addTearDown(tester.view.reset);
+    addTearDown(Get.reset);
+
+    await tester.pumpWidget(_app(const SBottomNavigation()));
+    await tester.pump(const Duration(milliseconds: 100));
+    final c = Get.find<SBottomNavigationController>();
+    expect(c.warmed, isEmpty); // not during the first frames
+
+    for (var i = 0; i < 40; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(c.warmed, {1, 2});
+    expect(c.selectedIndex.value, 0);
+    // Mounted (Quran, Prayers, Athkar), none of the extra ones twinkling.
+    expect(find.byType(NoorTwinkle, skipOffstage: false), findsNWidgets(3));
+    expect(
+        find
+            .byType(NoorTwinkle, skipOffstage: false)
+            .evaluate()
+            .where((e) => TickerMode.valuesOf(e).enabled),
+        hasLength(1));
+  });
+
+  testWidgets('a warming tab paints once, unseen, and keeps its state',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    SharedPrefService.resetForTest();
+    await tester.runAsync(() async {
+      await SharedPrefService.init();
+      await AdhkarData.init();
+    });
+    tester.view.physicalSize = const Size(840, 1870);
+    tester.view.devicePixelRatio = 2.1;
+    addTearDown(tester.view.reset);
+    addTearDown(Get.reset);
+
+    await tester.pumpWidget(_app(const SBottomNavigation()));
+    final c = Get.find<SBottomNavigationController>();
+    final prayers = find.byType(AdhanScreen);
+    Finder above(Type t) =>
+        find.ancestor(of: prayers, matching: find.byType(t));
+    bool ignoring() =>
+        tester.widget<IgnorePointer>(above(IgnorePointer).first).ignoring;
+
+    // The warm frame is over within one pump, so it is read from inside it.
+    int? painted, under;
+    bool? inert, unread, ticking;
+    c.warming.listen((k) {
+      if (k == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        painted = prayers.evaluate().length; // on-stage to the finder
+        final stack =
+            tester.element(prayers).findAncestorWidgetOfExactType<Stack>()!;
+        under = (stack.children.first.key! as ValueKey<int>).value;
+        inert = ignoring();
+        unread = tester
+            .widget<ExcludeSemantics>(above(ExcludeSemantics).first)
+            .excluding;
+        ticking = TickerMode.valuesOf(tester.element(prayers)).enabled;
+      });
+    });
+
+    for (var i = 0; i < 40 && !c.warmed.contains(1); i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(painted, 1);
+    expect(under, 1);
+    expect(inert, isTrue);
+    expect(unread, isTrue);
+    expect(ticking, isFalse);
+
+    await tester.pump(); // hidden again
+    expect(c.warming.value, isNull);
+    expect(prayers, findsNothing);
+    final state = tester.state(find.byType(AdhanScreen, skipOffstage: false));
+
+    await tester.tap(_label('Prayers'));
+    await tester.pump();
+    expect(tester.state(prayers), state);
+    expect(TickerMode.valuesOf(tester.element(prayers)).enabled, isTrue);
+    expect(ignoring(), isFalse);
+    Get.delete<SBottomNavigationController>();
   });
 
   testWidgets('bar floats s4 above the safe area and mirrors in Arabic',
