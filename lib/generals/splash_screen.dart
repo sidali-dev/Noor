@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:noor/generals/preload_svgs.dart';
 import 'package:noor/generals/widgets/arch_frame.dart';
@@ -8,10 +7,7 @@ import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// Shown right after the native splash. Stays up while [ready] (app startup)
-/// and the current theme's art precache run, then for [_hold] more with [next]
-/// mounted under it, so the shell has loaded and warmed its tabs
-/// ([SBottomNavigationController.onReady]) before it can be tapped. Then it
-/// fades away.
+/// and the current theme's art precache run, then fades into [next].
 class SplashScreen extends StatefulWidget {
   final Future<void> ready;
   final WidgetBuilder next;
@@ -25,9 +21,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   static const _fadeOut = Duration(milliseconds: 240);
-  // shortcut: a fixed time, not the end of the warm-up, so a slow phone may lift
-  // the splash early and pay the old first visit; wait on the warm-up if seen.
-  static const _hold = Duration(milliseconds: 1000);
   // Paper-settle: the frame fades and rises over 220 ms, the words follow 80 ms
   // behind. Played once.
   static const _settleFrame = 220;
@@ -44,11 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     duration: const Duration(seconds: 8),
   );
 
-  late final _out = AnimationController(vsync: this, duration: _fadeOut);
-
   bool _started = false;
-  bool _shellMounted = false;
-  bool _gone = false;
 
   @override
   void initState() {
@@ -69,7 +58,6 @@ class _SplashScreenState extends State<SplashScreen>
   void dispose() {
     _settle.dispose();
     _twinkle.dispose();
-    _out.dispose();
     super.dispose();
   }
 
@@ -84,13 +72,9 @@ class _SplashScreenState extends State<SplashScreen>
       AssetImage(ctx.noor.isDark ? NoorArt.markNight : NoorArt.markPaper),
       ctx,
       onError: (_, __) {},
-    ).then((_) async {
+    ).then((_) {
       if (!mounted) return;
-      if (reduce) {
-        _settle.value = 1;
-      } else {
-        await _settle.forward();
-      }
+      reduce ? _settle.value = 1 : _settle.forward();
     });
 
     await Future.wait([
@@ -103,15 +87,14 @@ class _SplashScreenState extends State<SplashScreen>
     ]);
 
     if (!mounted) return;
-    // The shell's warm-up waits while anything animates; an 8 s twinkle standing
-    // still for a second does not show.
-    _twinkle.stop();
-    setState(() => _shellMounted = true);
-
-    await Future<void>.delayed(_hold);
-    if (!mounted) return;
-    if (!reduce) await _out.forward();
-    if (mounted) setState(() => _gone = true);
+    Navigator.of(context).pushReplacement(PageRouteBuilder<void>(
+      transitionDuration: reduce ? Duration.zero : _fadeOut,
+      pageBuilder: (c, _, __) => widget.next(c),
+      transitionsBuilder: (_, a, __, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: a, curve: Curves.easeOutCubic),
+        child: child,
+      ),
+    ));
   }
 
   Widget _settled({
@@ -138,27 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-        fit: StackFit.expand,
-        children: [
-          if (_shellMounted)
-            ExcludeSemantics(
-              excluding: !_gone,
-              child: widget.next(context),
-            ),
-          if (!_gone)
-            // Over the hero's light status bar icons, which are under here.
-            AnnotatedRegion<SystemUiOverlayStyle>(
-              value: noorSystemOverlay(Theme.of(context).brightness),
-              child: FadeTransition(
-                opacity: ReverseAnimation(_out),
-                child: _splash(context),
-              ),
-            ),
-        ],
-      );
-
-  Widget _splash(BuildContext context) {
+  Widget build(BuildContext context) {
     final n = context.noor;
     final size = MediaQuery.sizeOf(context);
     // space-7 of ground each side so the shadows have room.
