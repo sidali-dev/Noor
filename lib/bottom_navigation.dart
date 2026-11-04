@@ -15,6 +15,7 @@ import 'package:noor/features/quran/quran_screen.dart';
 import 'package:noor/generals/controllers/location_controller.dart';
 import 'package:noor/generals/location_drift.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class SBottomNavigation extends StatelessWidget {
@@ -41,37 +42,110 @@ class SBottomNavigation extends StatelessWidget {
 
     return Scaffold(
       extendBody: true,
-      // Tabs are kept once built, so switching is a repaint (the nav circle
-      // animates smoothly) and tabs keep their state. Prayers and Athkar are
-      // built and painted once early, unseen, in idle time
-      // ([SBottomNavigationController.onReady]): a first build and paint cost
-      // over 100 ms, which a first visit would otherwise spend inside the
-      // switch. Qibla is mounted only while shown, so the compass sensor is not
-      // left running.
-      body: Obx(() {
-        final i = controller.selectedIndex.value;
-        controller.visited.add(i);
-        final warmed = controller.warmed;
-        final warming = controller.warming.value;
-        const tabs = [
-          QuranScreen(),
-          AdhanScreen(),
-          DuaaScreen(),
-          QiblaScreen(),
-        ];
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // A tab warming up goes first: under the shown tab, which hides it.
-            for (final k in [
-              if (warming != null) warming,
-              for (var k = 0; k < tabs.length; k++)
-                if (k != warming) k,
-            ])
-              KeyedSubtree(
-                key: ValueKey(k),
-                child: Offstage(
-                  offstage: k != i && k != warming,
+      body: _Tabs(controller: controller),
+      bottomNavigationBar: Obx(
+        () => NoorNavBar(
+          selectedIndex: controller.selectedIndex.value,
+          onItemSelected: controller.changeIndex,
+        ),
+      ),
+    );
+  }
+}
+
+/// The tabs: the shown one slides in and the one it replaces out, in step with
+/// [NoorNavBar]'s selector.
+// shortcut: slides the same way in RTL, pass SlideTransition's textDirection
+// before shipping.
+class _Tabs extends StatefulWidget {
+  final SBottomNavigationController controller;
+  const _Tabs({required this.controller});
+
+  @override
+  State<_Tabs> createState() => _TabsState();
+}
+
+class _TabsState extends State<_Tabs> with SingleTickerProviderStateMixin {
+  late final _slide = AnimationController(vsync: this, value: 1);
+  late final _curved =
+      CurvedAnimation(parent: _slide, curve: Curves.easeOutCubic);
+  late final Worker _onIndex;
+  late int _shown;
+  int? _leaving;
+
+  @override
+  void initState() {
+    super.initState();
+    _shown = widget.controller.selectedIndex.value;
+    _slide.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _leaving = null);
+      }
+    });
+    _onIndex = ever(widget.controller.selectedIndex, (int i) {
+      _leaving = _shown;
+      _shown = i;
+      _slide.forward(from: 0);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _slide.duration = noorDuration(context, NoorNavBar.select);
+  }
+
+  @override
+  void dispose() {
+    _onIndex.dispose();
+    _curved.dispose();
+    _slide.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Tabs are kept once built, so switching is a repaint (the nav circle
+    // animates smoothly) and tabs keep their state. Prayers and Athkar are
+    // built and painted once early, unseen, in idle time
+    // ([SBottomNavigationController.onReady]): a first build and paint cost
+    // over 100 ms, which a first visit would otherwise spend inside the
+    // switch. Qibla is mounted only while shown, so the compass sensor is not
+    // left running.
+    return Obx(() {
+      final i = widget.controller.selectedIndex.value;
+      widget.controller.visited.add(i);
+      final controller = widget.controller;
+      final warmed = controller.warmed;
+      final warming = controller.warming.value;
+      final leaving = _leaving;
+      final dir = leaving == null ? 0.0 : (i - leaving).sign.toDouble();
+      const tabs = [
+        QuranScreen(),
+        AdhanScreen(),
+        DuaaScreen(),
+        QiblaScreen(),
+      ];
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          // A tab warming up goes first: under the shown tab, which hides it.
+          for (final k in [
+            if (warming != null) warming,
+            for (var k = 0; k < tabs.length; k++)
+              if (k != warming) k,
+          ])
+            KeyedSubtree(
+              key: ValueKey(k),
+              child: Offstage(
+                offstage: k != i && k != warming && k != leaving,
+                child: SlideTransition(
+                  position: (k == i
+                          ? Tween(begin: Offset(dir, 0), end: Offset.zero)
+                          : k == leaving
+                              ? Tween(begin: Offset.zero, end: Offset(-dir, 0))
+                              : Tween(begin: Offset.zero, end: Offset.zero))
+                      .animate(_curved),
                   child: ExcludeFocus(
                     excluding: k != i,
                     child: ExcludeSemantics(
@@ -81,7 +155,7 @@ class SBottomNavigation extends StatelessWidget {
                         child: (controller.visited.contains(k) ||
                                     warmed.contains(k) ||
                                     k == warming) &&
-                                (k != 3 || k == i)
+                                (k != 3 || k == i || k == leaving)
                             // Kept-alive tabs would otherwise keep ticking;
                             // only the shown tab may run animations.
                             ? TickerMode(enabled: k == i, child: tabs[k])
@@ -91,16 +165,10 @@ class SBottomNavigation extends StatelessWidget {
                   ),
                 ),
               ),
-          ],
-        );
-      }),
-      bottomNavigationBar: Obx(
-        () => NoorNavBar(
-          selectedIndex: controller.selectedIndex.value,
-          onItemSelected: controller.changeIndex,
-        ),
-      ),
-    );
+            ),
+        ],
+      );
+    });
   }
 }
 

@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:noor/bottom_navigation.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
+import 'package:noor/features/duaa/duaa_screen.dart';
+import 'package:noor/features/quran/quran_screen.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
@@ -97,6 +99,83 @@ void main() {
     expect(_gap(tester, 'Athkar'), closeTo(0, 0.5));
     expect(_gap(tester, 'Quran').abs(), greaterThan(50));
     Get.delete<SBottomNavigationController>();
+  });
+
+  Future<void> pumpShell(WidgetTester tester, Widget home) async {
+    SharedPreferences.setMockInitialValues({});
+    SharedPrefService.resetForTest();
+    await tester.runAsync(() async {
+      await SharedPrefService.init();
+      await AdhkarData.init();
+    });
+    tester.view.physicalSize = const Size(840, 1870);
+    tester.view.devicePixelRatio = 2.1;
+    addTearDown(tester.view.reset);
+    addTearDown(Get.reset);
+    await tester.pumpWidget(_app(home));
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  testWidgets('a tab slides in and the old one out, in step with the selector',
+      (tester) async {
+    await pumpShell(tester, const SBottomNavigation());
+    final width = tester.getSize(find.byType(SBottomNavigation)).width;
+    final from = tester.getCenter(_label('Quran')).dx;
+    final to = tester.getCenter(_label('Athkar')).dx;
+
+    await tester.tap(_label('Athkar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // How far along: the selector, then each tab.
+    final t = (tester.getCenter(find.byKey(const ValueKey('nav-selector'))).dx -
+            from) /
+        (to - from);
+    expect(t, inExclusiveRange(0, 1));
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx / width,
+        closeTo(1 - t, 0.01));
+    expect(tester.getTopLeft(find.byType(QuranScreen)).dx / width,
+        closeTo(-t, 0.01));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, 0);
+    expect(find.byType(QuranScreen), findsNothing);
+    expect(tester.takeException(), isNull);
+    Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
+  });
+
+  testWidgets('going back to a lower tab slides the other way', (tester) async {
+    await pumpShell(tester, const SBottomNavigation(pageIndex: 2));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await tester.tap(_label('Quran'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.getTopLeft(find.byType(QuranScreen)).dx, lessThan(0));
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, greaterThan(0));
+    await tester.pump(const Duration(milliseconds: 300));
+    Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
+  });
+
+  testWidgets('Reduce Motion switches tabs at once', (tester) async {
+    await pumpShell(
+      tester,
+      const MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
+        child: SBottomNavigation(),
+      ),
+    );
+
+    await tester.tap(_label('Athkar'));
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, 0);
+    expect(find.byType(QuranScreen), findsNothing);
+    expect(tester.takeException(), isNull);
+    Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
   });
 
   testWidgets('only the shown tab keeps its hero twinkling', (tester) async {

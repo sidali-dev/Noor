@@ -31,7 +31,7 @@ class NoorNavBar extends StatelessWidget {
     required this.onItemSelected,
   });
 
-  static const _select = Duration(milliseconds: 300);
+  static const select = Duration(milliseconds: 300);
   static const _pill = BorderRadius.all(Radius.circular(NoorRadius.pill));
 
   @override
@@ -46,7 +46,7 @@ class NoorNavBar extends StatelessWidget {
       (svg: SImageString.kaaba, label: s.nav_qibla),
     ];
 
-    final duration = noorDuration(context, _select);
+    final duration = noorDuration(context, select);
 
     return Padding(
       padding: EdgeInsetsDirectional.only(
