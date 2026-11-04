@@ -100,7 +100,8 @@ Future<({String? city, int minutes})?> _detectDrift(List<String> saved) async {
 Future<Map<String, dynamic>> _getJson(Uri uri) async {
   final res = await http.get(uri).timeout(_timeout);
   if (res.statusCode != 200) throw http.ClientException('${res.statusCode}');
-  final body = json.decode(res.body);
+  // Not res.body: without a charset in the reply it decodes as Latin-1.
+  final body = json.decode(utf8.decode(res.bodyBytes));
   if (body is! Map<String, dynamic>) throw const FormatException();
   return body;
 }

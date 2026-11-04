@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:noor/utils/constants/shared_pref_keys.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 
@@ -153,9 +155,20 @@ class AppPrefs {
 
   static String? prayerYearJson(int year) {
     try {
-      return SharedPrefService.getString(SharedPrefKeys.adhanYear(year));
+      final json = SharedPrefService.getString(SharedPrefKeys.adhanYear(year));
+      return json == null ? null : _undoLatin1(json);
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Calendars saved by older versions hold UTF-8 bytes misread as Latin-1.
+  /// Good text doesn't survive this round trip, so it comes back as it was.
+  static String _undoLatin1(String text) {
+    try {
+      return utf8.decode(latin1.encode(text));
+    } catch (_) {
+      return text;
     }
   }
 

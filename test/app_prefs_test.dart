@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/utils/constants/shared_pref_keys.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
@@ -213,6 +215,23 @@ void main() {
       expect(SharedPrefKeys.reminder602, '602');
       expect(
           SharedPrefKeys.chouroukAlarm2Duration, 'chourouk_alarm_2_duration');
+    });
+  });
+
+  group('cached prayer calendar', () {
+    const json = '{"month":"رجب","en":"Rajāb"}';
+    final key = SharedPrefKeys.adhanYear(2026);
+
+    test('a calendar saved garbled reads back as the original text', () async {
+      await _useStore({key: latin1.decode(utf8.encode(json))});
+      expect(AppPrefs.prayerYearJson(2026), json);
+    });
+
+    test('a good calendar reads back unchanged', () async {
+      for (final good in [json, '{"code":200}', '{"city":"Sétif"}']) {
+        await _useStore({key: good});
+        expect(AppPrefs.prayerYearJson(2026), good);
+      }
     });
   });
 }

@@ -52,7 +52,8 @@ class SHttpHelper {
 
     final dynamic body;
     try {
-      body = json.decode(response.body);
+      // Not response.body: without a charset in the reply it decodes as Latin-1.
+      body = json.decode(utf8.decode(response.bodyBytes));
     } catch (_) {
       throw PrayerApiException(response.statusCode, 'Invalid JSON');
     }
