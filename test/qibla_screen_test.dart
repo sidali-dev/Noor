@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:noor/features/qibla/qibla_controller.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
 import 'package:noor/features/qibla/widgets/qibla_calibration_sheet.dart';
 import 'package:noor/features/qibla/widgets/qibla_compass.dart';
@@ -38,6 +41,67 @@ Widget _buildTestApp({
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('afterTabSwitch', () {
+    const settle = Duration(milliseconds: 400);
+    const justShort = Duration(milliseconds: 399);
+    const rest = Duration(milliseconds: 1);
+
+    testWidgets('starts and stops the source late, passing events through',
+        (tester) async {
+      var starts = 0, stops = 0;
+      final source = StreamController<int>.broadcast(
+        onListen: () => starts++,
+        onCancel: () => stops++,
+      );
+      final got = <Object>[];
+      final sub =
+          afterTabSwitch(() => source.stream).listen(got.add, onError: got.add);
+
+      await tester.pump(justShort);
+      expect(starts, 0);
+      await tester.pump(rest);
+      expect(starts, 1);
+
+      source
+        ..add(7)
+        ..addError('no sensor');
+      await tester.pump();
+      expect(got, [7, 'no sensor']);
+
+      // Not awaited: it completes outside the test's fake clock, and hangs pump.
+      sub.cancel();
+      await tester.pump(justShort);
+      expect(stops, 0);
+      await tester.pump(rest);
+      expect(stops, 1);
+    });
+
+    testWidgets('never starts the source when left before it settles',
+        (tester) async {
+      var starts = 0;
+      final source = StreamController<int>.broadcast(onListen: () => starts++);
+      final sub = afterTabSwitch(() => source.stream).listen((_) {});
+
+      await tester.pump(justShort);
+      sub.cancel();
+      await tester.pump(settle * 2);
+      expect(starts, 0);
+    });
+
+    testWidgets('can be listened to again after a cancel', (tester) async {
+      var starts = 0;
+      final source = StreamController<int>.broadcast(onListen: () => starts++);
+      final stream = afterTabSwitch(() => source.stream);
+
+      stream.listen((_) {}).cancel();
+      final again = stream.listen((_) {});
+      await tester.pump(settle);
+      expect(starts, 1);
+      again.cancel();
+      await tester.pump(settle);
+    });
+  });
 
   group('QiblaDirectionCard Widget Tests', () {
     testWidgets('pumps direction card and asserts degrees and distance text',

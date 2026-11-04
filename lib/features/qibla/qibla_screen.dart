@@ -157,7 +157,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
   Widget _buildActiveCompass() {
     return StreamBuilder<QiblahDirection>(
-      stream: FlutterQiblah.qiblahStream,
+      stream: _controller.direction,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return _scroll(EmptyState(
