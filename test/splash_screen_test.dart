@@ -19,13 +19,39 @@ Widget _app(Future<void> ready, {ThemeData? theme, bool reduce = false}) =>
 Future<void> _settleArt(WidgetTester tester) => tester
     .runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
 
+/// A real run of frames: one long pump draws only one, at its end.
+Future<void> _frames(WidgetTester tester, int ms) async {
+  for (var t = 0; t < ms; t += 50) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+class _Counted extends StatefulWidget {
+  const _Counted(this.built);
+  final List<int> built;
+
+  @override
+  State<_Counted> createState() => _CountedState();
+}
+
+class _CountedState extends State<_Counted> {
+  @override
+  void initState() {
+    super.initState();
+    widget.built.add(widget.built.length + 1);
+  }
+
+  @override
+  Widget build(BuildContext context) => const Text('shell');
+}
+
 void main() {
-  testWidgets('splash holds until startup is ready, then shows next',
+  testWidgets('splash holds until ready, then for its minimum over the shell',
       (tester) async {
     final ready = Completer<void>();
     await tester.pumpWidget(_app(ready.future));
     await _settleArt(tester);
-    await tester.pump(const Duration(milliseconds: 400));
+    await _frames(tester, 400);
     expect(find.text('shell'), findsNothing);
     expect(find.text('FAITH'), findsOneWidget);
     expect(find.byType(ArchFrame), findsOneWidget);
@@ -35,8 +61,45 @@ void main() {
     await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    // Loading under the splash, for its minimum time.
+    await _frames(tester, 900);
     expect(find.text('shell'), findsOneWidget);
+    expect(find.text('FAITH'), findsOneWidget);
+
+    await _frames(tester, 400);
+    expect(find.text('shell'), findsOneWidget);
+    expect(find.text('FAITH'), findsNothing);
+  });
+
+  testWidgets('the shell under the splash stays mounted when it lifts',
+      (tester) async {
+    final built = <int>[];
+    await tester.pumpWidget(MaterialApp(
+      theme: NoorTheme.light(),
+      home: SplashScreen(
+        ready: Future<void>.value(),
+        next: (_) => _Counted(built),
+      ),
+    ));
+    await _settleArt(tester);
+    await _frames(tester, 400);
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await _frames(tester, 1400);
+
+    expect(find.text('FAITH'), findsNothing);
+    expect(built, [1]); // one State, never remounted
+  });
+
+  testWidgets('under reduced motion the splash lifts at once after its hold',
+      (tester) async {
+    await tester.pumpWidget(_app(Future<void>.value(), reduce: true));
+    await _settleArt(tester);
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await _frames(tester, 1100);
+    expect(find.text('shell'), findsOneWidget);
+    expect(find.text('FAITH'), findsNothing);
   });
 
   testWidgets('night theme builds the same hero', (tester) async {
