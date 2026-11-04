@@ -101,7 +101,8 @@ void main() {
     Get.delete<SBottomNavigationController>();
   });
 
-  Future<void> pumpShell(WidgetTester tester, Widget home) async {
+  Future<void> pumpShell(WidgetTester tester, Widget home,
+      {Locale locale = const Locale('en')}) async {
     SharedPreferences.setMockInitialValues({});
     SharedPrefService.resetForTest();
     await tester.runAsync(() async {
@@ -112,7 +113,7 @@ void main() {
     tester.view.devicePixelRatio = 2.1;
     addTearDown(tester.view.reset);
     addTearDown(Get.reset);
-    await tester.pumpWidget(_app(home));
+    await tester.pumpWidget(_app(home, locale: locale));
     await tester.pump(const Duration(milliseconds: 100));
   }
 
@@ -157,6 +158,22 @@ void main() {
     expect(tester.getTopLeft(find.byType(QuranScreen)).dx, lessThan(0));
     expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 300));
+    Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
+  });
+
+  testWidgets('in Arabic a higher tab slides in from the left', (tester) async {
+    await pumpShell(tester, const SBottomNavigation(),
+        locale: const Locale('ar'));
+
+    await tester.tap(_label('الأذكار'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, lessThan(0));
+    expect(tester.getTopLeft(find.byType(QuranScreen)).dx, greaterThan(0));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.getTopLeft(find.byType(DuaaScreen)).dx, 0);
     Get.delete<SBottomNavigationController>(); // cancels its warm-up timer
   });
 

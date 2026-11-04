@@ -55,8 +55,6 @@ class SBottomNavigation extends StatelessWidget {
 
 /// The tabs: the shown one slides in and the one it replaces out, in step with
 /// [NoorNavBar]'s selector.
-// shortcut: slides the same way in RTL, pass SlideTransition's textDirection
-// before shipping.
 class _Tabs extends StatefulWidget {
   final SBottomNavigationController controller;
   const _Tabs({required this.controller});
@@ -112,6 +110,7 @@ class _TabsState extends State<_Tabs> with SingleTickerProviderStateMixin {
     // over 100 ms, which a first visit would otherwise spend inside the
     // switch. Qibla is mounted only while shown, so the compass sensor is not
     // left running.
+    final direction = Directionality.of(context);
     return Obx(() {
       final i = widget.controller.selectedIndex.value;
       widget.controller.visited.add(i);
@@ -140,6 +139,7 @@ class _TabsState extends State<_Tabs> with SingleTickerProviderStateMixin {
               child: Offstage(
                 offstage: k != i && k != warming && k != leaving,
                 child: SlideTransition(
+                  textDirection: direction,
                   position: (k == i
                           ? Tween(begin: Offset(dir, 0), end: Offset.zero)
                           : k == leaving
