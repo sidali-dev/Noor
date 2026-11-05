@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 
 /// Warms [svg.cache] with every SVG the shell draws, so a tab's first frame is
@@ -10,12 +11,11 @@ import 'package:noor/utils/constants/image_strings.dart';
 /// A failed load is swallowed; that SVG just loads late, like before.
 Future<void> preloadSvgs(BuildContext context) {
   final loaders = <BytesLoader>[
-    for (final base in NoorArt.heroes)
-      for (final theme in const ['paper', 'night'])
-        SvgAssetLoader('${base}_$theme.svg'),
+    SvgAssetLoader(noorSkyNow.value.asset),
     for (final path in const [
       NoorArt.objectMosque,
       NoorArt.objectQuran,
+      NoorArt.objectSabha,
       NoorArt.qiblaKaaba,
       SImageString.kaaba,
       SImageString.navQuran,

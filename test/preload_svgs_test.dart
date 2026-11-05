@@ -25,7 +25,7 @@ Widget _screen() => MaterialApp(
           child: Column(children: [
             const NoorIcon(NoorGlyph.bell),
             const NoorIcon(NoorGlyph.kaaba),
-            const NoorHero(art: NoorArt.heroPrayers, title: 'Prayers'),
+            const NoorHero(art: NoorArt.objectMosque, title: 'Prayers'),
             NoorNavBar(selectedIndex: 0, onItemSelected: (_) {}),
           ]),
         ),

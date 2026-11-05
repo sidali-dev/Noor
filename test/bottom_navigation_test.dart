@@ -8,6 +8,7 @@ import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/features/quran/quran_screen.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
+import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
@@ -202,6 +203,7 @@ void main() {
       await SharedPrefService.init();
       await AdhkarData.init();
     });
+    noorSkyNow.value = NoorSky.isha; // Only a sky with stars twinkles.
     tester.view.physicalSize = const Size(840, 1870);
     tester.view.devicePixelRatio = 2.1;
     addTearDown(tester.view.reset);
@@ -240,6 +242,7 @@ void main() {
       await SharedPrefService.init();
       await AdhkarData.init();
     });
+    noorSkyNow.value = NoorSky.isha; // Only a sky with stars twinkles.
     tester.view.physicalSize = const Size(840, 1870);
     tester.view.devicePixelRatio = 2.1;
     addTearDown(tester.view.reset);

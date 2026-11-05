@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 240" width="390" height="240"><rect width="390" height="240" fill="#07080c"/><defs><radialGradient id="g"><stop offset="0" stop-color="#f7f7f4" stop-opacity="0.12"/><stop offset="1" stop-color="#f7f7f4" stop-opacity="0"/></radialGradient></defs><circle cx="182" cy="40" r="40" fill="url(#g)"/><path fill="#f7f7f4" transform="translate(168 26) scale(0.5)" d="M29.1 6.2A26 26 0 1 0 56.6 40.5A22 22 0 1 1 29.1 6.2Z"/><path fill="#f7f7f4" d="M150 19.4Q150 22 152.6 22Q150 22 150 24.6Q150 22 147.4 22Q150 22 150 19.4ZM236 13.4Q236 16 238.6 16Q236 16 236 18.6Q236 16 233.4 16Q236 16 236 13.4ZM128 33.4Q128 36 130.6 36Q128 36 128 38.6Q128 36 125.4 36Q128 36 128 33.4ZM346 27.4Q346 30 348.6 30Q346 30 346 32.6Q346 30 343.4 30Q346 30 346 27.4Z"/><path fill="#f7f7f4" d="M262 5.4Q262 10 266.6 10Q262 10 262 14.6Q262 10 257.4 10Q262 10 262 5.4ZM8 53.4Q8 58 12.6 58Q8 58 8 62.6Q8 58 3.4 58Q8 58 8 53.4ZM382 57.4Q382 62 386.6 62Q382 62 382 66.6Q382 62 377.4 62Q382 62 382 57.4Z"/>
-<path fill="#13161c" d="M178 250V110A106 74 0 0 1 390 110V250Z"/>
-<path fill="#000" fill-opacity="0.16" transform="translate(0 7)" d="M187 250V112A97 66 0 0 1 381 112V250Z"/>
-<path fill="#000" fill-opacity="0.2" transform="translate(0 4)" d="M187 250V112A97 66 0 0 1 381 112V250Z"/>
-<path fill="#000" fill-opacity="0.24" transform="translate(0 2)" d="M187 250V112A97 66 0 0 1 381 112V250Z"/>
-<path fill="#1c1f27" d="M187 250V112A97 66 0 0 1 381 112V250Z"/>
-</svg>

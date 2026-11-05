@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_cloud.dart';
+import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:noor/generals/widgets/settings_sheet.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -12,46 +13,29 @@ import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
-/// The stars baked into each hero SVG as (cx, cy, arm), in the SVG's 390 x 240
-/// space, in the order they twinkle. `art_assets_test` checks them against the
-/// files.
+/// The stars baked into the skies that have them as (cx, cy, arm), in the SVG's
+/// 390 x 240 space, in the order they twinkle. They lie on the flat
+/// [NoorSky.edge] colour. `art_assets_test` checks them against the files.
 // ponytail: the stars are baked into the SVG, so the twinkle dims a copy of
-// each in the `window` colour over it instead of splitting the art into layers.
+// each in the sky's colour over it instead of splitting the art into layers.
 @visibleForTesting
-const Map<String, List<(double, double, double)>> noorHeroStars = {
-  NoorArt.heroQuran: [
-    (150, 22, 2.6), (238, 12, 2.6), (126, 38, 2.6), (354, 22, 2.6), //
-    (256, 9, 4.6), (10, 62, 4.6), (380, 36, 4.6),
+const Map<NoorSky, List<(double, double, double)>> noorHeroStars = {
+  NoorSky.fajr: [
+    (262, 14, 2.6), (318, 12, 2.6), (384, 44, 2.6), (296, 26, 4.6),
   ],
-  NoorArt.heroPrayers: [
-    (150, 22, 2.6), (236, 14, 2.6), (128, 40, 2.6), (352, 14, 2.6), //
-    (262, 8, 4.6), (8, 58, 4.6), (382, 52, 4.6),
-  ],
-  NoorArt.heroAthkar: [
-    (150, 40, 2.6), (230, 10, 2.6), (132, 96, 2.6), (372, 12, 2.6), //
-    (10, 70, 4.6), (160, 150, 4.6), (380, 22, 4.6),
-  ],
-  NoorArt.qiblaSkyline: [
-    (150, 22, 2.6), (236, 16, 2.6), (128, 36, 2.6), (346, 30, 2.6), //
-    (262, 10, 4.6), (8, 58, 4.6), (382, 62, 4.6),
+  NoorSky.isha: [
+    (262, 12, 2.6), (318, 10, 2.6), (384, 44, 2.6), //
+    (386, 176, 2.6), (296, 22, 4.6), (214, 12, 2.6),
   ],
 };
 
-/// Art that keeps its orientation: the SVG and its rect in the
-/// 390 x 240 space, laid over the mirrored art at the same end of the band.
-const Map<String, (String, Rect)> _upright = {
-  NoorArt.heroQuran: (
-    NoorArt.objectQuran,
-    Rect.fromLTWH(216, 84, 140, 117),
-  ),
-  NoorArt.heroPrayers: (
-    NoorArt.objectMosque,
-    Rect.fromLTWH(193, 80, 182, 121),
-  ),
-  NoorArt.qiblaSkyline: (
-    NoorArt.qiblaKaaba,
-    Rect.fromLTWH(201.5, 66.7, 176.3, 139.8),
-  ),
+/// Each tab's object and its rect in the 390 x 240 space, laid over the
+/// mirrored sky at the same end of the band and never mirrored itself.
+const Map<String, Rect> _upright = {
+  NoorArt.objectQuran: Rect.fromLTWH(216, 84, 140, 117),
+  NoorArt.objectMosque: Rect.fromLTWH(193, 80, 182, 121),
+  NoorArt.qiblaKaaba: Rect.fromLTWH(201.5, 66.7, 176.3, 139.8),
+  NoorArt.objectSabha: Rect.fromLTWH(243.2, 51, 83.7, 150),
 };
 
 class _StarsPainter extends CustomPainter {
@@ -87,24 +71,23 @@ class _StarsPainter extends CustomPainter {
       old.stars != stars || old.scale != scale || old.sky != sky;
 }
 
-/// Hilal screen header: a night-sky band behind the status bar with the hero
-/// art and a page-coloured cloud-scroll base painted over its foot. The title
-/// block sits at the start, an optional settings disc at the end, and an
-/// optional [overlap] straddles the bottom edge. With art the band casts no shadow, so
-/// it stays joined to the page; the flat band keeps `shadow-3`.
+/// Hilal screen header: a band behind the status bar with the sky of the hour,
+/// the tab's object and a page-coloured cloud-scroll base painted over its foot.
+/// The title block sits at the start, an optional settings disc at the end, and
+/// an optional [overlap] straddles the bottom edge. With art the band casts no
+/// shadow, so it stays joined to the page; the flat band keeps `shadow-3`.
 ///
 /// The widget is `height` plus half the overlap tall, so the content that
-/// follows is not covered. In RTL the art mirrors with the layout; the pieces
-/// with writing on them (the Qibla Kaaba) stay upright and move to the other
-/// side with it.
+/// follows is not covered. In RTL the sky mirrors with the layout; the object
+/// stays upright and moves to the other side with it.
 ///
 /// Past a phone the art stops growing at [_maxArtWidth] and sits at the end
 /// of the content column, so the sky takes the spare width and the start side
 /// is what gets cropped. On a short (landscape) window the band collapses to
 /// the flat `window` fill and the title block.
 class NoorHero extends StatelessWidget {
-  /// A [NoorArt] hero base; null (or a base that has no art) draws the flat
-  /// `window` fill instead.
+  /// The tab's [NoorArt] object; null (or one with no place in [_upright]) draws
+  /// the flat `window` fill instead of the sky.
   final String? art;
   final String title;
 
@@ -140,25 +123,30 @@ class NoorHero extends StatelessWidget {
   // grow tall rather than reach further.
   static const double _maxArtWidth = 480;
 
-  // The hero SVGs are 390 x 240; the cloud-scroll base takes the foot from
+  // The skies are 390 x 240; the cloud-scroll base takes the foot from
   // y = 187.
   static const double _artWidth = 390;
   static const double _artHeight = 240;
   static const double _cloudTop = 187;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<NoorSky>(
+        valueListenable: noorSkyNow,
+        builder: (context, sky, _) => _band(context, sky),
+      );
+
+  Widget _band(BuildContext context, NoorSky sky) {
     final n = context.noor;
-    final art = this.art;
     final short = NoorLayout.isShort(context);
-    final hasArt = !short && art != null && NoorArt.heroes.contains(art);
+    final upright = short ? null : _upright[art];
+    final hasArt = upright != null;
     final margin = NoorLayout.margin(context);
     final gutter = NoorLayout.gutter(context);
     final safeTop = MediaQuery.paddingOf(context).top;
     final reserve = overlap == null ? 0.0 : _overlapHeight / 2;
     final rtl = Directionality.of(context) == TextDirection.rtl;
     final flip = hasArt && rtl;
-    final upright = hasArt ? _upright[art] : null;
+    final stars = noorHeroStars[sky];
 
     final contentTop = safeTop + NoorSpace.s1;
 
@@ -191,7 +179,7 @@ class NoorHero extends StatelessWidget {
                 bottom: reserve,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: n.window,
+                    color: hasArt ? sky.edge : n.window,
                     // The art's cloud base runs into the page. A flat band has
                     // no base, and in Night only the shadow frames it.
                     boxShadow: hasArt ? null : n.shadow3,
@@ -215,68 +203,65 @@ class NoorHero extends StatelessWidget {
                                         fit: StackFit.expand,
                                         children: [
                                           SvgPicture.asset(
-                                            NoorArt.svgOf(context, art),
+                                            sky.asset,
                                             // Width-fitted and bottom-aligned: the
                                             // cloud base keeps its place whatever
                                             // the band height.
                                             fit: BoxFit.fitWidth,
                                             alignment: Alignment.bottomCenter,
                                           ),
-                                          Align(
-                                            alignment: Alignment.bottomCenter,
-                                            child: SizedBox(
-                                              width: artWidth,
-                                              height: _artHeight * scale,
-                                              child: NoorTwinkle(
-                                                builder: (context, twinkle) =>
-                                                    twinkle == null
-                                                        ? const SizedBox
-                                                            .shrink()
-                                                        : CustomPaint(
-                                                            painter:
-                                                                _StarsPainter(
-                                                              noorHeroStars[
-                                                                      art] ??
-                                                                  const [],
-                                                              scale,
-                                                              n.window,
-                                                              twinkle,
+                                          if (stars != null)
+                                            Align(
+                                              alignment: Alignment.bottomCenter,
+                                              child: SizedBox(
+                                                width: artWidth,
+                                                height: _artHeight * scale,
+                                                child: NoorTwinkle(
+                                                  builder: (context, twinkle) =>
+                                                      twinkle == null
+                                                          ? const SizedBox
+                                                              .shrink()
+                                                          : CustomPaint(
+                                                              painter:
+                                                                  _StarsPainter(
+                                                                stars,
+                                                                scale,
+                                                                sky.edge,
+                                                                twinkle,
+                                                              ),
                                                             ),
-                                                          ),
+                                                ),
                                               ),
                                             ),
-                                          ),
                                         ],
                                       ),
                                     ),
-                                    if (upright != null)
-                                      Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: SizedBox(
-                                          width: artWidth,
-                                          height: _artHeight * scale,
-                                          child: Stack(
-                                            children: [
-                                              Positioned(
-                                                left: (rtl
-                                                        ? _artWidth -
-                                                            upright.$2.right
-                                                        : upright.$2.left) *
-                                                    scale,
-                                                top: upright.$2.top * scale,
-                                                width: upright.$2.width * scale,
-                                                height:
-                                                    upright.$2.height * scale,
-                                                child: SvgPicture.asset(
-                                                  upright.$1,
-                                                  key: const ValueKey(
-                                                      'noor-hero-upright'),
-                                                ),
+                                    Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: SizedBox(
+                                        width: artWidth,
+                                        height: _artHeight * scale,
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                              left: (rtl
+                                                      ? _artWidth -
+                                                          upright.right
+                                                      : upright.left) *
+                                                  scale,
+                                              top: upright.top * scale,
+                                              width: upright.width * scale,
+                                              height: upright.height * scale,
+                                              child: SvgPicture.asset(
+                                                art!,
+                                                key: const ValueKey(
+                                                    'noor-hero-upright'),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),

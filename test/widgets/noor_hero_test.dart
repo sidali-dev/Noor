@@ -6,6 +6,7 @@ import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
+import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/generated/l10n.dart';
@@ -53,7 +54,7 @@ void main() {
   }
 
   const long = NoorHero(
-    art: NoorArt.heroQuran,
+    art: NoorArt.objectQuran,
     title: 'القرآن',
     subtitle:
         'إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9',
@@ -68,7 +69,7 @@ void main() {
         tester,
         locale,
         const NoorHero(
-          art: NoorArt.heroQuran,
+          art: NoorArt.objectQuran,
           title: 'Quran',
           overlap: NoorPill(
             label: 'The Democratic Republic of the Congo, Kinshasa',
@@ -111,7 +112,7 @@ void main() {
 
   testWidgets('NoorHero keeps the Qibla Kaaba upright, at the end of the band',
       (tester) async {
-    const hero = NoorHero(art: NoorArt.qiblaSkyline, title: 'Qibla');
+    const hero = NoorHero(art: NoorArt.qiblaKaaba, title: 'Qibla');
     final kaaba = find.byKey(const ValueKey('noor-hero-upright'));
 
     await pumpHero(tester, const Locale('en'), hero);
@@ -129,9 +130,13 @@ void main() {
         findsNothing);
   });
 
-  testWidgets('NoorHero lays the Quran and mosque objects at the end, upright',
+  testWidgets('NoorHero lays the other objects at the end, upright',
       (tester) async {
-    for (final art in [NoorArt.heroQuran, NoorArt.heroPrayers]) {
+    for (final art in [
+      NoorArt.objectQuran,
+      NoorArt.objectMosque,
+      NoorArt.objectSabha,
+    ]) {
       final hero = NoorHero(art: art, title: 'x');
       final object = find.byKey(const ValueKey('noor-hero-upright'));
       await pumpHero(tester, const Locale('en'), hero);
@@ -141,13 +146,23 @@ void main() {
     }
   });
 
-  testWidgets('NoorHero uses the night art in Night', (tester) async {
-    await pumpHero(tester, const Locale('en'), long, theme: NoorTheme.dark());
-    final loader = tester
-        .widget<SvgPicture>(find.descendant(
-            of: find.byKey(_artKey), matching: find.byType(SvgPicture)))
-        .bytesLoader as SvgAssetLoader;
-    expect(loader.assetName, '${NoorArt.heroQuran}_night.svg');
+  testWidgets('NoorHero draws the same sky in both themes, edge to edge',
+      (tester) async {
+    for (final theme in [NoorTheme.light(), NoorTheme.dark()]) {
+      await pumpHero(tester, const Locale('en'), long, theme: theme);
+      final loader = tester
+          .widget<SvgPicture>(find.descendant(
+              of: find.byKey(_artKey), matching: find.byType(SvgPicture)))
+          .bytesLoader as SvgAssetLoader;
+      expect(loader.assetName, noorSkyNow.value.asset);
+      final band = tester.widget<DecoratedBox>(find
+          .descendant(
+            of: find.byType(NoorHero),
+            matching: find.byType(DecoratedBox),
+          )
+          .first);
+      expect((band.decoration as BoxDecoration).color, noorSkyNow.value.edge);
+    }
   });
 
   testWidgets('NoorHero without art is a flat window fill', (tester) async {
@@ -201,7 +216,7 @@ void main() {
         tester,
         Locale(lang),
         NoorHero(
-          art: NoorArt.heroAthkar,
+          art: NoorArt.objectSabha,
           title: lang == 'ar' ? 'الأذكار' : 'Athkar',
           subtitle: subtitles[lang],
           settings: true,

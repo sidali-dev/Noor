@@ -225,7 +225,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NoorHero(
-              art: NoorArt.heroPrayers,
+              art: NoorArt.objectMosque,
               settings: true,
               title: S.of(context).nav_prayers,
               subtitle: S.of(context).tagline_prayers,

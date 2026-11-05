@@ -112,7 +112,7 @@ class _DuaaScreenState extends State<DuaaScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NoorHero(
-              art: NoorArt.heroAthkar,
+              art: NoorArt.objectSabha,
               settings: true,
               title: s.nav_adhkar,
               subtitle: s.tagline_adhkar,

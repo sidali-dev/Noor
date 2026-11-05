@@ -74,7 +74,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
           // The Kaaba stands at the end of the band, so the verse takes the
           // first 40%.
           NoorHero(
-            art: NoorArt.qiblaSkyline,
+            art: NoorArt.qiblaKaaba,
             settings: true,
             title: S.of(context).nav_qibla,
             subtitle: S.of(context).tagline_qibla,

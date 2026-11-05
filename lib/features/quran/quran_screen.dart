@@ -49,7 +49,7 @@ class QuranScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   NoorHero(
-                    art: NoorArt.heroQuran,
+                    art: NoorArt.objectQuran,
                     settings: true,
                     title: S.of(context).nav_quran,
                     subtitle: S.of(context).tagline_quran,
