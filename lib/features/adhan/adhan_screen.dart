@@ -225,7 +225,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NoorHero(
-              art: NoorArt.objectMosque,
+              art: NoorArt.heroPrayers,
               settings: true,
               title: S.of(context).nav_prayers,
               subtitle: S.of(context).tagline_prayers,
@@ -343,9 +343,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                   ],
                                 ),
                         ),
-                        // A capsule, like the two puffs it holds; the 4 dp the
-                        // 48 dp targets leave beside each puff is the 8 dp
-                        // that sits above and below it.
+                        // A capsule, holding the two arrows.
                         NoorWell(
                           radius: NoorRadius.pill,
                           child: Padding(
@@ -355,10 +353,8 @@ class _AdhanScreenState extends State<AdhanScreen> {
                             child: Row(
                               children: [
                                 NoorCloudButton(
-                                  size: 40,
                                   onTap: () =>
                                       _onPreviousDay(context, controller),
-                                  shadows: n.shadowCrisp,
                                   icon: const Icon(chevronBack),
                                 ),
                                 Expanded(
@@ -404,9 +400,7 @@ class _AdhanScreenState extends State<AdhanScreen> {
                                   ),
                                 ),
                                 NoorCloudButton(
-                                  size: 40,
                                   onTap: () => _onNextDay(context, controller),
-                                  shadows: n.shadowCrisp,
                                   icon: const Icon(chevron),
                                 ),
                               ],

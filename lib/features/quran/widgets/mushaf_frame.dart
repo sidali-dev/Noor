@@ -244,6 +244,7 @@ class AyahMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CloudMedallion(
+      plain: true,
       // Wider would rewrap the verses and push a full page past its foot.
       size: MediaQuery.textScalerOf(context).scale(30),
       child: Text(

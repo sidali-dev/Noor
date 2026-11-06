@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_sky.dart';
@@ -13,46 +12,39 @@ import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
-/// The stars baked into the skies that have them as (cx, cy, arm), in the SVG's
-/// 390 x 240 space, in the order they twinkle. They lie on the flat
-/// [NoorSky.edge] colour. `art_assets_test` checks them against the files.
-// ponytail: the stars are baked into the SVG, so the twinkle dims a copy of
-// each in the sky's colour over it instead of splitting the art into layers.
+/// The stars of the skies that have them as (cx, cy, arm), in the art's
+/// 390 x 240 space, in the order they twinkle. Painted, not baked, because they
+/// twinkle; the frame over them hides any that fall outside a tab's window.
 @visibleForTesting
 const Map<NoorSky, List<(double, double, double)>> noorHeroStars = {
-  NoorSky.fajr: [
-    (262, 14, 2.6), (318, 12, 2.6), (384, 44, 2.6), (296, 26, 4.6),
-  ],
+  // Keep in step with STARS in tool/hero_art.py, which checks they show.
   NoorSky.isha: [
-    (262, 12, 2.6), (318, 10, 2.6), (384, 44, 2.6), //
-    (386, 176, 2.6), (296, 22, 4.6), (214, 12, 2.6),
+    (262, 74, 2.6), (306, 62, 2.2), (252, 108, 2.2), //
+    (332, 122, 2.0), (287, 50, 2.0), (244, 140, 2.2), (316, 146, 1.8),
   ],
 };
 
-/// Each tab's object and its rect in the 390 x 240 space, laid over the
-/// mirrored sky at the same end of the band and never mirrored itself.
-const Map<String, Rect> _upright = {
-  NoorArt.objectQuran: Rect.fromLTWH(216, 84, 140, 117),
-  NoorArt.objectMosque: Rect.fromLTWH(193, 80, 182, 121),
-  NoorArt.qiblaKaaba: Rect.fromLTWH(201.5, 66.7, 176.3, 139.8),
-  NoorArt.objectSabha: Rect.fromLTWH(243.2, 51, 83.7, 150),
-};
+// tool/hero_art.py bakes the art to these rects, in the 390 x 240 space. The
+// frame runs past the art so its shadows can fade out, and is symmetric, so
+// RTL only moves it.
+const Rect _frameRect = Rect.fromLTWH(167, 0, 240, 240);
+const Rect _skyRect = Rect.fromLTWH(205, 16, 164, 180);
 
 class _StarsPainter extends CustomPainter {
-  _StarsPainter(this.stars, this.scale, this.sky, this.twinkle)
-      : super(repaint: twinkle);
+  _StarsPainter(this.stars, this.scale, this.twinkle) : super(repaint: twinkle);
 
   final List<(double, double, double)> stars;
   final double scale;
-  final Color sky;
-  final Animation<double> twinkle;
+  final Animation<double>? twinkle;
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.scale(scale);
+    canvas
+      ..scale(scale)
+      ..translate(-_skyRect.left, -_skyRect.top);
     for (var i = 0; i < stars.length; i++) {
       final (x, y, r) = stars[i];
-      final dim = 1 - noorTwinkleOpacity(twinkle.value, i);
+      final t = twinkle;
       canvas.drawPath(
         Path()
           ..moveTo(x, y - r)
@@ -61,33 +53,34 @@ class _StarsPainter extends CustomPainter {
           ..quadraticBezierTo(x, y, x - r, y)
           ..quadraticBezierTo(x, y, x, y - r)
           ..close(),
-        Paint()..color = sky.withValues(alpha: dim),
+        Paint()
+          ..color = const Color(0xFFF7F7F4).withValues(
+              alpha: t == null ? 1 : noorTwinkleOpacity(t.value, i)),
       );
     }
   }
 
   @override
   bool shouldRepaint(_StarsPainter old) =>
-      old.stars != stars || old.scale != scale || old.sky != sky;
+      old.stars != stars || old.scale != scale;
 }
 
-/// Hilal screen header: a band behind the status bar with the sky of the hour,
-/// the tab's object and a page-coloured cloud-scroll base painted over its foot.
-/// The title block sits at the start, an optional settings disc at the end, and
-/// an optional [overlap] straddles the bottom edge. With art the band casts no
-/// shadow, so it stays joined to the page; the flat band keeps `shadow-3`.
+/// Hilal screen header: a band of the page's own paper with the tab's onion
+/// arch at the end, cut in layers with the sky of the hour behind it, and a bank
+/// of paper clouds along the foot, clear above any [overlap], that runs into the
+/// page. The title block sits at the start, an
+/// optional settings disc at the end, and an optional [overlap] straddles the
+/// bottom edge.
 ///
 /// The widget is `height` plus half the overlap tall, so the content that
-/// follows is not covered. In RTL the sky mirrors with the layout; the object
-/// stays upright and moves to the other side with it.
+/// follows is not covered. In RTL the window moves to the other side; the art is
+/// symmetric, so nothing mirrors.
 ///
-/// Past a phone the art stops growing at [_maxArtWidth] and sits at the end
-/// of the content column, so the sky takes the spare width and the start side
-/// is what gets cropped. On a short (landscape) window the band collapses to
-/// the flat `window` fill and the title block.
+/// Past a phone the art stops growing at [_maxArtWidth] and sits at the end of
+/// the content column. On a short (landscape) window the band collapses to the
+/// flat `window` fill and the title block.
 class NoorHero extends StatelessWidget {
-  /// The tab's [NoorArt] object; null (or one with no place in [_upright]) draws
-  /// the flat `window` fill instead of the sky.
+  /// The tab's [NoorArt] window; null draws the flat `window` fill instead.
   final String? art;
   final String title;
 
@@ -101,8 +94,8 @@ class NoorHero extends StatelessWidget {
   /// A 48-56 dp child that overlaps the bottom edge by half its height.
   final Widget? overlap;
 
-  /// How much of the content width the title block may take. The art's subject
-  /// fills the rest, so a centred subject (the Qibla arch) needs less than half.
+  /// How much of the content width the title block may take. The window fills
+  /// the rest, so a wide one (the Qibla window) needs less than half.
   final double textShare;
 
   const NoorHero({
@@ -123,11 +116,15 @@ class NoorHero extends StatelessWidget {
   // grow tall rather than reach further.
   static const double _maxArtWidth = 480;
 
-  // The skies are 390 x 240; the cloud-scroll base takes the foot from
-  // y = 187.
+  // The art is 390 x 240; the clouds' crest starts at y = 176, and their tile
+  // from y = 168 for the shadow above it.
   static const double _artWidth = 390;
   static const double _artHeight = 240;
-  static const double _cloudTop = 187;
+  static const double _cloudsCrest = 176;
+  static const double _cloudsTile = 168;
+
+  // The art above the frames' highest point (the Prayers finial) is empty paper.
+  static const double _frameTop = 3;
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<NoorSky>(
@@ -138,36 +135,49 @@ class NoorHero extends StatelessWidget {
   Widget _band(BuildContext context, NoorSky sky) {
     final n = context.noor;
     final short = NoorLayout.isShort(context);
-    final upright = short ? null : _upright[art];
-    final hasArt = upright != null;
+    final hasArt = !short && art != null;
     final margin = NoorLayout.margin(context);
     final gutter = NoorLayout.gutter(context);
     final safeTop = MediaQuery.paddingOf(context).top;
     final reserve = overlap == null ? 0.0 : _overlapHeight / 2;
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final flip = hasArt && rtl;
     final stars = noorHeroStars[sky];
+    final variant = n.isDark ? 'night' : 'paper';
 
     final contentTop = safeTop + NoorSpace.s1;
 
-    // The band always has a dark top, so the status bar icons are light even
-    // in Paper.
+    // The flat band is the dark `window`, whatever the theme; the art is paper.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: noorSystemOverlay(Brightness.dark),
+      value: noorSystemOverlay(
+        !hasArt || n.isDark ? Brightness.dark : Brightness.light,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
           final artWidth = math.min(width - 2 * margin, _maxArtWidth);
           final scale = artWidth / _artWidth;
-          // Room the cloud-scroll base takes at the bottom of the band.
-          final base = hasArt ? (_artHeight - _cloudTop) * scale : reserve;
+          // Room the clouds take at the bottom of the band.
+          final base = hasArt ? (_artHeight - _cloudsCrest) * scale : reserve;
+          // The clouds run to the foot of their tile, so it stops above the
+          // overlap instead of sliding behind it.
+          final lift = hasArt ? reserve : 0.0;
           final minHeight = short
               ? reserve
-              : math.max(height, hasArt ? _artHeight * scale : 0) + reserve;
+              // The frame clears the status bar, whatever a notch adds.
+              : math.max(
+                    height,
+                    hasArt
+                        ? (_artHeight - _frameTop) * scale +
+                            safeTop +
+                            NoorSpace.s1
+                        : 0,
+                  ) +
+                  reserve +
+                  lift;
 
           // The title block sets the band's height (never below `height`), so
           // large text or a tall status bar grows the band instead of being
-          // clipped against the cloud. The overlap's shadow falls past the
+          // clipped against the clouds. The overlap's shadow falls past the
           // bottom edge.
           return Stack(
             clipBehavior: Clip.none,
@@ -179,116 +189,80 @@ class NoorHero extends StatelessWidget {
                 bottom: reserve,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: hasArt ? sky.edge : n.window,
-                    // The art's cloud base runs into the page. A flat band has
-                    // no base, and in Night only the shadow frames it.
+                    color: hasArt ? n.paper : n.window,
+                    // The art's clouds run into the page. A flat band has no
+                    // clouds, and in Night only the shadow frames it.
                     boxShadow: hasArt ? null : n.shadow3,
                   ),
                   child: hasArt
-                      ? Stack(
-                          children: [
-                            PositionedDirectional(
-                              end: margin,
-                              top: 0,
-                              bottom: 0,
-                              width: artWidth,
-                              child: ExcludeSemantics(
+                      ? ExcludeSemantics(
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              PositionedDirectional(
+                                end: margin,
+                                bottom: lift,
+                                width: artWidth,
+                                height: _artHeight * scale,
                                 child: Stack(
-                                  fit: StackFit.expand,
+                                  key: const ValueKey('noor-hero-art'),
+                                  clipBehavior: Clip.none,
                                   children: [
-                                    Transform.flip(
-                                      key: const ValueKey('noor-hero-art'),
-                                      flipX: flip,
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          SvgPicture.asset(
-                                            sky.asset,
-                                            // Width-fitted and bottom-aligned: the
-                                            // cloud base keeps its place whatever
-                                            // the band height.
-                                            fit: BoxFit.fitWidth,
-                                            alignment: Alignment.bottomCenter,
-                                          ),
-                                          if (stars != null)
-                                            Align(
-                                              alignment: Alignment.bottomCenter,
-                                              child: SizedBox(
-                                                width: artWidth,
-                                                height: _artHeight * scale,
-                                                child: NoorTwinkle(
-                                                  builder: (context, twinkle) =>
-                                                      twinkle == null
-                                                          ? const SizedBox
-                                                              .shrink()
-                                                          : CustomPaint(
-                                                              painter:
-                                                                  _StarsPainter(
-                                                                stars,
-                                                                scale,
-                                                                sky.edge,
-                                                                twinkle,
-                                                              ),
-                                                            ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
+                                    Positioned.fromRect(
+                                      rect: _place(_skyRect, scale, rtl),
+                                      child: Image.asset(
+                                        key: const ValueKey('noor-hero-sky'),
+                                        sky.asset,
+                                        fit: BoxFit.fill,
+                                        gaplessPlayback: true,
                                       ),
                                     ),
-                                    Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: SizedBox(
-                                        width: artWidth,
-                                        height: _artHeight * scale,
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                              left: (rtl
-                                                      ? _artWidth -
-                                                          upright.right
-                                                      : upright.left) *
-                                                  scale,
-                                              top: upright.top * scale,
-                                              width: upright.width * scale,
-                                              height: upright.height * scale,
-                                              child: SvgPicture.asset(
-                                                art!,
-                                                key: const ValueKey(
-                                                    'noor-hero-upright'),
-                                              ),
+                                    if (stars != null)
+                                      Positioned.fromRect(
+                                        rect: _place(_skyRect, scale, rtl),
+                                        child: NoorTwinkle(
+                                          builder: (context, twinkle) =>
+                                              CustomPaint(
+                                            painter: _StarsPainter(
+                                              stars,
+                                              scale,
+                                              twinkle,
                                             ),
-                                          ],
+                                          ),
                                         ),
+                                      ),
+                                    Positioned.fromRect(
+                                      rect: _place(_frameRect, scale, rtl),
+                                      child: Image.asset(
+                                        key: const ValueKey('noor-hero-frame'),
+                                        NoorArt.frame(art!, variant),
+                                        errorBuilder: (_, __, ___) =>
+                                            const SizedBox.shrink(),
+                                        fit: BoxFit.fill,
+                                        gaplessPlayback: true,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                            // Over the art's foot, which they cover: painted, not
-                            // baked in, so they can cast shadows.
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              height: base + CloudBankPainter.headroom,
-                              child: ExcludeSemantics(
-                                child: CustomPaint(
-                                  painter: CloudBankPainter(
-                                    back: n.isDark
-                                        ? n.windowRaised
-                                        : n.surfaceSunken,
-                                    front: n.paper,
-                                    lip: n.isDark ? n.depthShadow : null,
-                                    shade: n.depthShadow,
-                                    pixelRatio:
-                                        MediaQuery.devicePixelRatioOf(context),
-                                  ),
+                              // The tile repeats from the centre, so the band
+                              // stays symmetric at any width.
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: lift,
+                                height: (_artHeight - _cloudsTile) * scale,
+                                child: Image.asset(
+                                  key: const ValueKey('noor-hero-clouds'),
+                                  NoorArt.clouds(variant),
+                                  repeat: ImageRepeat.repeatX,
+                                  alignment: Alignment.bottomCenter,
+                                  fit: BoxFit.fitHeight,
+                                  gaplessPlayback: true,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         )
                       : null,
                 ),
@@ -299,13 +273,14 @@ class NoorHero extends StatelessWidget {
                   padding: EdgeInsetsDirectional.only(
                     top: contentTop,
                     start: gutter,
-                    bottom: reserve + math.max(base, reserve) + NoorSpace.s2,
+                    bottom: reserve + lift + math.max(base, reserve) + NoorSpace.s2,
                   ),
                   child: Align(
-                    alignment: AlignmentDirectional.topStart,
+                    // Centred beside the arch, as in the references.
+                    alignment: AlignmentDirectional.centerStart,
                     child: SizedBox(
                       width: math.max(0, (width - 2 * gutter) * textShare),
-                      child: _titleBlock(context, short),
+                      child: _titleBlock(context, short, hasArt),
                     ),
                   ),
                 ),
@@ -346,12 +321,20 @@ class NoorHero extends StatelessWidget {
     );
   }
 
-  Widget _titleBlock(BuildContext context, bool short) {
+  /// [rect] from the art's space to the art box, moved to the other end in RTL.
+  static Rect _place(Rect rect, double scale, bool rtl) => Rect.fromLTWH(
+        (rtl ? _artWidth - rect.right : rect.left) * scale,
+        rect.top * scale,
+        rect.width * scale,
+        rect.height * scale,
+      );
+
+  Widget _titleBlock(BuildContext context, bool short, bool onPaper) {
     final n = context.noor;
     final gap = SizedBox(width: leading == null ? 0 : NoorSpace.s2 + 2);
 
-    final subtitleStyle =
-        NoorText.bodySm(context).copyWith(color: n.onWindowMuted);
+    final subtitleStyle = NoorText.bodySm(context)
+        .copyWith(color: onPaper ? n.muted : n.onWindowMuted);
 
     return Semantics(
       header: true,
@@ -374,8 +357,8 @@ class NoorHero extends StatelessWidget {
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
                       title,
-                      style:
-                          NoorText.display(context).copyWith(color: n.onWindow),
+                      style: NoorText.display(context)
+                          .copyWith(color: onPaper ? n.ink : n.onWindow),
                       maxLines: 1,
                     ),
                   ),

@@ -66,6 +66,9 @@ enum Prayer {
   final String durationKey1;
   final String durationKey2;
 
+  /// Base alarm ID for reminder [slot] (1 -> [alarmId1], 2 -> [alarmId2], ...).
+  int alarmIdForSlot(int slot) => adhanId * 100 + slot;
+
   static const List<Prayer> all = Prayer.values;
 
   static Prayer? byKey(String key) {

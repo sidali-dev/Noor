@@ -59,7 +59,7 @@ Future<void> _pump(
 }
 
 const _hero = NoorHero(
-  art: NoorArt.objectQuran,
+  art: NoorArt.heroQuran,
   title: 'القرآن',
   subtitle:
       'إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9',

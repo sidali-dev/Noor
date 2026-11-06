@@ -177,7 +177,7 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
     final surahName =
         isAr ? quran.getSurahNameArabic(surahId) : quran.getSurahName(surahId);
 
-    // The puffs and the title float over the page: no strip behind them, so
+    // The ornaments and the title float over the page: no strip behind them, so
     // the text shows between and around them.
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -207,7 +207,6 @@ class _ReadQuranScreenState extends State<ReadQuranScreen> {
                   child: NoorIcon(
                     NoorGlyph.bookmark,
                     color: isBookmarked ? n.brass : n.muted,
-                    size: 20,
                   ),
                 ),
               ),

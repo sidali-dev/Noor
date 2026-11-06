@@ -44,7 +44,6 @@ Future<void> showBookmarksSheet(BuildContext context) {
                 NoorListRow(
                   title: getLineTitle(page, context),
                   trailing: NoorCloudButton(
-                    size: 40,
                     tooltip: S.of(context).remove,
                     icon: Icon(Iconsax.trash, color: context.noor.danger),
                     onTap: () async {

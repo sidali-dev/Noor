@@ -68,8 +68,7 @@ void main() {
   });
 
   group('NoorPagePanel', () {
-    Finder clouds() => find.byWidgetPredicate(
-        (w) => w is CustomPaint && w.painter is CloudBankPainter);
+    Finder clouds() => find.byType(NoorMotifBand);
 
     testWidgets('a card keeps its content clear of the clouds', (tester) async {
       await tester.pumpWidget(_app(

@@ -76,7 +76,8 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
     for (final prayer in Prayer.all) {
       if (prayer.adhanId == baseId ||
           prayer.alarmId1 == baseId ||
-          prayer.alarmId2 == baseId) {
+          prayer.alarmId2 == baseId ||
+          baseId ~/ 100 == prayer.adhanId) {
         return prayer;
       }
     }

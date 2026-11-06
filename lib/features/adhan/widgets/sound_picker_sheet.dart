@@ -124,7 +124,7 @@ class _SoundRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final sound = Get.find<SoundPickerController>();
 
-    // Brass is the radio alone; play is an ink glyph on a puff.
+    // Brass is the radio alone; play is an ink glyph on an ornament.
     return Semantics(
       checked: selected,
       inMutuallyExclusiveGroup: true,
@@ -152,7 +152,6 @@ class _SoundRow extends StatelessWidget {
                 Obx(() {
                   final playing = sound.playingPath.value == option.path;
                   return NoorCloudButton(
-                    size: 40,
                     // The triangle points the way the page reads, so it turns
                     // left in RTL; the stop square is symmetric.
                     icon: playing

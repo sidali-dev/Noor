@@ -8,7 +8,7 @@ import 'package:noor/utils/theme/noor_theme.dart';
 // Sheets round the top corners to `radius-lg` ([NoorSheet]); dialogs round all
 // four ([NoorDialogCard]). Neither clips, so the shadow is never cut.
 
-/// Shows a bottom sheet: clouds along its head, an optional [title] in the
+/// Shows a bottom sheet: the band along its head, an optional [title] in the
 /// display face (`titleOf` is re-evaluated when the locale changes), then
 /// [builder]'s content. It drags down to dismiss, from anywhere above its
 /// scrolling content.
@@ -43,7 +43,7 @@ Future<T?> showNoorSheet<T>(
   );
 }
 
-/// Cut as a [NoorPagePanel] with its clouds hung from the head, above the
+/// Cut as a [NoorPagePanel] with its band hung from the head, above the
 /// scrolling content; they give way to the keyboard.
 class NoorSheet extends StatelessWidget {
   final String? title;

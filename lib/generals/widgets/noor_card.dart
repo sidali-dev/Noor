@@ -11,17 +11,17 @@ import 'package:noor/utils/theme/noor_theme.dart';
 enum NoorCardTone { paper, night }
 
 /// Paper cut like a page of the Mushaf: a `line` panel pressed into it, a star
-/// in each top corner, an optional [folio] between them and a bank of clouds
+/// in each top corner, an optional [folio] between them and the arabesque band
 /// along the foot. [child] keeps clear of all of it, so no ornament touches a
-/// word. A short window has no room for the clouds, as the hero drops its art.
-/// With [cloudsAtTop] the bank hangs from the head instead (a sheet's) and the
+/// word. A short window has no room for the band, as the hero drops its art.
+/// With [cloudsAtTop] the band hangs from the head instead (a sheet's) and the
 /// stars give way to it.
 /// It shrinks to [child], or fills a parent that fixes its size.
 class NoorPagePanel extends StatelessWidget {
   final Widget child;
   final String? folio;
 
-  /// How much of the foot the clouds take; 0 for none.
+  /// How much of the foot the band takes; 0 for none.
   final double cloudHeight;
 
   /// Replaces the room kept for the stars, for a child that minds them itself.
@@ -99,32 +99,20 @@ class NoorPagePanel extends StatelessWidget {
           ),
           child: child,
         ),
-        // Inside the panel's hairline, which stays drawn around the clouds.
+        // Inside the panel's hairline, which stays drawn around the band.
         if (clouds)
           Positioned(
             left: _inset + 1,
             right: _inset + 1,
             top: cloudsAtTop ? _inset + 1 : null,
             bottom: cloudsAtTop ? null : _inset + 1,
-            height: cloudHeight + CloudBankPainter.headroom,
+            height: cloudHeight,
             child: IgnorePointer(
               child: ClipRRect(
                 borderRadius: const BorderRadius.all(
                   Radius.circular(NoorRadius.md - 1),
                 ),
-                // Hung from the head: the same bank, turned over.
-                child: Transform.flip(
-                  flipY: cloudsAtTop,
-                  child: CustomPaint(
-                    painter: CloudBankPainter(
-                      back: n.isDark ? n.windowRaised : n.surfaceSunken,
-                      front: n.card,
-                      lip: n.isDark ? n.depthShadow : null,
-                      shade: n.depthShadow,
-                      pixelRatio: MediaQuery.devicePixelRatioOf(context),
-                    ),
-                  ),
-                ),
+                child: NoorMotifBand(height: cloudHeight),
               ),
             ),
           ),
@@ -175,7 +163,7 @@ class NoorCard extends StatelessWidget {
   /// The place in a series, between the top stars. Paper tone only.
   final String? folio;
 
-  /// How much of the foot the clouds take. Paper tone only.
+  /// How much of the foot the band takes. Paper tone only.
   final double cloudHeight;
 
   const NoorCard({

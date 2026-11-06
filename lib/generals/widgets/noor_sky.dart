@@ -8,23 +8,21 @@ import 'package:noor/features/adhan/models/sub_models/timings.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 
-/// The hero's sky, one per prayer and the same in both themes. [edge] is the
-/// flat colour along the art's top and sides: the band behind the art is filled
-/// with it so no seam shows, and the twinkle dims a star by painting it.
+/// The hero's sky, one per prayer and the same in both themes, seen through the
+/// tab's window.
 enum NoorSky {
-  fajr(Prayer.fajr, 5 * 60, Color(0xFF1A2030)),
-  dhuhr(Prayer.dhuhr, 12 * 60 + 30, Color(0xFF123F5E)),
-  asr(Prayer.asr, 15 * 60 + 30, Color(0xFF573608)),
-  maghrib(Prayer.maghrib, 18 * 60 + 30, Color(0xFF561F30)),
-  isha(Prayer.isha, 20 * 60, Color(0xFF121622));
+  fajr(Prayer.fajr, 5 * 60),
+  dhuhr(Prayer.dhuhr, 12 * 60 + 30),
+  asr(Prayer.asr, 15 * 60 + 30),
+  maghrib(Prayer.maghrib, 18 * 60 + 30),
+  isha(Prayer.isha, 20 * 60);
 
-  const NoorSky(this.prayer, this.nominalMinute, this.edge);
+  const NoorSky(this.prayer, this.nominalMinute);
 
   final Prayer prayer;
   final int nominalMinute;
-  final Color edge;
 
-  String get asset => 'assets/images/art/sky_$name.svg';
+  String get asset => 'assets/images/art/sky_$name.webp';
 }
 
 /// The sky of the prayer nearest to [now], either way round the clock. Without

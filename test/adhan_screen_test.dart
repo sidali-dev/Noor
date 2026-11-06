@@ -9,6 +9,7 @@ import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
 import 'package:noor/features/adhan/widgets/adhan_reminders_sheet.dart';
 import 'package:noor/features/adhan/widgets/next_prayer_card.dart';
@@ -238,6 +239,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(enabled.value, !before);
+    expect(
+      find.text(enabled.value ? 'Adhan enabled' : 'Adhan disabled'),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 
   for (final locale in const [Locale('en'), Locale('fr'), Locale('ar')]) {
@@ -284,8 +292,7 @@ void main() {
 
     expect(find.byType(NoorSheet), findsOneWidget);
     expect(find.text('Set new alarm'), findsOneWidget);
-    expect(find.text('min after adhan'), findsOneWidget);
-    expect(_reminderField(tester).text, '10');
+    expect(_reminderField(tester).text, '+10');
   });
 
   testWidgets('Tapping the day opens a calendar that picks the date',
@@ -395,18 +402,18 @@ void main() {
     NoorButton button() => tester
         .widget<NoorButton>(find.widgetWithText(NoorButton, 'Set new alarm'));
 
-    // The words open the field too.
-    await tester.tap(find.text('min after adhan'));
+    // Tapping the counter focuses the field.
+    await tester.tap(field);
     await tester.pump();
     expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
 
-    // A bare number keeps the direction; a minus means before.
+    // A bare number keeps the direction (+); a minus means before (-).
     await tester.enterText(field, '15');
     await tester.pump();
-    expect(find.text('min after adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '+15');
     await tester.enterText(field, '-15');
     await tester.pump();
-    expect(find.text('min before adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '-15');
 
     // Past the limit it clamps; Arabic-Indic digits count.
     await tester.enterText(field, '-90');
@@ -424,18 +431,17 @@ void main() {
     // Leaving an empty field falls back to the last value, direction kept.
     tester.widget<TextField>(field).focusNode!.unfocus();
     await tester.pump();
-    expect(_reminderField(tester).text, '10');
-    expect(find.text('min after adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '+10');
 
     // A committed minus sticks: the next bare number stays before.
     await tester.enterText(field, '-5');
     await tester.pump();
     tester.widget<TextField>(field).focusNode!.unfocus();
     await tester.pump();
-    expect(_reminderField(tester).text, '5');
+    expect(_reminderField(tester).text, '-5');
     await tester.enterText(field, '8');
     await tester.pump();
-    expect(find.text('min before adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '-8');
   });
 
   testWidgets('AdhanLine sets the next prayer time in brass', (tester) async {
@@ -460,30 +466,110 @@ void main() {
       await tester.tap(earlier);
       await tester.pump();
     }
-    expect(_reminderField(tester).text, '1');
-    expect(find.text('min before adhan'), findsOneWidget);
+    expect(_reminderField(tester).text, '-1');
   });
 
-  testWidgets('Reminders sheet lists the set alarms and stops at two',
+  testWidgets(
+      'Reminders sheet hides corner button when empty, shows it when alarms exist, and supports saved alarms sheet, edit, delete, and snackbars',
       (tester) async {
     const prayer = Prayer.fajr;
-    await AppPrefs.setReminder(prayer.alarmId1, prayer.durationKey1, -15);
 
+    // 1. With no saved alarms, the corner "Saved alarms" button is hidden.
     await tester.pumpWidget(_buildTestApp(
-      child: const AdhanRemindersSheet(prayer: prayer, time: '05:00'),
+      child: const AdhanLine(prayer: prayer, time: '05:00'),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Remove'), findsOneWidget);
-    expect(find.text('Set new alarm'), findsOneWidget);
 
-    await AppPrefs.setReminder(prayer.alarmId2, prayer.durationKey2, 20);
-    await tester.pumpWidget(_buildTestApp(
-      child: const AdhanRemindersSheet(
-          key: ValueKey('two'), prayer: prayer, time: '05:00'),
-    ));
+    await tester.tap(find.text('Fajr'));
     await tester.pumpAndSettle();
-    expect(find.text('Remove'), findsNWidgets(2));
-    expect(find.text('Set new alarm'), findsNothing);
+
+    expect(find.byType(AdhanRemindersSheet), findsOneWidget);
+    expect(find.byTooltip('Saved alarms'), findsNothing);
+
+    // Checkbox is checked by default.
+    final checkbox = tester.widget<Checkbox>(find.byType(Checkbox));
+    expect(checkbox.value, isTrue);
+
+    // 2. Uncheck "Every day" and confirm to save a one-time alarm.
+    await tester.tap(find.text('Every day'));
+    await tester.pump();
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+
+    await tester.tap(find.text('Set new alarm'));
+    await tester.pumpAndSettle();
+
+    // Sheet closes and snackbar appears.
+    expect(find.byType(AdhanRemindersSheet), findsNothing);
+    expect(find.text('Alarm saved'), findsOneWidget);
+    expect(AdhanScheduler.reminders(prayer).length, 1);
+    expect(AdhanScheduler.reminders(prayer).first.everyDay, isFalse);
+
+    // 3. Re-open Set Alarm sheet: previous alarms are not shown inline,
+    //    and the corner icon button is now visible.
+    await tester.tap(find.text('Fajr'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdhanRemindersSheet), findsOneWidget);
+    expect(find.textContaining('min after adhan'), findsNothing);
+    expect(find.byTooltip('Saved alarms'), findsOneWidget);
+
+    // 4. Tap corner icon button -> closes Set Alarm sheet and opens Saved Alarms sheet.
+    await tester.tap(find.byTooltip('Saved alarms'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdhanRemindersSheet), findsNothing);
+    expect(find.byType(AdhanSavedAlarmsSheet), findsOneWidget);
+    expect(find.text('Saved alarms'), findsOneWidget);
+    expect(find.text('10 min after adhan'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AdhanSavedAlarmsSheet),
+        matching: find.byType(NoorWell),
+      ),
+      findsNothing,
+    );
+
+    // 5. Tap Edit icon button -> closes Saved Alarms sheet and opens Set Alarm sheet to edit.
+    await tester.tap(find.byTooltip('Edit'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdhanSavedAlarmsSheet), findsNothing);
+    expect(find.byType(AdhanRemindersSheet), findsOneWidget);
+    expect(_reminderField(tester).text, '+10');
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+
+    // Change value to -20 and check "Every day", then confirm.
+    await tester.enterText(find.byType(TextField), '-20');
+    await tester.tap(find.text('Every day'));
+    await tester.pump();
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdhanRemindersSheet), findsNothing);
+    expect(find.text('Alarm saved'), findsOneWidget);
+    expect(AdhanScheduler.reminders(prayer).length, 1);
+    expect(AdhanScheduler.reminders(prayer).first.minutes, -20);
+    expect(AdhanScheduler.reminders(prayer).first.everyDay, isTrue);
+
+    // 6. Open Saved Alarms sheet and delete the alarm -> closes sheet and shows snackbar.
+    await tester.tap(find.text('Fajr'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Saved alarms'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.text('20 min before adhan'), findsOneWidget);
+    await tester.tap(find.byTooltip('Remove'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdhanSavedAlarmsSheet), findsNothing);
+    expect(find.text('Alarm removed'), findsOneWidget);
+    expect(AdhanScheduler.reminders(prayer), isEmpty);
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('SoundPickerSheet renders 5 options and allows selection',

@@ -94,7 +94,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
     }
   }
 
-  // The counter rises into the card's clouds; this is how far.
+  // The counter rises into the card's band; this is how far.
   static const double _cloudHeight = 72;
   static const double _counterRise = _cloudHeight - NoorSpace.s2;
   static const double _counterFoot = NoorSpace.s3;
@@ -166,7 +166,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
     );
   }
 
-  /// The way back on a puff and the category's name on a piece of night sky,
+  /// The way back on an ornament and the category's name on a piece of night sky,
   /// as a surah is named in the Mushaf.
   Widget _buildHeader(BuildContext context) {
     return Padding(
@@ -205,7 +205,7 @@ class _AdhkarDisplayScreenState extends State<AdhkarDisplayScreen> {
       folio: '${index + 1} / ${widget.adhkar.length}',
       cloudHeight: _cloudHeight,
       padding: EdgeInsets.only(
-        // A short window drops the clouds, but the counter still rises here.
+        // A short window drops the band, but the counter still rises here.
         bottom: NoorLayout.isShort(context) ? _cloudHeight : 0,
       ),
       child: GestureDetector(

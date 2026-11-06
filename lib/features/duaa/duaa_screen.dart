@@ -112,7 +112,7 @@ class _DuaaScreenState extends State<DuaaScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NoorHero(
-              art: NoorArt.objectSabha,
+              art: NoorArt.heroAthkar,
               settings: true,
               title: s.nav_adhkar,
               subtitle: s.tagline_adhkar,
@@ -203,6 +203,6 @@ class _DuaaScreenState extends State<DuaaScreen> {
     );
   }
 
-  // The same puff that carries a surah's number in the Quran index.
+  // The same ornament that carries a surah's number in the Quran index.
   Widget _icon(NoorGlyph glyph) => NoorCloudIcon(NoorIcon(glyph));
 }

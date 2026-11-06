@@ -32,7 +32,7 @@ class NoorSegmented<T> extends StatelessWidget {
         base.copyWith(fontFamily: 'Amiri', letterSpacing: 0, height: 24 / 15);
 
     return NoorWell(
-      radius: NoorRadius.md,
+      radius: NoorRadius.pill,
       child: Padding(
         padding: const EdgeInsets.all(NoorSpace.s1),
         // Labels only: the targets keep their size.
@@ -49,7 +49,7 @@ class NoorSegmented<T> extends StatelessWidget {
                     excludeSemantics: true,
                     child: NoorPressable(
                       onPressed: () => onChanged(item.value),
-                      radius: NoorRadius.sm,
+                      radius: NoorRadius.pill,
                       builder: (context, pressed) {
                         final selected = item.value == value;
                         return AnimatedContainer(
@@ -62,7 +62,8 @@ class NoorSegmented<T> extends StatelessWidget {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: selected ? n.card : Colors.transparent,
-                            borderRadius: BorderRadius.circular(NoorRadius.sm),
+                            borderRadius:
+                                BorderRadius.circular(NoorRadius.pill),
                             boxShadow:
                                 selected && !pressed ? n.shadow1 : const [],
                           ),

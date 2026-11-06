@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
@@ -11,12 +12,7 @@ import 'package:noor/utils/constants/image_strings.dart';
 /// A failed load is swallowed; that SVG just loads late, like before.
 Future<void> preloadSvgs(BuildContext context) {
   final loaders = <BytesLoader>[
-    SvgAssetLoader(noorSkyNow.value.asset),
     for (final path in const [
-      NoorArt.objectMosque,
-      NoorArt.objectQuran,
-      NoorArt.objectSabha,
-      NoorArt.qiblaKaaba,
       SImageString.kaaba,
       SImageString.navQuran,
       SImageString.navMosque,
@@ -30,7 +26,29 @@ Future<void> preloadSvgs(BuildContext context) {
   assert(loaders.length < svg.cache.maximumSize,
       '${loaders.length} SVGs do not fit in svg.cache');
 
-  return Future.wait([for (final l in loaders) _warm(l, context)]);
+  return Future.wait([
+    for (final l in loaders) _warm(l, context),
+    _warmHeroArt(context),
+  ]);
+}
+
+// A baked image not yet decoded paints blank, which a tab's first frame would
+// show. shortcut: decodes at the full 4 px per unit and only the current theme,
+// so a theme switch decodes late; size them to the screen if memory bites.
+Future<void> _warmHeroArt(BuildContext context) {
+  final variant =
+      Theme.of(context).brightness == Brightness.dark ? 'night' : 'paper';
+  return Future.wait([
+    for (final path in [
+      noorSkyNow.value.asset,
+      NoorArt.clouds(variant),
+      NoorArt.band(variant),
+      NoorArt.ornament(variant),
+      NoorArt.disc(variant),
+      for (final hero in NoorArt.heroes) NoorArt.frame(hero, variant),
+    ])
+      precacheImage(AssetImage(path), context, onError: (_, __) {}),
+  ]);
 }
 
 // async: a cache hit is a SynchronousFuture and, in debug, a bad SVG throws

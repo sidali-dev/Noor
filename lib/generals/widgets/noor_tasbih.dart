@@ -6,7 +6,7 @@ import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
-/// The counter: a cloud holding a tasbih, the count at its centre. Each one
+/// The counter: the ornament holding a tasbih, the count at its centre. Each one
 /// said turns a bead from pearl to `ink`; the bead about to be said is the
 /// screen's one brass note. The string starts at the large bead at the foot and
 /// runs the way the language reads.
@@ -43,6 +43,9 @@ class TasbihCloud extends StatelessWidget {
 
   static const double standardSize = 132;
 
+  // The beads run on the ornament's raised ring, round the disc.
+  static const double _face = 0.56;
+
   // A count of 100 would be a smudge of beads: past a full 33-bead string the
   // said part is a thread instead.
   static const int _maxBeads = 33;
@@ -56,9 +59,10 @@ class TasbihCloud extends StatelessWidget {
       radius: NoorRadius.pill,
       builder: (context, pressed) => CloudMedallion(
         size: size,
-        shadows: pressed ? n.shadow1 : n.shadow2,
+        face: _face,
+        glow: pressed ? 1 : 0,
         child: SizedBox.square(
-          dimension: size * 0.62,
+          dimension: size * _face,
           child: TweenAnimationBuilder<double>(
             tween: Tween(end: said.toDouble()),
             duration: noorDuration(context, const Duration(milliseconds: 220)),
@@ -102,8 +106,8 @@ class TasbihCloud extends StatelessWidget {
   }
 }
 
-/// The counter between its previous and next puffs, each on the foot of the
-/// cloud. Chevrons follow [Directionality]: in the RTL Mushaf, left is next.
+/// The counter between its previous and next buttons, each on the foot of the
+/// ornament. Chevrons follow [Directionality]: in the RTL Mushaf, left is next.
 class NoorCounterRow extends StatelessWidget {
   final TasbihCloud counter;
   final String previousTooltip;
@@ -124,9 +128,9 @@ class NoorCounterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        // Close around the cloud, however wide the window.
+        // Close around the counter, however wide the window.
         constraints: BoxConstraints(
-          maxWidth: counter.size + 2 * 48 + 4 * NoorSpace.s4,
+          maxWidth: counter.size + 2 * NoorCloudButton.size + 4 * NoorSpace.s4,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -178,8 +182,8 @@ class _BeadsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final c = size.center(Offset.zero);
-    // Drawn for the 132 dp cloud; a smaller one keeps the proportions.
-    final k = size.width / (TasbihCloud.standardSize * 0.62);
+    // Drawn for the 132 dp ornament; a smaller one keeps the proportions.
+    final k = size.width / (TasbihCloud.standardSize * TasbihCloud._face);
     final radius = size.width / 2 - 4 * k;
     final direction = mirrored ? -1.0 : 1.0;
     Offset at(double angle) =>

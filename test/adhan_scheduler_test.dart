@@ -364,6 +364,55 @@ void main() {
       expect(fajrRemindersDay1.firstWhere((a) => a.minutes == 15).id, 102);
     });
 
+    test('supports more than 2 reminders and one-time reminders on a single date',
+        () {
+      final now = DateTime(2026, 4, 15, 3, 0);
+      final plan = AdhanScheduler.planAlarms(
+        now: now,
+        getCalendar: (y) => y == 2026 ? calendar2026 : null,
+        isPrayerEnabled: (_) => true,
+        reminders: (_) => [],
+        savedReminders: (prayer) {
+          if (prayer == Prayer.fajr) {
+            return [
+              const PrayerReminder(slot: 1, minutes: -10, everyDay: true),
+              const PrayerReminder(slot: 2, minutes: 10, everyDay: true),
+              PrayerReminder(
+                slot: 3,
+                minutes: -5,
+                everyDay: false,
+                date: DateTime(2026, 4, 16),
+              ),
+            ];
+          }
+          return [];
+        },
+        windowDays: 3,
+      );
+
+      final day15FajrReminders = plan.alarmsToSet
+          .where((a) =>
+              a.prayer == Prayer.fajr &&
+              a.kind == AlarmKind.reminder &&
+              a.time.day == 15)
+          .toList();
+      final day16FajrReminders = plan.alarmsToSet
+          .where((a) =>
+              a.prayer == Prayer.fajr &&
+              a.kind == AlarmKind.reminder &&
+              a.time.day == 16)
+          .toList();
+
+      // Day 15 gets only the 2 daily reminders
+      expect(day15FajrReminders.length, 2);
+      // Day 16 gets the 2 daily reminders + the 1 one-time reminder (slot 3 -> baseId 103)
+      expect(day16FajrReminders.length, 3);
+      expect(
+        day16FajrReminders.any((a) => a.minutes == -5 && a.id == 103),
+        isTrue,
+      );
+    });
+
     test('a date keeps its alarm ids on later launches', () {
       AlarmPlan planAt(DateTime now) => AdhanScheduler.planAlarms(
             now: now,

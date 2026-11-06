@@ -6,8 +6,8 @@ String getAlarmText(BuildContext context, int minutes) {
   final absMin = minutes.abs();
   final minStr = '$absMin ${s.minute_short}';
   if (minutes > 0) {
-    return '${s.alarm_set_for} $minStr ${s.after_adhan}';
+    return '$minStr ${s.after_adhan}';
   } else {
-    return '${s.alarm_set_for} $minStr ${s.before_adhan}';
+    return '$minStr ${s.before_adhan}';
   }
 }

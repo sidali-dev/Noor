@@ -29,15 +29,18 @@ class NoorWell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    return CustomPaint(
-      painter: _WellPainter(
-        radius: radius,
-        fill: fill ?? n.surfaceSunken,
-        shadows: n.inset,
-        border: borderColor ?? (border ? n.lineStrong : null),
-        pixelRatio: MediaQuery.devicePixelRatioOf(context),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: CustomPaint(
+        painter: _WellPainter(
+          radius: radius,
+          fill: fill ?? n.surfaceSunken,
+          shadows: n.inset,
+          border: borderColor ?? (border ? n.lineStrong : null),
+          pixelRatio: MediaQuery.devicePixelRatioOf(context),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
@@ -73,6 +76,7 @@ class _WellPainter extends CustomPainter {
       Offset.zero & size,
       Radius.circular(math.min(radius, size.shortestSide / 2)),
     );
+    canvas.saveLayer(Offset.zero & size, Paint());
     canvas.drawRRect(rrect, Paint()..color = fill);
 
     // The shadow is what is left of a big frame once the shifted well is cut
@@ -103,6 +107,14 @@ class _WellPainter extends CustomPainter {
           ..strokeWidth = 1,
       );
     }
+
+    // Mask out any blur bleed outside the rounded corners in PictureRecorder.
+    final outside = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size)
+      ..addRRect(rrect);
+    canvas.drawPath(outside, Paint()..blendMode = BlendMode.clear);
+    canvas.restore();
   }
 
   @override

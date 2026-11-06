@@ -254,6 +254,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "wc_adhkar":
             MessageLookupByLibrary.simpleMessage("أذكار دخول وخروج الخلاء"),
         "wudu_adhkar": MessageLookupByLibrary.simpleMessage("أذكار الوضوء"),
-        "year_ended": MessageLookupByLibrary.simpleMessage("انتهت ايام السنة")
+        "year_ended": MessageLookupByLibrary.simpleMessage("انتهت ايام السنة"),
+        "every_day": MessageLookupByLibrary.simpleMessage("كل يوم"),
+        "saved_alarms":
+            MessageLookupByLibrary.simpleMessage("المنبهات المحفوظة"),
+        "edit": MessageLookupByLibrary.simpleMessage("تعديل"),
+        "edit_alarm": MessageLookupByLibrary.simpleMessage("تعديل المنبه"),
+        "alarm_saved": MessageLookupByLibrary.simpleMessage("تم حفظ المنبه"),
+        "alarm_deleted": MessageLookupByLibrary.simpleMessage("تم حذف المنبه"),
+        "adhan_enabled":
+            MessageLookupByLibrary.simpleMessage("تم تفعيل الأذان"),
+        "adhan_disabled":
+            MessageLookupByLibrary.simpleMessage("تم إيقاف الأذان")
       };
 }

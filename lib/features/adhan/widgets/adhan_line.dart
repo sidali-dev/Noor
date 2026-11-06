@@ -43,7 +43,7 @@ extension PrayerUI on Prayer {
 
 /// One prayer in the day's list: its sun or moon (a flat mark, not a control),
 /// its name, its time (the screen's brass when it is next), the adhan bell on
-/// a puff, and a tap that opens its reminders sheet.
+/// an ornament, and a tap that opens its reminders sheet.
 class AdhanLine extends StatelessWidget {
   final Prayer prayer;
   final String time;
@@ -74,13 +74,19 @@ class AdhanLine extends StatelessWidget {
       style: NoorText.numeral(context, color: isNext ? n.brass : n.ink),
     );
 
+    final rowRadius = isNext ? NoorRadius.pill : NoorRadius.md;
     final row = Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(NoorRadius.md),
+      borderRadius: BorderRadius.circular(rowRadius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () =>
-            showAdhanRemindersSheet(context, prayer: prayer, time: time),
+        borderRadius: BorderRadius.circular(rowRadius),
+        onTap: () => showAdhanRemindersSheet(
+          context,
+          prayer: prayer,
+          time: time,
+          selectedDate: controller.date.value,
+        ),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(
             NoorSpace.s3,
@@ -90,7 +96,7 @@ class AdhanLine extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Flat, so it reads as a marker; the bell is the puff you press.
+              // Flat, so it reads as a marker; the bell is the ornament you press.
               SizedBox.square(
                 dimension: 40,
                 child: Center(
@@ -110,13 +116,22 @@ class AdhanLine extends StatelessWidget {
               Obx(() {
                 final isEnabled = controller.enabledFor(prayer.key).value;
                 return NoorCloudButton(
-                  size: 40,
                   icon: NoorIcon(
                     isEnabled ? NoorGlyph.bell : NoorGlyph.bellOff,
                     color: isEnabled ? n.ink : n.muted,
                   ),
                   tooltip: prayer.localizedTitle(context),
-                  onTap: () => controller.toggle(prayer.key),
+                  onTap: () async {
+                    final overlay =
+                        Overlay.maybeOf(context, rootOverlay: true);
+                    final s = S.of(context);
+                    await controller.toggle(prayer.key);
+                    final nowEnabled = controller.enabledFor(prayer.key).value;
+                    showAlarmSnackBar(
+                      overlay,
+                      nowEnabled ? s.adhan_enabled : s.adhan_disabled,
+                    );
+                  },
                 );
               }),
               Icon(
@@ -130,10 +145,10 @@ class AdhanLine extends StatelessWidget {
       ),
     );
 
-    // The current prayer sits in a sunken well inside the group.
+    // The current prayer sits in a rounded sunken well inside the group.
     return Padding(
       padding: const EdgeInsets.all(NoorSpace.s1),
-      child: isNext ? NoorWell(radius: NoorRadius.md, child: row) : row,
+      child: isNext ? NoorWell(radius: NoorRadius.pill, child: row) : row,
     );
   }
 }

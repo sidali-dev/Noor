@@ -123,7 +123,7 @@ class _NoorSearchFieldState extends State<NoorSearchField> {
                   ),
                   trailing: _hasText
                       ? NoorCloudButton(
-                          size: 40,
+                          plain: true,
                           tooltip: MaterialLocalizations.of(context)
                               .clearButtonTooltip,
                           icon: const Icon(Icons.close_rounded),

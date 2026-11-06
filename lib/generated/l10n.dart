@@ -1579,6 +1579,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Every day`
+  String get every_day {
+    return Intl.message(
+      'Every day',
+      name: 'every_day',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saved alarms`
+  String get saved_alarms {
+    return Intl.message(
+      'Saved alarms',
+      name: 'saved_alarms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit`
+  String get edit {
+    return Intl.message(
+      'Edit',
+      name: 'edit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit alarm`
+  String get edit_alarm {
+    return Intl.message(
+      'Edit alarm',
+      name: 'edit_alarm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alarm saved`
+  String get alarm_saved {
+    return Intl.message(
+      'Alarm saved',
+      name: 'alarm_saved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alarm removed`
+  String get alarm_deleted {
+    return Intl.message(
+      'Alarm removed',
+      name: 'alarm_deleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adhan enabled`
+  String get adhan_enabled {
+    return Intl.message(
+      'Adhan enabled',
+      name: 'adhan_enabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adhan disabled`
+  String get adhan_disabled {
+    return Intl.message(
+      'Adhan disabled',
+      name: 'adhan_disabled',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

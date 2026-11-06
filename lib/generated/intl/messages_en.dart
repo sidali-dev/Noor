@@ -266,6 +266,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Athkar for Entering and Leaving the Bathroom"),
         "wudu_adhkar": MessageLookupByLibrary.simpleMessage("Wudu Athkar"),
         "year_ended": MessageLookupByLibrary.simpleMessage(
-            "The days of the year are over")
+            "The days of the year are over"),
+        "every_day": MessageLookupByLibrary.simpleMessage("Every day"),
+        "saved_alarms": MessageLookupByLibrary.simpleMessage("Saved alarms"),
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "edit_alarm": MessageLookupByLibrary.simpleMessage("Edit alarm"),
+        "alarm_saved": MessageLookupByLibrary.simpleMessage("Alarm saved"),
+        "alarm_deleted": MessageLookupByLibrary.simpleMessage("Alarm removed"),
+        "adhan_enabled": MessageLookupByLibrary.simpleMessage("Adhan enabled"),
+        "adhan_disabled": MessageLookupByLibrary.simpleMessage("Adhan disabled")
       };
 }

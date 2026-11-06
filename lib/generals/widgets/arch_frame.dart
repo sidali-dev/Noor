@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// Hilal ArchFrame: the layered paper shadow box (see
 /// `hilal-design-system/components/ArchFrame`). One per screen, as the hero.
 ///
-/// Three nested arches, a night window with stars, a cloud scroll and a lace
-/// border. [child] is centred in the sky; the moon and skyline are left out so
+/// Three nested arches, a night window with stars, the arabesque band and a
+/// lace border. [child] is centred in the sky; the moon and skyline are left out so
 /// the child owns the window. The paper-shade wash and the shadows are the only
 /// gradients, and they stay inside this widget.
 class ArchFrame extends StatelessWidget {
@@ -36,6 +37,13 @@ class ArchFrame extends StatelessWidget {
             child: CustomPaint(
               painter: _ArchPainter(n, twinkle),
             ),
+          ),
+          // In the artwork's units: over the arches' feet, on the ledge.
+          Positioned(
+            left: width * 20 / 240,
+            right: width * 20 / 240,
+            top: width * 188 / 240,
+            child: NoorMotifBand(height: width * 40 / 240),
           ),
           if (child != null)
             Align(
@@ -74,30 +82,6 @@ class _ArchPainter extends CustomPainter {
     [78.0, 44.0, 1.4],
     [124.0, 40.0, 1.4],
   ];
-  static const _backClouds = [
-    [10.0, 200.0, 18.0],
-    [46.0, 192.0, 22.0],
-    [86.0, 196.0, 20.0],
-    [126.0, 190.0, 22.0],
-    [166.0, 196.0, 20.0],
-    [196.0, 202.0, 16.0],
-  ];
-  static const _frontClouds = [
-    [-4.0, 214.0, 14.0],
-    [26.0, 210.0, 18.0],
-    [62.0, 212.0, 19.0],
-    [100.0, 208.0, 21.0],
-    [138.0, 212.0, 19.0],
-    [174.0, 210.0, 18.0],
-    [204.0, 215.0, 14.0],
-    [8.0, 226.0, 12.0],
-    [36.0, 228.0, 13.0],
-    [66.0, 227.0, 13.0],
-    [96.0, 229.0, 13.0],
-    [126.0, 227.0, 13.0],
-    [156.0, 228.0, 13.0],
-    [186.0, 226.0, 12.0],
-  ];
 
   static Path _arch(double d) {
     final sx = (200 - 2 * d) / 200;
@@ -115,14 +99,6 @@ class _ArchPainter extends CustomPainter {
     return p
       ..lineTo(x(200), 240)
       ..close();
-  }
-
-  static Path _circles(List<List<double>> cs) {
-    final p = Path();
-    for (final c in cs) {
-      p.addOval(Rect.fromCircle(center: Offset(c[0], c[1]), radius: c[2]));
-    }
-    return p;
   }
 
   static Path _star(double x, double y, double r) => Path()
@@ -217,32 +193,10 @@ class _ArchPainter extends CustomPainter {
       canvas.drawPath(ring, wash);
     }
 
-    // Cloud scroll: back row, then front row, hiding the base.
-    final back = _circles(_backClouds);
-    _cast(canvas, back, 1.4, 1.3);
-    canvas.drawPath(back, Paint()..color = n.paperShade);
-    final front = _circles(_frontClouds)
-      ..addRect(const Rect.fromLTWH(-2, 210, 204, 32));
-    _cast(canvas, front, 1.4, 1.3);
-    canvas.drawPath(front, Paint()..color = n.card);
-    final swirl = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1
-      ..strokeCap = StrokeCap.round
-      ..color = n.line;
-    for (final w in const [
-      [26.0, 212.0, 9.0],
-      [100.0, 210.0, 11.0],
-      [174.0, 212.0, 9.0],
-    ]) {
-      canvas.drawPath(
-        Path()
-          ..moveTo(w[0] - w[2], w[1])
-          ..relativeArcToPoint(Offset(w[2], w[2] * .6),
-              radius: Radius.circular(w[2]), largeArc: true, clockwise: true),
-        swirl,
-      );
-    }
+    // A ledge hiding the base; the arabesque band stands on it, over this paint.
+    final ledge = Path()..addRect(const Rect.fromLTWH(-2, 214, 204, 28));
+    _cast(canvas, ledge, 1.4, 1.3);
+    canvas.drawPath(ledge, Paint()..color = n.card);
 
     // Lace border, the front-most layer.
     final lace = _lace();

@@ -71,10 +71,9 @@ class _QiblaScreenState extends State<QiblaScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // The Kaaba stands at the end of the band, so the verse takes the
-          // first 40%.
+          // The widest window, so the verse takes the first 40%.
           NoorHero(
-            art: NoorArt.qiblaKaaba,
+            art: NoorArt.heroQibla,
             settings: true,
             title: S.of(context).nav_qibla,
             subtitle: S.of(context).tagline_qibla,

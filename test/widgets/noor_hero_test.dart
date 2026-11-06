@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_mark.dart';
 import 'package:noor/generals/widgets/noor_pager_pill.dart';
 import 'package:noor/generals/widgets/noor_pill.dart';
 import 'package:noor/generals/widgets/noor_sky.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
@@ -54,7 +55,7 @@ void main() {
   }
 
   const long = NoorHero(
-    art: NoorArt.objectQuran,
+    art: NoorArt.heroQuran,
     title: 'القرآن',
     subtitle:
         'إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ — الإسراء 9',
@@ -69,7 +70,7 @@ void main() {
         tester,
         locale,
         const NoorHero(
-          art: NoorArt.objectQuran,
+          art: NoorArt.heroQuran,
           title: 'Quran',
           overlap: NoorPill(
             label: 'The Democratic Republic of the Congo, Kinshasa',
@@ -82,86 +83,89 @@ void main() {
     }
   });
 
-  testWidgets('NoorHero mirrors art and layout in RTL', (tester) async {
-    await pumpHero(tester, const Locale('ar'), long);
+  const frame = ValueKey('noor-hero-frame');
+  const skyImage = ValueKey('noor-hero-sky');
 
-    final flip = tester.widget<Transform>(find.byKey(_artKey));
-    expect(flip.transform.storage[0], -1); // flipX
-    expect(
-        find.descendant(
-            of: find.byKey(_artKey), matching: find.byType(SvgPicture)),
-        findsOneWidget);
+  String assetOf(WidgetTester tester, Key key) =>
+      (tester.widget<Image>(find.byKey(key)).image as dynamic).assetName
+          as String;
+
+  testWidgets('NoorHero moves the window to the other side in RTL',
+      (tester) async {
+    await pumpHero(tester, const Locale('ar'), long);
 
     // Title on the start side (right), settings disc on the end side (left).
     final title = tester.getRect(find.text('القرآن'));
     final disc = tester.getRect(find.byTooltip('الإعدادات'));
     expect(title.right, closeTo(390 - 16, 1));
     expect(disc.left, closeTo(16, 1));
-    expect(disc.size, const Size(48, 48));
+    expect(disc.size, const Size.square(NoorCloudButton.size));
+    expect(tester.getRect(find.byKey(frame)).center.dx, lessThan(390 / 2));
+    expect(tester.getRect(find.byKey(skyImage)).center.dx, lessThan(390 / 2));
   });
 
-  testWidgets('NoorHero keeps art and layout in LTR', (tester) async {
+  testWidgets('NoorHero keeps the window at the end in LTR', (tester) async {
     await pumpHero(tester, const Locale('en'), long);
 
-    expect(
-        tester.widget<Transform>(find.byKey(_artKey)).transform.storage[0], 1);
     expect(tester.getRect(find.text('القرآن')).left, closeTo(16, 1));
     expect(
         tester.getRect(find.byTooltip('Settings')).right, closeTo(390 - 16, 1));
+    expect(tester.getRect(find.byKey(frame)).center.dx, greaterThan(390 / 2));
   });
 
-  testWidgets('NoorHero keeps the Qibla Kaaba upright, at the end of the band',
+  testWidgets('NoorHero centres the sky behind the frame, either way round',
       (tester) async {
-    const hero = NoorHero(art: NoorArt.qiblaKaaba, title: 'Qibla');
-    final kaaba = find.byKey(const ValueKey('noor-hero-upright'));
-
-    await pumpHero(tester, const Locale('en'), hero);
-    final ltr = tester.getRect(kaaba);
-    expect(ltr.center.dx, greaterThan(390 / 2));
-
-    await pumpHero(tester, const Locale('ar'), hero);
-    final rtl = tester.getRect(kaaba);
-    expect(rtl.center.dx, lessThan(390 / 2));
-    expect(rtl.width, closeTo(ltr.width, 0.01));
-    // The art behind it mirrors; the Kaaba is not inside that flip.
-    expect(
-        tester.widget<Transform>(find.byKey(_artKey)).transform.storage[0], -1);
-    expect(find.descendant(of: find.byKey(_artKey), matching: kaaba),
-        findsNothing);
-  });
-
-  testWidgets('NoorHero lays the other objects at the end, upright',
-      (tester) async {
-    for (final art in [
-      NoorArt.objectQuran,
-      NoorArt.objectMosque,
-      NoorArt.objectSabha,
-    ]) {
-      final hero = NoorHero(art: art, title: 'x');
-      final object = find.byKey(const ValueKey('noor-hero-upright'));
-      await pumpHero(tester, const Locale('en'), hero);
-      expect(tester.getRect(object).center.dx, greaterThan(390 / 2));
-      await pumpHero(tester, const Locale('ar'), hero);
-      expect(tester.getRect(object).center.dx, lessThan(390 / 2));
+    for (final locale in const [Locale('en'), Locale('ar')]) {
+      await pumpHero(tester, locale, long);
+      expect(tester.getRect(find.byKey(skyImage)).center.dx,
+          closeTo(tester.getRect(find.byKey(frame)).center.dx, 0.01));
     }
   });
 
-  testWidgets('NoorHero draws the same sky in both themes, edge to edge',
+  testWidgets(
+      'NoorHero draws each tab its own window, in the theme, on one sky',
       (tester) async {
-    for (final theme in [NoorTheme.light(), NoorTheme.dark()]) {
-      await pumpHero(tester, const Locale('en'), long, theme: theme);
-      final loader = tester
-          .widget<SvgPicture>(find.descendant(
-              of: find.byKey(_artKey), matching: find.byType(SvgPicture)))
-          .bytesLoader as SvgAssetLoader;
-      expect(loader.assetName, noorSkyNow.value.asset);
-      final band = tester.widget<DecoratedBox>(find
-          .descendant(
-            of: find.byType(NoorHero),
-            matching: find.byType(DecoratedBox),
-          )
-          .first);
-      expect((band.decoration as BoxDecoration).color, noorSkyNow.value.edge);
+    for (final (theme, variant) in [
+      (NoorTheme.light(), 'paper'),
+      (NoorTheme.dark(), 'night'),
+    ]) {
+      for (final hero in NoorArt.heroes) {
+        await pumpHero(
+            tester, const Locale('en'), NoorHero(art: hero, title: 'x'),
+            theme: theme);
+        expect(assetOf(tester, frame), NoorArt.frame(hero, variant));
+        expect(assetOf(tester, skyImage), noorSkyNow.value.asset);
+        expect(assetOf(tester, const ValueKey('noor-hero-clouds')),
+            NoorArt.clouds(variant));
+      }
+    }
+  });
+
+  testWidgets('NoorHero text and status bar follow the theme, not the sky',
+      (tester) async {
+    final was = noorSkyNow.value;
+    addTearDown(() => noorSkyNow.value = was);
+    for (final (theme, n, icons) in [
+      (NoorTheme.light(), NoorColors.light, Brightness.dark),
+      (NoorTheme.dark(), NoorColors.dark, Brightness.light),
+    ]) {
+      for (final sky in NoorSky.values) {
+        noorSkyNow.value = sky;
+        await pumpHero(
+          tester,
+          const Locale('en'),
+          const NoorHero(
+              art: NoorArt.heroQuran, title: 'Quran', subtitle: 'Verse'),
+          theme: theme,
+        );
+        expect(tester.widget<Text>(find.text('Quran')).style!.color, n.ink);
+        expect(tester.widget<Text>(find.text('Verse')).style!.color, n.muted);
+        final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+            find.descendant(
+                of: find.byType(NoorHero),
+                matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>)));
+        expect(region.value.statusBarIconBrightness, icons);
+      }
     }
   });
 
@@ -173,7 +177,7 @@ void main() {
     );
 
     final n = NoorTheme.light().extension<NoorColors>()!;
-    expect(find.byType(SvgPicture), findsNothing);
+    expect(find.byType(Image), findsNothing);
     expect(find.byKey(_artKey), findsNothing);
     final band = tester.widget<DecoratedBox>(find
         .descendant(
@@ -216,7 +220,7 @@ void main() {
         tester,
         Locale(lang),
         NoorHero(
-          art: NoorArt.objectSabha,
+          art: NoorArt.heroAthkar,
           title: lang == 'ar' ? 'الأذكار' : 'Athkar',
           subtitle: subtitles[lang],
           settings: true,
@@ -228,10 +232,10 @@ void main() {
           tester.renderObject<RenderParagraph>(find.text(subtitles[lang]!));
       expect(p.size.height,
           greaterThanOrEqualTo(p.getMaxIntrinsicHeight(p.size.width) - 0.5));
-      // The cloud-scroll base is the last 53 dp of the band; a long verse
-      // grows the band rather than running into it.
+      // The clouds are the last 58 dp of the band; a long verse grows the band
+      // rather than running into it.
       expect(tester.getRect(find.text(subtitles[lang]!)).bottom,
-          lessThanOrEqualTo(tester.getRect(find.byKey(_artKey)).bottom - 53));
+          lessThanOrEqualTo(tester.getRect(find.byKey(_artKey)).bottom - 58));
     });
   }
 

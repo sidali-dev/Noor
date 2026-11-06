@@ -172,41 +172,6 @@ class NoorColors extends ThemeExtension<NoorColors> {
         blurRadius: 40),
   ];
 
-  // Not a Hilal token: a tight contact shadow and a short drop, for a puff that
-  // must read against a sunken well, where `shadow2`'s soft haze disappears.
-  static const _shadowCrispPaper = [
-    BoxShadow(
-        color: Color.fromRGBO(23, 26, 33, 0.24),
-        offset: Offset(0, 1),
-        blurRadius: 1.5),
-    BoxShadow(
-        color: Color.fromRGBO(23, 26, 33, 0.20),
-        offset: Offset(0, 3),
-        blurRadius: 4),
-    BoxShadow(
-        color: Color.fromRGBO(23, 26, 33, 0.12),
-        offset: Offset(0, 7),
-        blurRadius: 9),
-  ];
-  static const _shadowCrispNight = [
-    BoxShadow(
-        color: Color.fromRGBO(0, 0, 0, 0.85),
-        offset: Offset(0, 1),
-        blurRadius: 1.5),
-    BoxShadow(
-        color: Color.fromRGBO(0, 0, 0, 0.75),
-        offset: Offset(0, 3),
-        blurRadius: 4),
-    BoxShadow(
-        color: Color.fromRGBO(0, 0, 0, 0.55),
-        offset: Offset(0, 7),
-        blurRadius: 9),
-  ];
-
-  /// A harder lift than [shadow2]: the day arrows in their well.
-  List<BoxShadow> get shadowCrisp =>
-      isDark ? _shadowCrispNight : _shadowCrispPaper;
-
   /// Flat paper: list groups, inputs on raised paper, the tab bar.
   List<BoxShadow> get shadow1 => isDark ? _shadow1Night : _shadow1Paper;
 

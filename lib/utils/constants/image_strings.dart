@@ -18,13 +18,27 @@ abstract final class NoorArt {
   static const String pageCorner = 'assets/images/ornaments/page_corner.svg';
   static const String divider = 'assets/images/ornaments/divider.svg';
 
-  /// The Kaaba of the Qibla header, drawn over the sky. It carries
-  /// writing, so it is never mirrored in RTL (U2): [NoorHero] places it at the
-  /// end of the band instead.
-  static const String qiblaKaaba = 'assets/images/art/qibla_kaaba.svg';
+  /// The tabs' windows for [NoorHero]: pass one to [frame] for the baked image.
+  /// Baked by tool/hero_art.py, in the app's exact paper colours.
+  static const String heroPrayers = 'prayers';
+  static const String heroQuran = 'quran';
+  static const String heroAthkar = 'athkar';
+  static const String heroQibla = 'qibla';
+  static const List<String> heroes = [
+    heroPrayers,
+    heroQuran,
+    heroAthkar,
+    heroQibla,
+  ];
 
-  /// The objects laid over the sky by [NoorHero], one per tab.
-  static const String objectMosque = 'assets/images/art/object_mosque.svg';
-  static const String objectQuran = 'assets/images/art/object_quran.svg';
-  static const String objectSabha = 'assets/images/art/object_sabha.svg';
+  static String frame(String hero, String variant) =>
+      'assets/images/art/hero_${hero}_$variant.webp';
+  static String clouds(String variant) =>
+      'assets/images/art/hero_clouds_$variant.webp';
+  static String band(String variant) =>
+      'assets/images/art/motif_band_$variant.webp';
+  static String ornament(String variant) =>
+      'assets/images/art/motif_ornament_$variant.webp';
+  static String disc(String variant) =>
+      'assets/images/art/motif_disc_$variant.webp';
 }

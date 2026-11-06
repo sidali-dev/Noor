@@ -81,6 +81,19 @@ class AppPrefs {
     await SharedPrefService.setInt(durationKey, 0);
   }
 
+  static String? prayerRemindersJson(String prayerKey) {
+    try {
+      return SharedPrefService.getString(
+          SharedPrefKeys.prayerReminders(prayerKey));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> setPrayerRemindersJson(String prayerKey, String json) =>
+      SharedPrefService.setString(
+          SharedPrefKeys.prayerReminders(prayerKey), json);
+
   // ---- location -----------------------------------------------------------
 
   static String get country => _string(SharedPrefKeys.country, '');

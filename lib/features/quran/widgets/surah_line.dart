@@ -14,7 +14,7 @@ class IndexNumber extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CloudMedallion(
-      size: 40,
+      size: NoorCloudIcon.size,
       child: Text(
         '$number',
         textDirection: TextDirection.ltr,

@@ -25,7 +25,7 @@ Widget _screen() => MaterialApp(
           child: Column(children: [
             const NoorIcon(NoorGlyph.bell),
             const NoorIcon(NoorGlyph.kaaba),
-            const NoorHero(art: NoorArt.objectMosque, title: 'Prayers'),
+            const NoorHero(art: NoorArt.heroPrayers, title: 'Prayers'),
             NoorNavBar(selectedIndex: 0, onItemSelected: (_) {}),
           ]),
         ),
@@ -37,6 +37,34 @@ int _painted(WidgetTester t) => t.allRenderObjects
     .length;
 
 void main() {
+  testWidgets('the hero art is decoded before its first frame', (tester) async {
+    await tester.pumpWidget(_screen());
+    final providers = [
+      for (final image in tester.widgetList<Image>(find.descendant(
+          of: find.byType(NoorHero), matching: find.byType(Image))))
+        image.image,
+    ];
+    expect(providers, hasLength(3)); // sky, frame, clouds
+
+    // With the hero gone, so its own live images do not answer for the cache.
+    await tester.pumpWidget(MaterialApp(
+      theme: NoorTheme.light(),
+      home: const SizedBox(key: ValueKey('ctx')),
+    ));
+    final ctx = tester.element(find.byKey(const ValueKey('ctx')));
+    imageCache
+      ..clear()
+      ..clearLiveImages();
+    await tester.runAsync(() async {
+      await preloadSvgs(ctx);
+      for (final provider in providers) {
+        final key =
+            await provider.obtainKey(createLocalImageConfiguration(ctx));
+        expect(imageCache.containsKey(key), isTrue, reason: '$key');
+      }
+    });
+  });
+
   testWidgets('preloaded SVGs paint on the first frame', (tester) async {
     // Debug builds and tests parse SVGs inline, so a first frame paints with or
     // without the preload. What the preload must get right is the cache key:

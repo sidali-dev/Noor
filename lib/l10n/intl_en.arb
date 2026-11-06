@@ -203,5 +203,13 @@
     "relocate_body_unknown" : "Your network suggests you're somewhere else. Prayer times there differ by about {shift} from {saved}.",
     "@relocate_body_unknown" : { "placeholders" : { "shift" : { "type" : "String" }, "saved" : { "type" : "String" } } },
     "relocate_auto" : "Detect automatically",
-    "relocate_manual" : "Choose manually"
+    "relocate_manual" : "Choose manually",
+    "every_day" : "Every day",
+    "saved_alarms" : "Saved alarms",
+    "edit" : "Edit",
+    "edit_alarm" : "Edit alarm",
+    "alarm_saved" : "Alarm saved",
+    "alarm_deleted" : "Alarm removed",
+    "adhan_enabled" : "Adhan enabled",
+    "adhan_disabled" : "Adhan disabled"
 }

@@ -206,7 +206,7 @@ class SBottomNavigationController extends GetxController {
   }
 
   /// After the first frame, builds and paints the tabs the user will most likely
-  /// open next, one at a time and never while something animates. The paint is what bakes a tab's blurred clouds and wells
+  /// open next, one at a time and never while something animates. The paint is what bakes a tab's blurred wells
   /// ([BakedPaint]) and readies the GPU for its art and text; a first visit
   /// would otherwise do both inside the switch.
   @override

@@ -60,4 +60,7 @@ class SharedPrefKeys {
 
   /// Cached prayer calendar for a year (JSON String), e.g. `Adhan2026`.
   static String adhanYear(int year) => 'Adhan$year';
+
+  /// Saved reminders list for a prayer (JSON String), e.g. `fajr_reminders`.
+  static String prayerReminders(String prayerKey) => '${prayerKey}_reminders';
 }

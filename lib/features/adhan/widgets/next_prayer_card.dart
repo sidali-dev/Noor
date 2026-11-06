@@ -4,8 +4,8 @@ import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// The one window of the Prayers screen: the next prayer's time and how long
-/// until it, centred over a bank of paper clouds. No art behind the time: the
-/// clouds keep to the foot and the text is padded clear of them at any scale.
+/// until it, centred over the arabesque band. No art behind the time: the band
+/// keeps to the foot and the text is padded clear of it at any scale.
 class NextPrayerCard extends StatelessWidget {
   final String time;
 
@@ -30,20 +30,12 @@ class NextPrayerCard extends StatelessWidget {
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          Positioned(
+          const Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            height: _cloudHeight + CloudBankPainter.headroom,
-            child: CustomPaint(
-              painter: CloudBankPainter(
-                back: n.isDark ? n.windowRaised : n.surfaceSunken,
-                front: n.card,
-                lip: n.isDark ? n.depthShadow : null,
-                shade: n.depthShadow,
-                pixelRatio: MediaQuery.devicePixelRatioOf(context),
-              ),
-            ),
+            height: _cloudHeight,
+            child: NoorMotifBand(height: _cloudHeight),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

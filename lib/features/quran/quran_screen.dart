@@ -49,7 +49,7 @@ class QuranScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   NoorHero(
-                    art: NoorArt.objectQuran,
+                    art: NoorArt.heroQuran,
                     settings: true,
                     title: S.of(context).nav_quran,
                     subtitle: S.of(context).tagline_quran,
@@ -166,7 +166,7 @@ class QuranScreen extends StatelessWidget {
               ),
               const SizedBox(width: NoorSpace.s2),
               NoorCloudButton(
-                // The puff is paper; the card's own ink would be moon-white.
+                // The ornament is paper; the card's own ink would be moon-white.
                 icon: NoorIcon(NoorGlyph.bookmark, color: n.ink),
                 tooltip: S.of(context).bookmarks,
                 onTap: () => showBookmarksSheet(context),

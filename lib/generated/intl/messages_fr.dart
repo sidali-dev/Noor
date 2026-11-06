@@ -279,6 +279,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "wudu_adhkar":
             MessageLookupByLibrary.simpleMessage("Athkar des ablutions"),
         "year_ended": MessageLookupByLibrary.simpleMessage(
-            "Les jours de l\'année sont terminés")
+            "Les jours de l\'année sont terminés"),
+        "every_day": MessageLookupByLibrary.simpleMessage("Tous les jours"),
+        "saved_alarms":
+            MessageLookupByLibrary.simpleMessage("Alarmes enregistrées"),
+        "edit": MessageLookupByLibrary.simpleMessage("Modifier"),
+        "edit_alarm":
+            MessageLookupByLibrary.simpleMessage("Modifier l\'alarme"),
+        "alarm_saved":
+            MessageLookupByLibrary.simpleMessage("Alarme enregistrée"),
+        "alarm_deleted":
+            MessageLookupByLibrary.simpleMessage("Alarme supprimée"),
+        "adhan_enabled": MessageLookupByLibrary.simpleMessage("Adhan activé"),
+        "adhan_disabled":
+            MessageLookupByLibrary.simpleMessage("Adhan désactivé")
       };
 }
