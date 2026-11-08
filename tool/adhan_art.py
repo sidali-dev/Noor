@@ -2,7 +2,7 @@
 
     python tool/adhan_art.py [out_dir]
 
-The ringing adhan's window, after the owner's reference assets/adhan_screen.jpg:
+The ringing adhan's window, after the owner's reference tool/sources/adhan_screen.jpg:
 a tall cusped arch in one thick band of paper with a step down to the sky, a
 broad scalloped plate behind it that runs off the top of the screen, a column
 at each side, the mosque standing in the window, and banks of paper clouds that

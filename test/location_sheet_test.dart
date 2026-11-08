@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/location_flow.dart';
-import 'package:noor/generals/widgets/noor_button.dart';
-import 'package:noor/generals/widgets/noor_list_row.dart';
-import 'package:noor/generals/widgets/noor_radio.dart';
+import 'package:noor/core/services/location_flow.dart';
+import 'package:noor/core/widgets/noor_button.dart';
+import 'package:noor/core/widgets/noor_list_row.dart';
+import 'package:noor/core/widgets/noor_radio.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 void main() {
   for (final loc in ['ar', 'fr', 'en']) {
@@ -19,7 +19,7 @@ void main() {
       final handle = tester.ensureSemantics();
 
       await tester.pumpWidget(MaterialApp(
-        theme: NoorTheme.light(),
+        theme: AppTheme.light(),
         locale: Locale(loc),
         localizationsDelegates: const [
           S.delegate,

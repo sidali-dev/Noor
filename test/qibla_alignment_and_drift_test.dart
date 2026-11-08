@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/qibla/widgets/qibla_compass.dart';
-import 'package:noor/generals/location_drift.dart';
+import 'package:noor/features/qibla/views/widgets/qibla_compass.dart';
+import 'package:noor/core/services/location_drift.dart';
 
 void main() {
   test('angleError folds any heading into 0..180', () {

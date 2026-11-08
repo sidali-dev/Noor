@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
 import 'package:noor/features/adhan/models/sub_models/timings.dart';
-import 'package:noor/generals/widgets/noor_sky.dart';
-import 'package:noor/utils/local_storage/app_prefs.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/core/widgets/noor_sky.dart';
+import 'package:noor/core/services/app_prefs.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Timings _timings({String fajr = '06:10 (CET)', String isha = '19:40 (CET)'}) =>

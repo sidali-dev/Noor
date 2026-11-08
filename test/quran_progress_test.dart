@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:noor/features/quran/quran_screen.dart';
+import 'package:noor/features/quran/controllers/quran_controller.dart';
+import 'package:noor/features/quran/views/quran_view.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
-import 'package:noor/features/quran/data/quran_progress.dart';
-import 'package:noor/utils/constants/shared_pref_keys.dart';
-import 'package:noor/utils/local_storage/app_prefs.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/core/theme/app_theme.dart';
+import 'package:noor/features/quran/controllers/quran_progress.dart';
+import 'package:noor/core/constants/shared_pref_keys.dart';
+import 'package:noor/core/services/app_prefs.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -154,8 +155,9 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
       addTearDown(Get.reset);
+      Get.put(QuranController());
       await tester.pumpWidget(GetMaterialApp(
-        theme: dark ? NoorTheme.dark() : NoorTheme.light(),
+        theme: dark ? AppTheme.dark() : AppTheme.light(),
         locale: const Locale('en'),
         localizationsDelegates: const [
           S.delegate,
@@ -164,7 +166,7 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: S.delegate.supportedLocales,
-        home: const QuranScreen(),
+        home: const QuranView(),
       ));
       await tester.pump();
     }

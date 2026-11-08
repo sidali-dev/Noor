@@ -13,8 +13,8 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage as ni
 
-BORDER = 'assets/images/Bordure arabesque blanche en relief.png'
-BUTTON = 'assets/images/Bouton ornemental arabesque en relief.png'
+BORDER = 'tool/sources/Bordure arabesque blanche en relief.png'
+BUTTON = 'tool/sources/Bouton ornemental arabesque en relief.png'
 
 # Page colours, from NoorColors: the hero band's plate must match them exactly.
 PAGE = {'paper': (0xEE, 0xF0, 0xF4), 'night': (0x10, 0x12, 0x17)}

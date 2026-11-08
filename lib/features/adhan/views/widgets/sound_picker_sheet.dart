@@ -1,0 +1,173 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:noor/core/widgets/noor_cloud.dart';
+import 'package:noor/core/services/adhan_scheduler.dart';
+import 'package:noor/features/adhan/controllers/sound_picker_controller.dart';
+import 'package:noor/core/widgets/noor_button.dart';
+import 'package:noor/core/widgets/noor_pressable.dart';
+import 'package:noor/core/widgets/noor_radio.dart';
+import 'package:noor/core/widgets/noor_sheet.dart';
+import 'package:noor/generated/l10n.dart';
+import 'package:noor/core/constants/assets/sounds.dart';
+import 'package:noor/core/services/app_prefs.dart';
+import 'package:noor/core/theme/app_theme.dart';
+
+class SoundOption {
+  final String path;
+  final String Function(BuildContext) titleBuilder;
+
+  const SoundOption({
+    required this.path,
+    required this.titleBuilder,
+  });
+}
+
+const List<SoundOption> kAdhanSoundOptions = [
+  SoundOption(
+    path: AppSounds.adhanAhmadAlNafees,
+    titleBuilder: _titleNafees,
+  ),
+  SoundOption(
+    path: AppSounds.adhanAlafasy1,
+    titleBuilder: _titleAlafasy1,
+  ),
+  SoundOption(
+    path: AppSounds.adhanAlafasy2,
+    titleBuilder: _titleAlafasy2,
+  ),
+  SoundOption(
+    path: AppSounds.adhanAhmedElKourdi,
+    titleBuilder: _titleElKourdi,
+  ),
+  SoundOption(
+    path: AppSounds.adhanHamzaElMajali,
+    titleBuilder: _titleElMajali,
+  ),
+];
+
+String _titleNafees(BuildContext c) => S.of(c).chikh_nafees;
+String _titleAlafasy1(BuildContext c) => S.of(c).chikh_afassy_1;
+String _titleAlafasy2(BuildContext c) => S.of(c).chilh_afassy_2;
+String _titleElKourdi(BuildContext c) => S.of(c).chikh_elkourdi;
+String _titleElMajali(BuildContext c) => S.of(c).chikh_elmajali;
+
+Future<void> showAdhanSoundPickerSheet(BuildContext context) async {
+  final soundController = Get.find<SoundPickerController>();
+  await showNoorSheet(
+    context,
+    title: S.of(context).pick_adhan,
+    builder: (sheetContext) => const SoundPickerSheet(),
+  );
+  await soundController.stopPreview();
+}
+
+class SoundPickerSheet extends StatefulWidget {
+  const SoundPickerSheet({super.key});
+
+  @override
+  State<SoundPickerSheet> createState() => _SoundPickerSheetState();
+}
+
+class _SoundPickerSheetState extends State<SoundPickerSheet> {
+  final _sound = Get.find<SoundPickerController>();
+  String _selected = AppPrefs.adhanSoundPath;
+
+  Future<void> _save() async {
+    final option = kAdhanSoundOptions.firstWhere((o) => o.path == _selected);
+    final title = option.titleBuilder(context);
+    await AppPrefs.setAdhanSoundPath(option.path);
+    await AppPrefs.setAdhanSoundName(title);
+    _sound.updateAdhanName();
+    await _sound.stopPreview();
+    try {
+      await AdhanScheduler.sync();
+    } catch (_) {}
+    if (mounted && Navigator.of(context).canPop()) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final o in kAdhanSoundOptions)
+          _SoundRow(
+            option: o,
+            selected: o.path == _selected,
+            onTap: () {
+              if (o.path == _selected) return;
+              _sound.stopPreview();
+              setState(() => _selected = o.path);
+            },
+          ),
+        const SizedBox(height: NoorSpace.s4),
+        NoorButton(label: S.of(context).save, onPressed: _save),
+      ],
+    );
+  }
+}
+
+class _SoundRow extends StatelessWidget {
+  final SoundOption option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SoundRow({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sound = Get.find<SoundPickerController>();
+
+    // Brass is the radio alone; play is an ink glyph on an ornament.
+    return Semantics(
+      checked: selected,
+      inMutuallyExclusiveGroup: true,
+      child: NoorPressable(
+        onPressed: onTap,
+        radius: NoorRadius.md,
+        builder: (context, pressed) => ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Row(
+            children: [
+              const SizedBox(width: NoorSpace.s2),
+              NoorRadioMark(selected: selected),
+              const SizedBox(width: NoorSpace.s3),
+              Expanded(
+                child: Text(
+                  option.titleBuilder(context),
+                  style: NoorText.heading(context).copyWith(
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (selected)
+                Obx(() {
+                  final playing = sound.playingPath.value == option.path;
+                  return NoorCloudButton(
+                    // The triangle points the way the page reads, so it turns
+                    // left in RTL; the stop square is symmetric.
+                    icon: playing
+                        ? const Icon(Iconsax.stop)
+                        : Transform.flip(
+                            flipX:
+                                Directionality.of(context) == TextDirection.rtl,
+                            child: const Icon(Iconsax.play),
+                          ),
+                    onTap: () => sound.togglePreview(option.path),
+                  );
+                }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

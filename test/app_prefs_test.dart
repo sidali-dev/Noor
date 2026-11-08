@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/utils/constants/shared_pref_keys.dart';
-import 'package:noor/utils/local_storage/app_prefs.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/core/constants/shared_pref_keys.dart';
+import 'package:noor/core/services/app_prefs.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> _useStore(Map<String, Object> values) async {

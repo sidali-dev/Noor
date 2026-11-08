@@ -1,5 +1,5 @@
 import 'package:noor/features/adhan/models/prayer.dart';
-import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/core/services/adhan_scheduler.dart';
 
 /// What the ring screen shows for one ringing alarm: whose prayer it is and
 /// the prayer's own time, which for a reminder is not the alarm's.

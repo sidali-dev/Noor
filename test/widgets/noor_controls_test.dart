@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_icon.dart';
-import 'package:noor/generals/widgets/noor_list_row.dart';
-import 'package:noor/generals/widgets/noor_pill.dart';
-import 'package:noor/generals/widgets/noor_cloud.dart';
-import 'package:noor/generals/widgets/noor_search_field.dart';
+import 'package:noor/core/widgets/noor_icon.dart';
+import 'package:noor/core/widgets/noor_list_row.dart';
+import 'package:noor/core/widgets/noor_pill.dart';
+import 'package:noor/core/widgets/noor_cloud.dart';
+import 'package:noor/core/widgets/noor_search_field.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(Locale locale, Widget child, {ThemeData? theme}) {
   return MaterialApp(
-    theme: theme ?? NoorTheme.light(),
+    theme: theme ?? AppTheme.light(),
     locale: locale,
     localizationsDelegates: const [
       S.delegate,

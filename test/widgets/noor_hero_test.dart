@@ -3,20 +3,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_cloud.dart';
-import 'package:noor/generals/widgets/noor_hero.dart';
-import 'package:noor/generals/widgets/noor_mark.dart';
-import 'package:noor/generals/widgets/noor_pager_pill.dart';
-import 'package:noor/generals/widgets/noor_pill.dart';
-import 'package:noor/generals/widgets/noor_sky.dart';
-import 'package:noor/utils/constants/image_strings.dart';
+import 'package:noor/core/widgets/noor_cloud.dart';
+import 'package:noor/core/widgets/noor_hero.dart';
+import 'package:noor/core/widgets/noor_mark.dart';
+import 'package:noor/core/widgets/noor_pill.dart';
+import 'package:noor/core/widgets/noor_sky.dart';
+import 'package:noor/core/constants/assets/images.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(Locale locale, Widget hero,
         {ThemeData? theme, double scale = 1.3}) =>
     MaterialApp(
-      theme: theme ?? NoorTheme.light(),
+      theme: theme ?? AppTheme.light(),
       locale: locale,
       localizationsDelegates: const [
         S.delegate,
@@ -126,8 +125,8 @@ void main() {
       'NoorHero draws each tab its own window, in the theme, on one sky',
       (tester) async {
     for (final (theme, variant) in [
-      (NoorTheme.light(), 'paper'),
-      (NoorTheme.dark(), 'night'),
+      (AppTheme.light(), 'paper'),
+      (AppTheme.dark(), 'night'),
     ]) {
       for (final hero in NoorArt.heroes) {
         await pumpHero(
@@ -145,8 +144,8 @@ void main() {
     final was = noorSkyNow.value;
     addTearDown(() => noorSkyNow.value = was);
     for (final (theme, n, icons) in [
-      (NoorTheme.light(), NoorColors.light, Brightness.dark),
-      (NoorTheme.dark(), NoorColors.dark, Brightness.light),
+      (AppTheme.light(), NoorColors.light, Brightness.dark),
+      (AppTheme.dark(), NoorColors.dark, Brightness.light),
     ]) {
       for (final sky in NoorSky.values) {
         noorSkyNow.value = sky;
@@ -175,7 +174,7 @@ void main() {
       const NoorHero(title: 'Qibla', subtitle: 'Turn your face', height: 180),
     );
 
-    final n = NoorTheme.light().extension<NoorColors>()!;
+    final n = AppTheme.light().extension<NoorColors>()!;
     expect(find.byType(Image), findsNothing);
     expect(find.byKey(_artKey), findsNothing);
     final band = tester.widget<DecoratedBox>(find
@@ -260,31 +259,5 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Prayers'), findsOneWidget);
     });
-  }
-
-  for (final lang in ['ar', 'en']) {
-    for (final split in [true, false]) {
-      testWidgets('NoorPagerPill, $lang, split=$split, x1.3', (tester) async {
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-
-        await tester.pumpWidget(_app(
-          Locale(lang),
-          NoorPagerPill(
-            label: '604',
-            split: split,
-            onPrevious: () {},
-            onNext: () {},
-            previousTooltip: 'Previous',
-            nextTooltip: 'Next',
-          ),
-        ));
-
-        expect(tester.takeException(), isNull);
-        expect(find.text('604'), findsOneWidget);
-        expect(find.byTooltip('Next'), findsOneWidget);
-      });
-    }
   }
 }

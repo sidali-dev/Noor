@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_sheet.dart';
-import 'package:noor/utils/theme/noor_motion.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/widgets/noor_sheet.dart';
+import 'package:noor/core/theme/noor_motion.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(Widget child, {bool reduce = false}) => MaterialApp(
-      theme: NoorTheme.light(),
+      theme: AppTheme.light(),
       builder: (context, c) => MediaQuery(
         data: MediaQuery.of(context).copyWith(disableAnimations: reduce),
         child: c!,

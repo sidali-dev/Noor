@@ -2,31 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'package:noor/bottom_navigation.dart';
-import 'package:noor/generals/controllers/localization_controller.dart';
-import 'package:noor/generals/splash_screen.dart';
+import 'package:noor/core/routes/app_pages.dart';
+import 'package:noor/core/services/language_service.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
-import 'generals/controllers/theme_controller.dart';
+import 'package:noor/core/services/theme_service.dart';
 
 class MyApp extends StatelessWidget {
-  /// App startup still running; the splash holds the shell back until it ends.
-  final Future<void> startup;
-
-  const MyApp({super.key, required this.startup});
+  const MyApp({super.key});
 
   // Built once: a ThemeData is not cheap, and the same instance lets [Theme]
   // skip notifying dependents when nothing changed.
-  static final ThemeData _light = NoorTheme.light();
-  static final ThemeData _dark = NoorTheme.dark();
+  static final ThemeData _light = AppTheme.light();
+  static final ThemeData _dark = AppTheme.dark();
 
   @override
   Widget build(BuildContext context) {
-    ThemeController themeController = Get.put(ThemeController());
-
-    LocalizationController localizationController =
-        Get.put(LocalizationController());
+    final themeController = Get.find<ThemeService>();
+    final localizationController = Get.find<LanguageService>();
 
     return GetMaterialApp(
       title: 'Faith',
@@ -59,10 +53,8 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
-      home: SplashScreen(
-        ready: startup,
-        next: (_) => const SBottomNavigation(),
-      ),
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/quran/hizb_pages.dart';
+import 'package:noor/features/quran/models/hizb_pages.dart';
 
 void main() {
   group('hizbStartPages', () {

@@ -4,11 +4,16 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:noor/features/adhan/adhan_app.dart';
-import 'package:noor/features/adhan/services/adhan_scheduler.dart';
-import 'package:noor/features/duaa/data/adhkar_data.dart';
+import 'package:get/get.dart';
+import 'package:noor/core/routes/app_pages.dart';
+import 'package:noor/core/services/language_service.dart';
+import 'package:noor/core/services/location_service.dart';
+import 'package:noor/core/services/theme_service.dart';
+import 'package:noor/features/adhan/views/adhan_app.dart';
+import 'package:noor/core/services/adhan_scheduler.dart';
+import 'package:noor/features/duaa/controllers/adhkar_data.dart';
 import 'package:noor/my_app.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:workmanager/workmanager.dart';
 
 const String scheduleAdhan = "schedule adhan key";
@@ -36,8 +41,12 @@ void main() async {
 
   // Theme and language are read from prefs on the first frame.
   await SharedPrefService.init();
+  Get.put(ThemeService(), permanent: true);
+  Get.put(LanguageService(), permanent: true);
+  Get.put(LocationService(), permanent: true);
 
-  runApp(MyApp(startup: _startup()));
+  AppPages.startup = _startup();
+  runApp(const MyApp());
 }
 
 /// The adhan screen's own engine, started by Android's AdhanActivity when an

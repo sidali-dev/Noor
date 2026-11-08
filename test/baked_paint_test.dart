@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/baked_paint.dart';
+import 'package:noor/core/widgets/baked_paint.dart';
 
 void main() {
   testWidgets('bakes once per key, and disposes what it evicts', (_) async {

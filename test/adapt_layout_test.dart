@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/adhan/adhan_ring_screen.dart';
+import 'package:noor/features/adhan/views/adhan_ring_view.dart';
 import 'package:noor/features/adhan/models/adhan_ring.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
-import 'package:noor/generals/widgets/noor_hero.dart';
-import 'package:noor/generals/widgets/noor_nav_bar.dart';
-import 'package:noor/generals/widgets/noor_sheet.dart';
+import 'package:noor/core/widgets/noor_hero.dart';
+import 'package:noor/core/widgets/noor_nav_bar.dart';
+import 'package:noor/core/widgets/noor_sheet.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/constants/image_strings.dart';
-import 'package:noor/utils/theme/noor_layout.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/constants/assets/images.dart';
+import 'package:noor/core/theme/noor_layout.dart';
+import 'package:noor/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _phone = Size(412, 915);
@@ -39,7 +39,7 @@ Future<void> _pump(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(MaterialApp(
-    theme: NoorTheme.light(),
+    theme: AppTheme.light(),
     locale: locale,
     localizationsDelegates: const [
       S.delegate,
@@ -116,7 +116,7 @@ void main() {
           await _pump(
               tester,
               e.value,
-              AdhanRingScreen(
+              AdhanRingView(
                 ring: AdhanRing(
                     id: Prayer.fajr.adhanId,
                     prayer: Prayer.fajr,

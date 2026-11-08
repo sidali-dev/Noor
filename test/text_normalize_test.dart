@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/duaa/data/adhkar_search.dart';
-import 'package:noor/features/duaa/model/adhkar_model.dart';
-import 'package:noor/utils/text_normalize.dart';
+import 'package:noor/features/duaa/controllers/adhkar_search.dart';
+import 'package:noor/features/duaa/models/adhkar_model.dart';
+import 'package:noor/core/utils/text_normalize.dart';
 
 void main() {
   group('normalizeArabic', () {

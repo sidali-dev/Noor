@@ -2,25 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:noor/generals/controllers/localization_controller.dart';
-import 'package:noor/generals/controllers/location_controller.dart';
-import 'package:noor/generals/controllers/theme_controller.dart';
-import 'package:noor/generals/widgets/check_dialog.dart';
-import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/noor_button.dart';
-import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_list_row.dart';
-import 'package:noor/generals/widgets/noor_mark.dart';
-import 'package:noor/generals/widgets/noor_nav_bar.dart';
-import 'package:noor/generals/widgets/noor_pill.dart';
-import 'package:noor/generals/widgets/noor_progress_bar.dart';
-import 'package:noor/generals/widgets/noor_search_field.dart';
-import 'package:noor/generals/widgets/noor_segmented.dart';
-import 'package:noor/generals/widgets/settings_sheet.dart';
-import 'package:noor/generals/widgets/wait_dialog.dart';
+import 'package:noor/core/services/language_service.dart';
+import 'package:noor/core/services/location_service.dart';
+import 'package:noor/core/services/theme_service.dart';
+import 'package:noor/core/widgets/empty_state.dart';
+import 'package:noor/core/widgets/noor_button.dart';
+import 'package:noor/core/widgets/noor_card.dart';
+import 'package:noor/core/widgets/noor_list_row.dart';
+import 'package:noor/core/widgets/noor_mark.dart';
+import 'package:noor/core/widgets/noor_nav_bar.dart';
+import 'package:noor/core/widgets/noor_pill.dart';
+import 'package:noor/core/widgets/noor_progress_bar.dart';
+import 'package:noor/core/widgets/noor_search_field.dart';
+import 'package:noor/core/widgets/noor_segmented.dart';
+import 'package:noor/core/widgets/settings_sheet.dart';
+import 'package:noor/core/widgets/wait_dialog.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
+import 'package:noor/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildWrapper({
@@ -56,9 +55,9 @@ void main() {
     SharedPrefService.resetForTest();
     await SharedPrefService.init();
     Get.testMode = true;
-    Get.put(ThemeController());
-    Get.put(LocalizationController());
-    Get.put(LocationController());
+    Get.put(ThemeService());
+    Get.put(LanguageService());
+    Get.put(LocationService());
   });
 
   tearDown(() {
@@ -66,8 +65,8 @@ void main() {
   });
 
   final themes = [
-    ('light', NoorTheme.light()),
-    ('dark', NoorTheme.dark()),
+    ('light', AppTheme.light()),
+    ('dark', AppTheme.dark()),
   ];
 
   final locales = [
@@ -261,22 +260,6 @@ void main() {
                 locale: locale,
                 textScale: textScale,
                 child: const WaitDialog(),
-              ),
-            );
-            expect(tester.takeException(), isNull);
-          });
-
-          testWidgets('CheckDialog pumps without exception', (tester) async {
-            await tester.pumpWidget(
-              _buildWrapper(
-                theme: theme,
-                locale: locale,
-                textScale: textScale,
-                child: const CheckDialog(
-                  title: 'Saved',
-                  icon: Icons.check_rounded,
-                  color: Colors.green,
-                ),
               ),
             );
             expect(tester.takeException(), isNull);

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/duaa/data/adhkar_data.dart';
+import 'package:noor/features/duaa/controllers/adhkar_data.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

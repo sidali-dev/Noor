@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/adhan/widgets/permission_notice.dart';
-import 'package:noor/generals/widgets/empty_state.dart';
-import 'package:noor/generals/widgets/loading_state.dart';
-import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/features/adhan/views/widgets/permission_notice.dart';
+import 'package:noor/core/widgets/empty_state.dart';
+import 'package:noor/core/widgets/loading_state.dart';
+import 'package:noor/core/widgets/noor_icon.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(
   Widget Function(BuildContext) build, {
@@ -15,7 +15,7 @@ Widget _app(
   bool reduceMotion = false,
 }) {
   return MaterialApp(
-    theme: dark ? NoorTheme.dark() : NoorTheme.light(),
+    theme: dark ? AppTheme.dark() : AppTheme.light(),
     locale: locale,
     localizationsDelegates: const [
       S.delegate,
@@ -49,7 +49,7 @@ void main() {
 
     final icon = tester.widget<NoorIcon>(find.byType(NoorIcon));
     expect(icon.glyph, NoorGlyph.alert);
-    expect(icon.color, NoorTheme.light().extension<NoorColors>()!.danger);
+    expect(icon.color, AppTheme.light().extension<NoorColors>()!.danger);
     expect(find.text("Couldn't load prayer times"), findsOneWidget);
     expect(find.text('Try again'), findsOneWidget);
   });
@@ -61,7 +61,7 @@ void main() {
 
     final icon = tester.widget<NoorIcon>(find.byType(NoorIcon));
     expect(icon.glyph, NoorGlyph.search);
-    expect(icon.color, NoorTheme.light().extension<NoorColors>()!.muted);
+    expect(icon.color, AppTheme.light().extension<NoorColors>()!.muted);
   });
 
   testWidgets('loading shows three dots, and keeps still under reduced motion',

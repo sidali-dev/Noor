@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_button.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/widgets/noor_button.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: NoorTheme.light(),
+      theme: AppTheme.light(),
       home: MediaQuery(
         data: const MediaQueryData(textScaler: TextScaler.linear(1.3)),
         child: Directionality(

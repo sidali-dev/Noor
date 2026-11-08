@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_card.dart';
-import 'package:noor/generals/widgets/noor_pressable.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/widgets/noor_card.dart';
+import 'package:noor/core/widgets/noor_pressable.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _app(ThemeData theme, Widget child) => MaterialApp(
       theme: theme,
@@ -27,7 +27,7 @@ void main() {
       'NoorCard paper is raised paper with shadow-2 and no border; night is '
       'the window (RTL, text scale 1.3)', (tester) async {
     await tester.pumpWidget(_app(
-      NoorTheme.light(),
+      AppTheme.light(),
       const NoorCard(child: Text('paper')),
     ));
     var d = _deco(tester);
@@ -38,7 +38,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(_app(
-      NoorTheme.light(),
+      AppTheme.light(),
       const NoorCard(tone: NoorCardTone.night, child: Text('night')),
     ));
     d = _deco(tester);
@@ -51,7 +51,7 @@ void main() {
       (tester) async {
     var taps = 0;
     await tester.pumpWidget(_app(
-      NoorTheme.light(),
+      AppTheme.light(),
       SizedBox(
         width: 300,
         child: NoorPressable(

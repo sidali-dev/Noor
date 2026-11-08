@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
 import 'package:noor/features/adhan/models/sub_models/timings.dart';
-import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/core/services/adhan_scheduler.dart';
 
 PrayerTime createTestPrayerTime({
   required int year,

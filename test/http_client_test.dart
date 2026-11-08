@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:noor/utils/http/http_client.dart';
+import 'package:noor/core/services/http_service.dart';
 
 void main() {
   test('reads a JSON reply without a charset as UTF-8, not Latin-1', () async {
@@ -15,7 +15,7 @@ void main() {
     }));
 
     final body = await http.runWithClient(
-      () => SHttpHelper.getJson(Uri.https('api.aladhan.com', '/v1/methods')),
+      () => HttpService.getJson(Uri.https('api.aladhan.com', '/v1/methods')),
       () => MockClient((_) async => http.Response.bytes(reply, 200,
           headers: {'content-type': 'application/json'})),
     );

@@ -3,9 +3,9 @@ import 'package:noor/features/adhan/models/datum.dart';
 import 'package:noor/features/adhan/models/islamic_occasion.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_settings.dart';
-import 'package:noor/features/adhan/services/adhan_scheduler.dart';
-import 'package:noor/features/adhan/services/prayer_api.dart';
-import 'package:noor/features/duaa/data/asma_al_husna.dart';
+import 'package:noor/core/services/adhan_scheduler.dart';
+import 'package:noor/core/services/api/prayer_api.dart';
+import 'package:noor/features/duaa/models/asma_al_husna.dart';
 
 Datum _day(String hijri) => Datum.fromJson({
       'timings': {

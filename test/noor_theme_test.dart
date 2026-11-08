@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 double contrast(Color a, Color b) {
   final la = a.computeLuminance();
@@ -15,12 +15,12 @@ double contrast(Color a, Color b) {
 
 void main() {
   final themes = {
-    'paper': (NoorColors.light, NoorTheme.light()),
-    'night': (NoorColors.dark, NoorTheme.dark()),
+    'paper': (NoorColors.light, AppTheme.light()),
+    'night': (NoorColors.dark, AppTheme.dark()),
   };
 
   final tokens =
-      jsonDecode(File('hilal-design-system/tokens.json').readAsStringSync())
+      jsonDecode(File('docs/design-system/tokens.json').readAsStringSync())
           as Map<String, dynamic>;
   final colorTokens = {
     for (final t in (tokens['color']['tokens'] as List))
@@ -32,7 +32,7 @@ void main() {
     final n = entry.value.$1;
     final theme = entry.value.$2;
 
-    group('NoorTheme.$id', () {
+    group('AppTheme.$id', () {
       test('registers the NoorColors extension', () {
         expect(theme.extension<NoorColors>(), isNotNull);
       });
@@ -149,7 +149,7 @@ void main() {
       (tester) async {
     late BuildContext ctx;
     await tester.pumpWidget(MaterialApp(
-      theme: NoorTheme.light(),
+      theme: AppTheme.light(),
       home: Builder(builder: (c) {
         ctx = c;
         return const SizedBox();

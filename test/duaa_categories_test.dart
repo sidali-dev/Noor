@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/features/duaa/adhkar_categories.dart';
-import 'package:noor/features/duaa/adhkar_display_screen.dart';
-import 'package:noor/features/duaa/data/adhkar_data.dart';
-import 'package:noor/features/duaa/duaa_screen.dart';
-import 'package:noor/generals/widgets/noor_hero.dart';
-import 'package:noor/generals/widgets/noor_list_row.dart';
-import 'package:noor/generals/widgets/noor_search_field.dart';
-import 'package:noor/features/duaa/model/adhkar_model.dart';
-import 'package:noor/generals/widgets/noor_tasbih.dart';
+import 'package:noor/features/duaa/models/adhkar_category.dart';
+import 'package:noor/features/duaa/views/adhkar_display_view.dart';
+import 'package:noor/features/duaa/controllers/adhkar_data.dart';
+import 'package:noor/features/duaa/views/duaa_view.dart';
+import 'package:noor/core/widgets/noor_hero.dart';
+import 'package:noor/core/widgets/noor_list_row.dart';
+import 'package:noor/core/widgets/noor_search_field.dart';
+import 'package:noor/features/duaa/models/adhkar_model.dart';
+import 'package:noor/core/widgets/noor_tasbih.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 void main() {
   test('adhkarCategories has exactly 19 categories with unique type IDs 1..19',
@@ -50,7 +50,7 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(MaterialApp(
-        theme: dark ? NoorTheme.dark() : NoorTheme.light(),
+        theme: dark ? AppTheme.dark() : AppTheme.light(),
         locale: Locale(lang),
         localizationsDelegates: const [
           S.delegate,
@@ -63,7 +63,7 @@ void main() {
           data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)),
           child: w!,
         ),
-        home: const DuaaScreen(),
+        home: const DuaaView(),
       ));
       await tester.pump(const Duration(milliseconds: 300));
     }
@@ -79,7 +79,7 @@ void main() {
           expect(find.byType(NoorListRow), findsNWidgets(20));
           expect(
               find.text(
-                  S.of(tester.element(find.byType(DuaaScreen))).asma_al_husna),
+                  S.of(tester.element(find.byType(DuaaView))).asma_al_husna),
               findsOneWidget);
           expect(tester.takeException(), isNull);
         });
@@ -116,7 +116,7 @@ void main() {
   });
 
   testWidgets(
-      'AdhkarDisplayScreen pumps, decrements repetitions, and completes',
+      'AdhkarDisplayView pumps, decrements repetitions, and completes',
       (tester) async {
     final fakeAdhkar = [
       AdhkarModel(
@@ -136,7 +136,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: NoorTheme.light(),
+        theme: AppTheme.light(),
         locale: const Locale('ar'),
         localizationsDelegates: const [
           S.delegate,
@@ -145,7 +145,7 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: S.delegate.supportedLocales,
-        home: AdhkarDisplayScreen(
+        home: AdhkarDisplayView(
           title: 'أذكار الصباح',
           adhkar: fakeAdhkar,
         ),
@@ -180,7 +180,7 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
-  group('AdhkarDisplayScreen at large text', () {
+  group('AdhkarDisplayView at large text', () {
     final long = AdhkarModel(
       id: 1,
       dhikrType: 1,
@@ -197,7 +197,7 @@ void main() {
           tester.view.devicePixelRatio = 3;
           addTearDown(tester.view.reset);
           await tester.pumpWidget(MaterialApp(
-            theme: dark ? NoorTheme.dark() : NoorTheme.light(),
+            theme: dark ? AppTheme.dark() : AppTheme.light(),
             locale: Locale(loc),
             localizationsDelegates: const [
               S.delegate,
@@ -211,7 +211,7 @@ void main() {
                   .copyWith(textScaler: const TextScaler.linear(1.3)),
               child: child!,
             ),
-            home: AdhkarDisplayScreen(
+            home: AdhkarDisplayView(
               title: loc == 'fr' ? 'Invocations du matin' : 'Morning',
               adhkar: [long, long],
             ),

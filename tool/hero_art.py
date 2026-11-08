@@ -12,7 +12,7 @@ Everything is in the hero's 390 x 240 art space. A frame is opaque paper around
 a see-through ogee window, so the sky drawn under it needs no clipping at
 runtime. The cloud strip runs across the band's foot, under the frame's
 foreground, and tiles. The look follows the owner's references,
-assets/day_states.png, assets/screen_bg.png and assets/preview.png.
+tool/sources/day_states.png, screen_bg.png and preview.png.
 """
 import math
 import os

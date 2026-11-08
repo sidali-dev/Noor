@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:noor/features/adhan/adhan_controller.dart';
-import 'package:noor/generals/controllers/localization_controller.dart';
-import 'package:noor/generals/controllers/location_controller.dart';
-import 'package:noor/generals/controllers/theme_controller.dart';
-import 'package:noor/generals/widgets/location_pill.dart';
+import 'package:noor/features/adhan/controllers/adhan_controller.dart';
+import 'package:noor/core/services/language_service.dart';
+import 'package:noor/core/services/location_service.dart';
+import 'package:noor/core/services/theme_service.dart';
+import 'package:noor/core/widgets/location_pill.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/services/shared_prefs_service.dart';
+import 'package:noor/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildWrapper({
@@ -42,9 +42,9 @@ void main() {
     await SharedPrefService.init();
 
     Get.testMode = true;
-    Get.put(ThemeController());
-    Get.put(LocalizationController());
-    Get.put(LocationController());
+    Get.put(ThemeService());
+    Get.put(LanguageService());
+    Get.put(LocationService());
     Get.put(AdhanController());
   });
 
@@ -56,7 +56,7 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       _buildWrapper(
-        theme: NoorTheme.light(),
+        theme: AppTheme.light(),
         locale: const Locale('en'),
         child: const LocationPill(),
       ),
@@ -74,7 +74,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildWrapper(
-        theme: NoorTheme.light(),
+        theme: AppTheme.light(),
         locale: const Locale('en'),
         child: const LocationPill(),
       ),
@@ -92,7 +92,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildWrapper(
-        theme: NoorTheme.dark(),
+        theme: AppTheme.dark(),
         locale: const Locale('ar'),
         child: const LocationPill(),
       ),

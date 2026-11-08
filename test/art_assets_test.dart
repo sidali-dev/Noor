@@ -4,9 +4,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart' show Color;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noor/generals/widgets/noor_sky.dart';
-import 'package:noor/utils/constants/image_strings.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/widgets/noor_sky.dart';
+import 'package:noor/core/constants/assets/images.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 void main() {
   for (final p in [

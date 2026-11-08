@@ -5,15 +5,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/generated/l10n.dart';
-import 'package:noor/generals/preload_svgs.dart';
-import 'package:noor/generals/widgets/noor_hero.dart';
-import 'package:noor/generals/widgets/noor_icon.dart';
-import 'package:noor/generals/widgets/noor_nav_bar.dart';
-import 'package:noor/utils/constants/image_strings.dart';
-import 'package:noor/utils/theme/noor_theme.dart';
+import 'package:noor/core/utils/preload_svgs.dart';
+import 'package:noor/core/widgets/noor_hero.dart';
+import 'package:noor/core/widgets/noor_icon.dart';
+import 'package:noor/core/widgets/noor_nav_bar.dart';
+import 'package:noor/core/constants/assets/images.dart';
+import 'package:noor/core/theme/app_theme.dart';
 
 Widget _screen() => MaterialApp(
-      theme: NoorTheme.light(),
+      theme: AppTheme.light(),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -48,7 +48,7 @@ void main() {
 
     // With the hero gone, so its own live images do not answer for the cache.
     await tester.pumpWidget(MaterialApp(
-      theme: NoorTheme.light(),
+      theme: AppTheme.light(),
       home: const SizedBox(key: ValueKey('ctx')),
     ));
     final ctx = tester.element(find.byKey(const ValueKey('ctx')));
