@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -12,6 +13,11 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Only this app may open the adhan screen: the alarm plugin finds it by
+         an implicit action, so it has to be exported. -->
+    <permission
+        android:name="com.sidalidev.noor.permission.SHOW_ADHAN"
+        android:protectionLevel="signature" />
     <application
         android:label="Faith"
         android:name="${applicationName}"
@@ -38,8 +44,24 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- The alarm plugin opens this activity for a ringing adhan; the
-                 action tells MainActivity it may show over the lock screen. -->
+        </activity>
+        <!-- The ringing adhan: its own task, over the lock screen, gone from the
+             screen and from Recents once the adhan stops. The alarm plugin opens
+             it for its full-screen intent and its notification. -->
+        <activity
+            android:name=".AdhanActivity"
+            android:exported="true"
+            android:permission="com.sidalidev.noor.permission.SHOW_ADHAN"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.sidalidev.noor.adhan"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/AdhanTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true"
+            tools:targetApi="o_mr1">
             <intent-filter>
                 <action android:name="com.gdelataillade.alarm.action.RING"/>
                 <category android:name="android.intent.category.DEFAULT"/>

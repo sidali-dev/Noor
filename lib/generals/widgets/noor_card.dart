@@ -4,6 +4,7 @@ import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/generals/widgets/noor_well.dart';
 import 'package:noor/utils/theme/noor_layout.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// `paper` is raised paper; `night` is a window into the sky, for the one
@@ -187,6 +188,7 @@ class NoorCard extends StatelessWidget {
 
     Widget body = Material(
       color: Colors.transparent,
+      animationDuration: Duration.zero,
       child: night
           ? Padding(
               padding: padding ?? const EdgeInsets.all(NoorSpace.s4),
@@ -237,7 +239,7 @@ class NoorCard extends StatelessWidget {
       onPressed: onTap,
       radius: NoorRadius.lg,
       builder: (context, pressed) => AnimatedContainer(
-        duration: kNoorPressDuration,
+        duration: noorDuration(context, kNoorPressDuration),
         curve: Curves.ease,
         decoration: BoxDecoration(
           color: night ? n.window : n.card,

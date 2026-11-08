@@ -45,6 +45,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(count) => "${count} versets";
 
+  static String m11(prayer) => "C\'est l\'heure de ${prayer}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "add_location":
@@ -292,6 +294,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Alarme supprimée"),
         "adhan_enabled": MessageLookupByLibrary.simpleMessage("Adhan activé"),
         "adhan_disabled":
-            MessageLookupByLibrary.simpleMessage("Adhan désactivé")
+            MessageLookupByLibrary.simpleMessage("Adhan désactivé"),
+        "adhan_now": m11,
+        "full_screen_off": MessageLookupByLibrary.simpleMessage(
+            "Autorisez les alertes plein écran pour que l\'écran de l\'adhan s\'affiche")
       };
 }

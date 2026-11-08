@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A small piece of night sky: a `window` pill framed by a raised paper ring
@@ -51,7 +52,7 @@ class NoorCartouche extends StatelessWidget {
     final pill = BorderRadius.circular(NoorRadius.pill);
 
     Widget frame(bool down) => AnimatedContainer(
-          duration: kNoorPressDuration,
+          duration: noorDuration(context, kNoorPressDuration),
           curve: Curves.ease,
           // The Night seam takes its dp out of the ring: 56 dp in both themes.
           padding: EdgeInsets.all(n.isDark ? NoorSpace.s1 - 1 : NoorSpace.s1),

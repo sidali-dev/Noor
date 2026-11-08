@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:noor/utils/constants/image_strings.dart';
@@ -17,10 +17,13 @@ Future<void> preloadSvgs(BuildContext context) {
       SImageString.navQuran,
       SImageString.navMosque,
       SImageString.navTasbih,
+      NoorArt.separator,
     ])
       SvgAssetLoader(path),
     for (final glyph in NoorGlyph.values)
       SvgStringLoader(noorIconSvg(glyph, noorIconStroke)),
+    SvgStringLoader(noorSeparatorSvg(false)),
+    SvgStringLoader(noorSeparatorSvg(true)),
   ];
   // The cache is LRU: past its size the oldest entries would silently go.
   assert(loaders.length < svg.cache.maximumSize,
@@ -33,19 +36,19 @@ Future<void> preloadSvgs(BuildContext context) {
 }
 
 // A baked image not yet decoded paints blank, which a tab's first frame would
-// show. shortcut: decodes at the full 4 px per unit and only the current theme,
-// so a theme switch decodes late; size them to the screen if memory bites.
+// show. Both themes are decoded, so a theme switch finds its art ready instead
+// of decoding it in the switch's frame. shortcut: decodes at the full 4 px per
+// unit; size them to the screen if memory bites.
 Future<void> _warmHeroArt(BuildContext context) {
-  final variant =
-      Theme.of(context).brightness == Brightness.dark ? 'night' : 'paper';
   return Future.wait([
     for (final path in [
       noorSkyNow.value.asset,
-      NoorArt.clouds(variant),
-      NoorArt.band(variant),
-      NoorArt.ornament(variant),
-      NoorArt.disc(variant),
-      for (final hero in NoorArt.heroes) NoorArt.frame(hero, variant),
+      for (final variant in const ['paper', 'night']) ...[
+        NoorArt.band(variant),
+        NoorArt.ornament(variant),
+        NoorArt.disc(variant),
+        for (final hero in NoorArt.heroes) NoorArt.frame(hero, variant),
+      ],
     ])
       precacheImage(AssetImage(path), context, onError: (_, __) {}),
   ]);

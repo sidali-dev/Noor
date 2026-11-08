@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
 import 'package:noor/generals/widgets/noor_well.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A sunken trough with the selected segment raised on it as paper
@@ -21,9 +22,7 @@ class NoorSegmented<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : kNoorPressDuration;
+    final duration = noorDuration(context, kNoorPressDuration);
 
     // Arabic script: Amiri, no letter-spacing (it breaks joining) and a taller
     // line. Chosen per label, so a language picker can mix scripts.

@@ -77,6 +77,7 @@ class AdhanLine extends StatelessWidget {
     final rowRadius = isNext ? NoorRadius.pill : NoorRadius.md;
     final row = Material(
       color: Colors.transparent,
+      animationDuration: Duration.zero,
       borderRadius: BorderRadius.circular(rowRadius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

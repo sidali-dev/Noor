@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
 import 'package:noor/generals/widgets/noor_cloud.dart';
 import 'package:noor/generals/widgets/noor_sky.dart';
@@ -116,12 +117,10 @@ class NoorHero extends StatelessWidget {
   // grow tall rather than reach further.
   static const double _maxArtWidth = 480;
 
-  // The art is 390 x 240; the clouds' crest starts at y = 176, and their tile
-  // from y = 168 for the shadow above it.
+  // The art is 390 x 240; the wave clouds' crest starts around y = 176.
   static const double _artWidth = 390;
   static const double _artHeight = 240;
   static const double _cloudsCrest = 176;
-  static const double _cloudsTile = 168;
 
   // The art above the frames' highest point (the Prayers finial) is empty paper.
   static const double _frameTop = 3;
@@ -159,8 +158,8 @@ class NoorHero extends StatelessWidget {
           // Room the clouds take at the bottom of the band.
           final base = hasArt ? (_artHeight - _cloudsCrest) * scale : reserve;
           // The clouds run to the foot of their tile, so it stops above the
-          // overlap instead of sliding behind it.
-          final lift = hasArt ? reserve : 0.0;
+          // separator and overlap instead of sliding behind them.
+          final lift = hasArt ? reserve + (overlap == null ? 0.0 : 8.0) : 0.0;
           final minHeight = short
               ? reserve
               // The frame clears the status bar, whatever a notch adds.
@@ -245,20 +244,13 @@ class NoorHero extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              // The tile repeats from the centre, so the band
-                              // stays symmetric at any width.
                               Positioned(
                                 left: 0,
                                 right: 0,
-                                bottom: lift,
-                                height: (_artHeight - _cloudsTile) * scale,
-                                child: Image.asset(
-                                  key: const ValueKey('noor-hero-clouds'),
-                                  NoorArt.clouds(variant),
-                                  repeat: ImageRepeat.repeatX,
-                                  alignment: Alignment.bottomCenter,
-                                  fit: BoxFit.fitHeight,
-                                  gaplessPlayback: true,
+                                bottom: math.max(0.0, lift - 6 * scale),
+                                height: 26 * scale,
+                                child: const NoorSeparator(
+                                  key: ValueKey('noor-hero-separator'),
                                 ),
                               ),
                             ],
@@ -273,7 +265,8 @@ class NoorHero extends StatelessWidget {
                   padding: EdgeInsetsDirectional.only(
                     top: contentTop,
                     start: gutter,
-                    bottom: reserve + lift + math.max(base, reserve) + NoorSpace.s2,
+                    bottom:
+                        reserve + lift + math.max(base, reserve) + NoorSpace.s2,
                   ),
                   child: Align(
                     // Centred beside the arch, as in the references.
@@ -381,4 +374,72 @@ class NoorHero extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Vector SVG string for the sculpted Islamic arch-cusp separator at the foot
+/// of [NoorHero], themed for Paper (`!isDark`) and Night (`isDark`).
+String noorSeparatorSvg(bool isDark) {
+  final shadow = isDark ? '#000000' : '#252934';
+  final op1 = isDark ? '0.14' : '0.04';
+  final op2 = isDark ? '0.22' : '0.07';
+  final op3 = isDark ? '0.32' : '0.11';
+  final op4 = isDark ? '0.44' : '0.16';
+  final bodyTop = isDark ? '#2C3038' : '#FFFFFF';
+  final bodyMid = isDark ? '#242830' : '#F6F7FA';
+  final bodyBot = isDark ? '#1A1D23' : '#DCE0E9';
+  final bevelTop = isDark ? '#323741' : '#FFFFFF';
+  final bevelBot = isDark ? '#252830' : '#EDEFF4';
+  final rimStroke = isDark ? '#3E4451' : '#FFFFFF';
+  final creaseStroke = isDark ? '#181B20' : '#D0D5E0';
+
+  const dBody =
+      'M4.4 33.5C5.6 31.4 7.8 30.6 11 30.6H154.5C158.8 30.6 161.2 29.2 162.8 26.2C164 24.1 165.2 23.7 168 23.7H169.8C170.8 18.2 174.5 14.5 181.5 12C188.2 9.6 192.4 6.6 195 2.2C197.6 6.6 201.8 9.6 208.5 12C215.5 14.5 219.2 18.2 220.2 23.7H222C224.8 23.7 226 24.1 227.2 26.2C228.8 29.2 231.2 30.6 235.5 30.6H379C382.2 30.6 384.4 31.4 385.6 33.5H232C228.2 33.5 226.2 32.3 224.6 29.5C223.6 27.8 222.6 27.5 220 27.5H216.6C215.4 21 211.8 17.5 205.2 15C199.8 13 196.8 11.2 195 9.2C193.2 11.2 190.2 13 184.8 15C178.2 17.5 174.6 21 173.4 27.5H170C167.4 27.5 166.4 27.8 165.4 29.5C163.8 32.3 161.8 33.5 158 33.5H4.4Z';
+  const dBevel =
+      'M5.4 32.7C6.5 31.2 8.4 30.6 11 30.6H154.5C158.8 30.6 161.2 29.2 162.8 26.2C164 24.1 165.2 23.7 168 23.7H169.8C170.8 18.2 174.5 14.5 181.5 12C188.2 9.6 192.4 6.6 195 2.2C197.6 6.6 201.8 9.6 208.5 12C215.5 14.5 219.2 18.2 220.2 23.7H222C224.8 23.7 226 24.1 227.2 26.2C228.8 29.2 231.2 30.6 235.5 30.6H379C381.6 30.6 383.5 31.2 384.6 32.7H232.6C228.6 32.7 226.5 31.6 224.9 28.8C223.9 27.1 222.8 26.6 220.2 26.6H217.2C216 20.1 212.3 16.6 205.6 14.1C200.1 12.1 196.9 10.1 195 7.9C193.1 10.1 189.9 12.1 184.4 14.1C177.7 16.6 174 20.1 172.8 26.6H169.8C167.2 26.6 166.1 27.1 165.1 28.8C163.5 31.6 161.4 32.7 157.4 32.7H5.4Z';
+  const dRim =
+      'M4.8 33.1C6 31.3 8.1 30.6 11 30.6H154.5C158.8 30.6 161.2 29.2 162.8 26.2C164 24.1 165.2 23.7 168 23.7H169.8C170.8 18.2 174.5 14.5 181.5 12C188.2 9.6 192.4 6.6 195 2.2C197.6 6.6 201.8 9.6 208.5 12C215.5 14.5 219.2 18.2 220.2 23.7H222C224.8 23.7 226 24.1 227.2 26.2C228.8 29.2 231.2 30.6 235.5 30.6H379C381.9 30.6 384 31.3 385.2 33.1';
+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 40" fill="none">'
+      '<defs>'
+      '<linearGradient id="sep-body" x1="195" y1="2" x2="195" y2="34" gradientUnits="userSpaceOnUse">'
+      '<stop offset="0" stop-color="$bodyTop"/>'
+      '<stop offset="0.65" stop-color="$bodyMid"/>'
+      '<stop offset="1" stop-color="$bodyBot"/>'
+      '</linearGradient>'
+      '<linearGradient id="sep-bevel" x1="195" y1="2" x2="195" y2="34" gradientUnits="userSpaceOnUse">'
+      '<stop offset="0" stop-color="$bevelTop"/>'
+      '<stop offset="1" stop-color="$bevelBot"/>'
+      '</linearGradient>'
+      '</defs>'
+      '<g fill="$shadow">'
+      '<path fill-opacity="$op1" transform="translate(0 3.8)" d="$dBody"/>'
+      '<path fill-opacity="$op2" transform="translate(0 2.6)" d="$dBody"/>'
+      '<path fill-opacity="$op3" transform="translate(0 1.6)" d="$dBody"/>'
+      '<path fill-opacity="$op4" transform="translate(0 0.8)" d="$dBody"/>'
+      '</g>'
+      '<path fill="url(#sep-body)" d="$dBody"/>'
+      '<path fill="url(#sep-bevel)" d="$dBevel"/>'
+      '<path stroke="$rimStroke" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" d="$dRim"/>'
+      '<path stroke="$creaseStroke" stroke-width="0.6" stroke-linejoin="round" d="M195 2.2V9.2M169.8 23.7L173.4 27.5M220.2 23.7L216.6 27.5"/>'
+      '</svg>';
+}
+
+/// Ornamental sculpted separator dividing the [NoorHero] header band from the
+/// screen body below, adapting its bevel and shadow to Paper and Night themes.
+class NoorSeparator extends StatelessWidget {
+  const NoorSeparator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.noor.isDark;
+    return SvgPicture.string(
+      isDark ? _svgNight : _svgPaper,
+      fit: BoxFit.fill,
+      excludeFromSemantics: true,
+    );
+  }
+
+  // Built once, not on every build: svg.cache hashes the whole string.
+  static final _svgPaper = noorSeparatorSvg(false);
+  static final _svgNight = noorSeparatorSvg(true);
 }

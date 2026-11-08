@@ -73,6 +73,7 @@ class NoorSheet extends StatelessWidget {
       // transparent here, so give the card its own above the paper.
       child: Material(
         type: MaterialType.transparency,
+        animationDuration: Duration.zero,
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.padding.bottom),
           child: NoorPagePanel(
@@ -138,6 +139,7 @@ class NoorDialogCard extends StatelessWidget {
       ),
       child: Material(
         type: MaterialType.transparency,
+        animationDuration: Duration.zero,
         child: Padding(
           padding: const EdgeInsets.all(NoorSpace.s5),
           child: child,

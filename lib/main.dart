@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:noor/features/adhan/adhan_app.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/my_app.dart';
@@ -37,6 +38,17 @@ void main() async {
   await SharedPrefService.init();
 
   runApp(MyApp(startup: _startup()));
+}
+
+/// The adhan screen's own engine, started by Android's AdhanActivity when an
+/// alarm rings, whatever state the app is in. It registers shared_preferences
+/// only: the alarm plugin stays with the app's engine.
+@pragma('vm:entry-point')
+Future<void> adhanMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  await SharedPrefService.init();
+  runApp(const AdhanApp());
 }
 
 /// The rest of startup. The custom splash waits on it, so alarm and background

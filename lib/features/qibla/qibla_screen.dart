@@ -194,13 +194,16 @@ class _QiblaScreenState extends State<QiblaScreen> {
               );
             }
             // The compass takes what the card leaves, so it shrinks first.
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: Center(child: compass)),
-                const SizedBox(height: NoorSpace.s4),
-                card,
-              ],
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: NoorSpace.s6),
+                  SizedBox(height: 260, child: compass),
+                  const SizedBox(height: NoorSpace.s6),
+                  card,
+                ],
+              ),
             );
           },
         );

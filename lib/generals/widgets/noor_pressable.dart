@@ -74,9 +74,7 @@ class _NoorPressableState extends State<NoorPressable> {
             children: [
               AnimatedContainer(
                 // Reduced motion: the 1 dp step still shows, without easing.
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : kNoorPressDuration,
+                duration: noorDuration(context, kNoorPressDuration),
                 curve: Curves.ease,
                 transform: Matrix4.translationValues(
                   0,

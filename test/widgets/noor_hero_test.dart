@@ -135,8 +135,7 @@ void main() {
             theme: theme);
         expect(assetOf(tester, frame), NoorArt.frame(hero, variant));
         expect(assetOf(tester, skyImage), noorSkyNow.value.asset);
-        expect(assetOf(tester, const ValueKey('noor-hero-clouds')),
-            NoorArt.clouds(variant));
+        expect(find.byKey(const ValueKey('noor-hero-separator')), findsOneWidget);
       }
     }
   });

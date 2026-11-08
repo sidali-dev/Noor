@@ -161,5 +161,7 @@
     "alarm_saved" : "تم حفظ المنبه",
     "alarm_deleted" : "تم حذف المنبه",
     "adhan_enabled" : "تم تفعيل الأذان",
-    "adhan_disabled" : "تم إيقاف الأذان"
+    "adhan_disabled" : "تم إيقاف الأذان",
+    "adhan_now" : "حان وقت {prayer}",
+    "full_screen_off" : "اسمح بالتنبيهات بملء الشاشة لتظهر شاشة الأذان"
 }

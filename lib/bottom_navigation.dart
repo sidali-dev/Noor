@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
-import 'package:noor/features/adhan/adhan_ring_screen.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
+import 'package:noor/features/adhan/services/adhan_channels.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/features/adhan/widgets/in_app_adhan_ring.dart';
 import 'package:noor/features/adhan/widgets/sound_picker_controller.dart';
 import 'package:noor/features/duaa/duaa_screen.dart';
 import 'package:noor/features/qibla/qibla_screen.dart';
@@ -194,15 +195,26 @@ class SBottomNavigationController extends GetxController {
   void onInit() {
     super.onInit();
     if (Alarm.android) _askPermissions();
-    // Alarm.ringing replays the current set, so an alarm that began ringing
-    // before this controller existed (a cold start from the lock screen) still
-    // opens its screen. The old ringStream is a plain broadcast and lost it.
-    _subscription = Alarm.ringing.listen((ringing) {
-      _shown.retainAll({for (final a in ringing.alarms) a.id});
-      for (final alarm in ringing.alarms) {
-        if (_shown.add(alarm.id)) navigateToRingScreen(alarm);
-      }
+    // The adhan screen's Open Athkar: at launch, or into the running app.
+    AppChannel.launchTab().then((tab) {
+      if (tab != null) changeIndex(tab);
     });
+    AppChannel.onOpenTab((tab) {
+      Get.until((route) => route.isFirst);
+      changeIndex(tab);
+    });
+    // Android shows a ringing adhan in its own activity, in every app state.
+    // On iOS it is a route here. Alarm.ringing replays the current set, so an
+    // alarm that began ringing before this controller existed (a cold start
+    // from its notification) still opens its screen.
+    if (Alarm.iOS) {
+      _subscription = Alarm.ringing.listen((ringing) {
+        _shown.retainAll({for (final a in ringing.alarms) a.id});
+        for (final alarm in ringing.alarms) {
+          if (_shown.add(alarm.id)) navigateToRingScreen(alarm);
+        }
+      });
+    }
   }
 
   /// After the first frame, builds and paints the tabs the user will most likely
@@ -245,7 +257,10 @@ class SBottomNavigationController extends GetxController {
   }
 
   Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-    await Get.to(() => AdhanRingScreen(alarmSettings: alarmSettings));
+    await Get.to(() => InAppAdhanRing(
+          alarm: alarmSettings,
+          onOpenAthkar: () => changeIndex(2),
+        ));
   }
 
   @override

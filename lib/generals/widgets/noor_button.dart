@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// `primary` is a piece of night sky (moon-white in Night), `tonal` is raised
@@ -25,18 +26,22 @@ class NoorButton extends StatelessWidget {
   final Widget? icon;
   final NoorButtonVariant variant;
 
+  /// [NoorRadius.md]; [NoorRadius.pill] for the adhan screen's buttons.
+  final double radius;
+
   const NoorButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.icon,
     this.variant = NoorButtonVariant.primary,
+    this.radius = NoorRadius.md,
   });
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final borderRadius = BorderRadius.circular(NoorRadius.md);
+    final borderRadius = BorderRadius.circular(radius);
 
     Color bg;
     Color fg;
@@ -105,9 +110,9 @@ class NoorButton extends StatelessWidget {
       opacity: isEnabled ? 1.0 : 0.45,
       child: NoorPressable(
         onPressed: onPressed,
-        radius: NoorRadius.md,
+        radius: radius,
         builder: (context, pressed) => AnimatedContainer(
-          duration: kNoorPressDuration,
+          duration: noorDuration(context, kNoorPressDuration),
           curve: Curves.ease,
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           padding: const EdgeInsets.symmetric(

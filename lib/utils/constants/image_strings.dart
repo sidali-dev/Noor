@@ -17,6 +17,7 @@ abstract final class NoorArt {
       'assets/images/ornaments/surah_cartouche.svg';
   static const String pageCorner = 'assets/images/ornaments/page_corner.svg';
   static const String divider = 'assets/images/ornaments/divider.svg';
+  static const String separator = 'assets/images/ornaments/separator.svg';
 
   /// The tabs' windows for [NoorHero]: pass one to [frame] for the baked image.
   /// Baked by tool/hero_art.py, in the app's exact paper colours.
@@ -33,6 +34,9 @@ abstract final class NoorArt {
 
   static String frame(String hero, String variant) =>
       'assets/images/art/hero_${hero}_$variant.webp';
+  /// The ringing adhan's arch, baked by tool/adhan_art.py.
+  static String adhanFrame(String variant) =>
+      'assets/images/art/adhan_frame_$variant.webp';
   static String clouds(String variant) =>
       'assets/images/art/hero_clouds_$variant.webp';
   static String band(String variant) =>

@@ -1659,6 +1659,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Time for {prayer}`
+  String adhan_now(String prayer) {
+    return Intl.message(
+      'Time for $prayer',
+      name: 'adhan_now',
+      desc: '',
+      args: [prayer],
+    );
+  }
+
+  /// `Allow full-screen alerts so the adhan screen can show`
+  String get full_screen_off {
+    return Intl.message(
+      'Allow full-screen alerts so the adhan screen can show',
+      name: 'full_screen_off',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -125,6 +125,7 @@ class _TopPaperCutSnackBarState extends State<_TopPaperCutSnackBar>
             width: double.infinity,
             child: Material(
               type: MaterialType.transparency,
+              animationDuration: Duration.zero,
               child: SlideTransition(
                 position: _slide,
                 child: FadeTransition(

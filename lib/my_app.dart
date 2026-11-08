@@ -16,6 +16,11 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key, required this.startup});
 
+  // Built once: a ThemeData is not cheap, and the same instance lets [Theme]
+  // skip notifying dependents when nothing changed.
+  static final ThemeData _light = NoorTheme.light();
+  static final ThemeData _dark = NoorTheme.dark();
+
   @override
   Widget build(BuildContext context) {
     ThemeController themeController = Get.put(ThemeController());
@@ -36,12 +41,24 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode:
           themeController.isDarkMode() ? ThemeMode.dark : ThemeMode.light,
-      theme: NoorTheme.light(),
-      darkTheme: NoorTheme.dark(),
-      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-        value: noorSystemOverlay(Theme.of(context).brightness),
-        child: child ?? const SizedBox.shrink(),
-      ),
+      theme: _light,
+      darkTheme: _dark,
+      // MaterialApp cross-fades themes over ~12 frames, lerping every colour;
+      // each frame then rebuilt every kept-alive tab and re-baked every
+      // [BakedPaint] (new colours, new cache key), and the night art decoded
+      // mid-fade. The app's own Theme snaps to the target in one frame, so
+      // nothing below sees the lerped theme. GetMaterialApp has no
+      // themeAnimationDuration to set to zero instead.
+      builder: (context, child) {
+        final theme = themeController.isDarkMode() ? _dark : _light;
+        return Theme(
+          data: theme,
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: noorSystemOverlay(theme.brightness),
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
       home: SplashScreen(
         ready: startup,
         next: (_) => const SBottomNavigation(),

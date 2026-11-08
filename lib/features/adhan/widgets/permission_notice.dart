@@ -1,5 +1,6 @@
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'package:noor/features/adhan/services/adhan_channels.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_icon.dart';
@@ -8,10 +9,11 @@ import 'package:noor/generated/l10n.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// One calm sentence and Open settings, in a sunken well, when notifications
-/// or (on Android) exact alarms are off and the adhan cannot ring. It only
-/// reads the status, never requests it, and checks again on return from
-/// settings. Nothing shows while both are granted.
+/// One calm sentence and Open settings, in a sunken well, when notifications,
+/// or on Android exact alarms or full-screen alerts, are off and the adhan
+/// cannot ring or cannot show its screen. It only reads the status, never
+/// requests it, and checks again on return from settings. Nothing shows while
+/// all are granted.
 class PermissionNotice extends StatefulWidget {
   const PermissionNotice({super.key});
 
@@ -23,6 +25,7 @@ class _PermissionNoticeState extends State<PermissionNotice>
     with WidgetsBindingObserver {
   bool _notifications = true;
   bool _alarms = true;
+  bool _fullScreen = true;
 
   @override
   void initState() {
@@ -47,12 +50,15 @@ class _PermissionNoticeState extends State<PermissionNotice>
       final notifications = await Permission.notification.isGranted;
       final alarms =
           !Alarm.android || await Permission.scheduleExactAlarm.isGranted;
+      final fullScreen =
+          !Alarm.android || await AppChannel.canUseFullScreenIntent();
       // Granted from settings: nothing was scheduled while it was off.
       if (notifications && !_notifications) AdhanScheduler.sync();
       if (mounted) {
         setState(() {
           _notifications = notifications;
           _alarms = alarms;
+          _fullScreen = fullScreen;
         });
       }
     } catch (_) {
@@ -62,8 +68,16 @@ class _PermissionNoticeState extends State<PermissionNotice>
 
   @override
   Widget build(BuildContext context) {
-    if (_notifications && _alarms) return const SizedBox.shrink();
+    if (_notifications && _alarms && _fullScreen) {
+      return const SizedBox.shrink();
+    }
     final s = S.of(context);
+    // The one that stops the adhan ringing at all comes first.
+    final (text, open) = !_notifications
+        ? (s.notifications_off, openAppSettings)
+        : !_alarms
+            ? (s.alarms_off, openAppSettings)
+            : (s.full_screen_off, AppChannel.openFullScreenIntentSettings);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: NoorSpace.s5),
@@ -80,10 +94,7 @@ class _PermissionNoticeState extends State<PermissionNotice>
                   const ExcludeSemantics(child: NoorIcon(NoorGlyph.bellOff)),
                   const SizedBox(width: NoorSpace.s3),
                   Expanded(
-                    child: Text(
-                      _notifications ? s.alarms_off : s.notifications_off,
-                      style: NoorText.body(context),
-                    ),
+                    child: Text(text, style: NoorText.body(context)),
                   ),
                 ],
               ),
@@ -91,7 +102,7 @@ class _PermissionNoticeState extends State<PermissionNotice>
               NoorButton(
                 label: s.open_settings,
                 variant: NoorButtonVariant.tonal,
-                onPressed: openAppSettings,
+                onPressed: open,
               ),
             ],
           ),

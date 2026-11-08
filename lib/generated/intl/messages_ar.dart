@@ -44,6 +44,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(count) => "${count} آية";
 
+  static String m11(prayer) => "حان وقت ${prayer}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "add_location": MessageLookupByLibrary.simpleMessage("إضافة الموقع"),
@@ -265,6 +267,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "adhan_enabled":
             MessageLookupByLibrary.simpleMessage("تم تفعيل الأذان"),
         "adhan_disabled":
-            MessageLookupByLibrary.simpleMessage("تم إيقاف الأذان")
+            MessageLookupByLibrary.simpleMessage("تم إيقاف الأذان"),
+        "adhan_now": m11,
+        "full_screen_off": MessageLookupByLibrary.simpleMessage(
+            "اسمح بالتنبيهات بملء الشاشة لتظهر شاشة الأذان")
       };
 }

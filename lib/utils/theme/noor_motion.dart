@@ -11,10 +11,19 @@ const kNoorSettleDistance = 6.0;
 const kNoorSettleDuration = Duration(milliseconds: 200);
 const kNoorSettleCurve = Curves.easeOut;
 
-/// [d], or [Duration.zero] under Reduce Motion, for implicit animations and
-/// page slides that have no softer fallback.
+/// Set during the single frame in which the app switches between Paper and
+/// Night, so implicit colour animations snap instead of trailing the rest of
+/// the tree.
+abstract final class NoorThemeSwitch {
+  static bool active = false;
+}
+
+/// [d], or [Duration.zero] under Reduce Motion or a theme switch, for implicit
+/// animations and page slides that have no softer fallback.
 Duration noorDuration(BuildContext context, Duration d) =>
-    MediaQuery.disableAnimationsOf(context) ? Duration.zero : d;
+    NoorThemeSwitch.active || MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : d;
 
 /// "Pressing a button moves it 1px down." Used by `NoorPressable`.
 const kNoorPressDistance = 1.0;

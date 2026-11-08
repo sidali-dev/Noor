@@ -161,5 +161,7 @@
     "alarm_saved" : "Alarme enregistrée",
     "alarm_deleted" : "Alarme supprimée",
     "adhan_enabled" : "Adhan activé",
-    "adhan_disabled" : "Adhan désactivé"
+    "adhan_disabled" : "Adhan désactivé",
+    "adhan_now" : "C'est l'heure de {prayer}",
+    "full_screen_off" : "Autorisez les alertes plein écran pour que l'écran de l'adhan s'affiche"
 }

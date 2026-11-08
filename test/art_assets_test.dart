@@ -15,6 +15,7 @@ void main() {
     NoorArt.surahCartouche,
     NoorArt.pageCorner,
     NoorArt.divider,
+    NoorArt.separator,
     for (final variant in const ['paper', 'night']) ...[
       for (final hero in NoorArt.heroes) NoorArt.frame(hero, variant),
       NoorArt.clouds(variant),

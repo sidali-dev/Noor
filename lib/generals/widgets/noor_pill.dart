@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noor/generals/widgets/noor_pressable.dart';
+import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// A raised paper chip: `surface-raised`, `radius-md`, `shadow-2` (`shadow-1`
@@ -37,7 +38,7 @@ class NoorPill extends StatelessWidget {
       onPressed: onTap,
       radius: NoorRadius.md,
       builder: (context, pressed) => AnimatedContainer(
-        duration: kNoorPressDuration,
+        duration: noorDuration(context, kNoorPressDuration),
         curve: Curves.ease,
         constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsetsDirectional.symmetric(

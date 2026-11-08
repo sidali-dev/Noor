@@ -211,5 +211,12 @@
     "alarm_saved" : "Alarm saved",
     "alarm_deleted" : "Alarm removed",
     "adhan_enabled" : "Adhan enabled",
-    "adhan_disabled" : "Adhan disabled"
+    "adhan_disabled" : "Adhan disabled",
+    "adhan_now" : "Time for {prayer}",
+    "@adhan_now" : {
+        "placeholders" : {
+            "prayer" : { "type" : "String" }
+        }
+    },
+    "full_screen_off" : "Allow full-screen alerts so the adhan screen can show"
 }

@@ -1,8 +1,8 @@
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:noor/features/adhan/adhan_ring_screen.dart';
+import 'package:noor/features/adhan/models/adhan_ring.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/generals/widgets/noor_hero.dart';
 import 'package:noor/generals/widgets/noor_nav_bar.dart';
@@ -112,20 +112,22 @@ void main() {
         });
 
         testWidgets('ring screen fits: $name', (tester) async {
-          final alarm = AlarmSettings(
-            id: Prayer.fajr.adhanId,
-            dateTime: DateTime(2026, 1, 1, 5, 0),
-            assetAudioPath: 'a.mp3',
-            loopAudio: false,
-            vibrate: false,
-            volumeSettings: const VolumeSettings.fixed(volume: 0.5),
-            warningNotificationOnKill: false,
-            androidFullScreenIntent: false,
-            notificationSettings: const NotificationSettings(
-                title: 'Fajr', body: 'in 10 minutes', stopButton: 'stop'),
-          );
-          await _pump(tester, e.value, AdhanRingScreen(alarmSettings: alarm),
-              locale: locale, scale: scale);
+          final fajr = DateTime(2026, 1, 1, 5, 0);
+          await _pump(
+              tester,
+              e.value,
+              AdhanRingScreen(
+                ring: AdhanRing(
+                    id: Prayer.fajr.adhanId,
+                    prayer: Prayer.fajr,
+                    prayerTime: fajr,
+                    title: 'Fajr'),
+                onStop: () {},
+                onOpenAthkar: () {},
+                now: () => fajr.subtract(const Duration(minutes: 10)),
+              ),
+              locale: locale,
+              scale: scale);
           expect(tester.takeException(), isNull);
         });
       }

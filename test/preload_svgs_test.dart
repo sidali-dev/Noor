@@ -44,7 +44,7 @@ void main() {
           of: find.byType(NoorHero), matching: find.byType(Image))))
         image.image,
     ];
-    expect(providers, hasLength(3)); // sky, frame, clouds
+    expect(providers, hasLength(2)); // sky, frame
 
     // With the hero gone, so its own live images do not answer for the cache.
     await tester.pumpWidget(MaterialApp(

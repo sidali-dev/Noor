@@ -189,6 +189,7 @@ class _NoorNavBarState extends State<NoorNavBar> {
             maxScaleFactor: 1.3,
             child: Material(
               type: MaterialType.transparency,
+              animationDuration: Duration.zero,
               child: NoorWell(
                 radius: NoorRadius.pill,
                 child: LayoutBuilder(

@@ -1,22 +1,23 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:noor/bottom_navigation.dart';
+import 'package:noor/features/adhan/models/adhan_ring.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
-import 'package:noor/features/adhan/services/adhan_scheduler.dart';
+import 'package:noor/features/adhan/services/adhan_texts.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
+import 'package:noor/generals/widgets/noor_card.dart';
+import 'package:noor/generals/widgets/noor_icon.dart';
+import 'package:noor/generals/widgets/noor_sky.dart';
 import 'package:noor/generated/l10n.dart';
+import 'package:noor/utils/constants/image_strings.dart';
 import 'package:noor/utils/theme/noor_layout.dart';
 import 'package:noor/utils/theme/noor_motion.dart';
 import 'package:noor/utils/theme/noor_theme.dart';
 
 /// Latin and Arabic name of each prayer, keyed by [Prayer.key]. Both show in
-/// every locale, stacked at equal weight.
+/// every locale, stacked.
 const _names = {
   'fajr': ('Fajr', 'الفجر'),
   'chourouk': ('Chourouk', 'الشروق'),
@@ -26,165 +27,188 @@ const _names = {
   'isha': ('Isha', 'العشاء'),
 };
 
+// tool/adhan_art.py bakes the arch to this space and these rects: keep them in
+// step with W, HT, SKY, MOON and STARS there.
+const Size _artSize = Size(390, 600);
+const Rect _skyRect = Rect.fromLTWH(45, 50, 300, 390);
+const _moon = (198.0, 131.0, 16.0);
+const _stars = [
+  (172.0, 124.0, 2.4), (150.0, 150.0, 3.0), (196.0, 110.0, 2.0), //
+  (110.0, 180.0, 2.4), (300.0, 196.0, 2.2), (100.0, 220.0, 2.0),
+  (290.0, 236.0, 2.2),
+];
+
+/// Where in the art the names start: on the clouds, below the mosque.
+const double _textTop = 412;
+
+/// The window's sky for [prayer]: its own, Sunrise taking Fajr's dawn. An alarm
+/// that is no prayer's gets the sky of the hour.
+NoorSky adhanSkyOf(Prayer? prayer, DateTime now) => switch (prayer) {
+      Prayer.fajr || Prayer.chourouk => NoorSky.fajr,
+      Prayer.dhuhr => NoorSky.dhuhr,
+      Prayer.asr => NoorSky.asr,
+      Prayer.maghrib => NoorSky.maghrib,
+      Prayer.isha => NoorSky.isha,
+      null => skyFor(now, null),
+    };
+
+/// The ringing adhan, after assets/adhan_screen.jpg: the prayer's sky in a
+/// paper arch, its names and time, how long since (or until) it, and two
+/// buttons. It does not touch the alarm itself: [onStop] and [onOpenAthkar]
+/// do, as the host it runs in needs (Android's AdhanActivity, or a route in
+/// the app on iOS).
 class AdhanRingScreen extends StatefulWidget {
-  final AlarmSettings alarmSettings;
-  const AdhanRingScreen({super.key, required this.alarmSettings});
+  final AdhanRing ring;
+  final VoidCallback onStop;
+  final VoidCallback onOpenAthkar;
+
+  /// The clock, for tests.
+  final DateTime Function() now;
+
+  const AdhanRingScreen({
+    super.key,
+    required this.ring,
+    required this.onStop,
+    required this.onOpenAthkar,
+    this.now = DateTime.now,
+  });
 
   @override
   State<AdhanRingScreen> createState() => _AdhanRingScreenState();
 }
 
 class _AdhanRingScreenState extends State<AdhanRingScreen> {
-  /// Below this the screen scrolls: room for the sky, the niche, a note and two
-  /// buttons.
-  static const double _minHeight = 640;
-  static const double _maxNoteHeight = 120;
+  // The art stops growing here; wider, it would only grow taller.
+  static const double _maxArtWidth = 480;
+  static const double _maxButtonsWidth = 380;
+  static const double _buttonHeight = 52;
 
-  StreamSubscription<dynamic>? _ringing;
-  bool _wasRinging = false;
-  bool _left = false;
+  late final Timer _tick;
+  bool _acted = false;
 
   @override
   void initState() {
     super.initState();
-    // The audio of a non-looping adhan ends by itself, and a stop from the
-    // notification bypasses these buttons: either way this screen should go.
-    _ringing = Alarm.ringing.listen((set) {
-      final ringing = set.containsId(widget.alarmSettings.id);
-      if (ringing) {
-        _wasRinging = true;
-      } else if (_wasRinging) {
-        _leave();
-      }
-    });
-  }
-
-  void _leave() {
-    if (_left || !mounted) return;
-    _left = true;
-    Navigator.of(context).pop();
+    // Keeps "4 min since" true while the adhan plays out.
+    _tick = Timer.periodic(const Duration(seconds: 15), (_) => setState(() {}));
   }
 
   @override
   void dispose() {
-    _ringing?.cancel();
-    Alarm.stop(widget.alarmSettings.id);
+    _tick.cancel();
     super.dispose();
   }
 
-  Prayer? _prayerFromBaseId(int baseId) {
-    for (final prayer in Prayer.all) {
-      if (prayer.adhanId == baseId ||
-          prayer.alarmId1 == baseId ||
-          prayer.alarmId2 == baseId ||
-          baseId ~/ 100 == prayer.adhanId) {
-        return prayer;
-      }
-    }
-    return null;
-  }
-
-  void _openAdhkar() {
-    Alarm.stop(widget.alarmSettings.id).then((_) {
-      Get.offAll(() => const SBottomNavigation(pageIndex: 2));
-    });
-  }
-
-  void _close() {
-    // Pushed over the app (bottom_navigation), so pop back instead of exiting.
-    Alarm.stop(widget.alarmSettings.id).then((_) => _leave());
-  }
+  /// Runs [action] once: a second tap while the host closes does nothing.
+  VoidCallback _once(VoidCallback action) => () {
+        if (_acted) return;
+        setState(() => _acted = true);
+        action();
+      };
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final baseId = AdhanScheduler.baseOf(widget.alarmSettings.id);
-    final prayer = _prayerFromBaseId(baseId);
-    final names = prayer == null ? null : _names[prayer.key];
+    final s = S.of(context);
+    final ring = widget.ring;
+    final now = widget.now();
+    final gutter = NoorLayout.gutter(context);
+    final bottom = math.max(MediaQuery.paddingOf(context).bottom, NoorSpace.s4);
 
-    final title = widget.alarmSettings.notificationSettings.title;
-    final body = widget.alarmSettings.notificationSettings.body;
-    // 'en' keeps Western digits 0-9 in every locale.
-    final formattedTime =
-        DateFormat('HH:mm', 'en').format(widget.alarmSettings.dateTime);
-    final inset = MediaQuery.paddingOf(context);
-
-    // The ground is the night sky in both themes, so the system bars take
-    // light icons whatever the theme.
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: noorSystemOverlay(Brightness.dark),
+    return AnnotatedRegion(
+      value: noorSystemOverlay(Theme.of(context).brightness),
       child: PopScope(
         canPop: false,
         child: Scaffold(
-          backgroundColor: n.window,
-          // Short phones and large text scroll the whole screen rather than
-          // squeeze the niche to nothing or push the buttons off it.
+          backgroundColor: n.paper,
           body: LayoutBuilder(
             builder: (context, view) {
-              final height = math.max(view.maxHeight, _minHeight);
-              final skyHeight = inset.top + (height * .22).clamp(100.0, 190.0);
-              return SingleChildScrollView(
-                child: SizedBox(
-                  height: height,
-                  // The active alarm screen is one of the loops Hilal allows:
-                  // the stars twinkle and the moon breathes.
-                  child: NoorTwinkle(
-                    builder: (context, twinkle) => Stack(
+              final artWidth = math.min(view.maxWidth, _maxArtWidth);
+              final scale = artWidth / _artSize.width;
+              // Short phones and large text scroll rather than squeeze.
+              return CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
                       children: [
-                        // Each animated painter gets its own layer, so a
-                        // frame of twinkle repaints it and not the panel.
-                        Positioned.fill(
-                          child: RepaintBoundary(
-                            child: CustomPaint(
-                              painter:
-                                  _SkyPainter(n, twinkle, inset.top, skyHeight),
-                            ),
-                          ),
-                        ),
-                        Positioned.fill(
-                          top: skyHeight,
-                          child: _Crest(
-                            side: NoorLayout.gutter(context),
-                            bottom: math.max(inset.bottom, NoorSpace.s4) +
-                                NoorSpace.s2,
-                            twinkle: twinkle,
-                            niche: _NicheContent(
-                              names: names,
-                              title: title,
-                              time: formattedTime,
-                            ),
-                            // Reminders say how long until the prayer; a long
-                            // one scrolls in its own box.
-                            note: body.isEmpty
-                                ? null
-                                : ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                        maxHeight: _maxNoteHeight),
-                                    child: SingleChildScrollView(
-                                      child: Text(
-                                        body,
-                                        style: NoorText.bodySm(context),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                            buttons: [
-                              NoorButton(
-                                label: S.of(context).stop_adhan,
-                                onPressed: _close,
-                              ),
-                              NoorButton(
-                                label: S.of(context).open_adhkar,
-                                onPressed: _openAdhkar,
-                                variant: NoorButtonVariant.outline,
+                        // The art runs on under the names.
+                        SizedBox(
+                          width: double.infinity,
+                          height: _textTop * scale,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.topCenter,
+                            children: [
+                              Positioned(
+                                top: 0,
+                                width: artWidth,
+                                height: _artSize.height * scale,
+                                child: _Window(
+                                  sky: adhanSkyOf(ring.prayer, now),
+                                  scale: scale,
+                                ),
                               ),
                             ],
                           ),
                         ),
+                        // A tall phone's spare height goes around the heading
+                        // and buttons, rather than all of it between them.
+                        const Spacer(),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: gutter),
+                          child: NoorSettle(
+                            child: _Heading(ring: ring, now: now),
+                          ),
+                        ),
+                        const Spacer(flex: 2),
+                        Padding(
+                          // Set in from the page's edges, under the heading.
+                          padding: EdgeInsets.fromLTRB(
+                              gutter + NoorSpace.s5,
+                              NoorSpace.s5,
+                              gutter + NoorSpace.s5,
+                              bottom + NoorSpace.s4),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                                maxWidth: _maxButtonsWidth),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                      minHeight: _buttonHeight),
+                                  child: NoorButton(
+                                    label: s.stop_adhan,
+                                    icon: const NoorIcon(NoorGlyph.bell),
+                                    radius: NoorRadius.pill,
+                                    onPressed:
+                                        _acted ? null : _once(widget.onStop),
+                                  ),
+                                ),
+                                const SizedBox(height: NoorSpace.s3 + 2),
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                      minHeight: _buttonHeight),
+                                  child: NoorButton(
+                                    label: s.open_adhkar,
+                                    icon: const NoorIcon(NoorGlyph.book),
+                                    variant: NoorButtonVariant.tonal,
+                                    radius: NoorRadius.pill,
+                                    onPressed: _acted
+                                        ? null
+                                        : _once(widget.onOpenAthkar),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
                       ],
                     ),
                   ),
-                ),
+                ],
               );
             },
           ),
@@ -194,451 +218,226 @@ class _AdhanRingScreenState extends State<AdhanRingScreen> {
   }
 }
 
-/// A four-point star, the same cut as the hero art's.
-Path _star(Offset c, double r) => Path()
-  ..moveTo(c.dx, c.dy - r)
-  ..quadraticBezierTo(c.dx, c.dy, c.dx + r, c.dy)
-  ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy + r)
-  ..quadraticBezierTo(c.dx, c.dy, c.dx - r, c.dy)
-  ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy - r)
-  ..close();
+/// The arch with the sky behind it, and Isha's stars twinkling in it.
+class _Window extends StatelessWidget {
+  const _Window({required this.sky, required this.scale});
 
-/// How much of star [i] shows at cycle position [t]: two flickers a cycle,
-/// each star out of step with the next. Deeper than the hero's glint, since
-/// this sky is the whole screen's picture.
-double _glint(double t, int i) =>
-    .3 + .7 * math.pow(math.sin(math.pi * ((t * 2 + i * .37) % 1)), 2);
-
-/// A pointed arch: straight legs up to the springing line [rise] below
-/// `r.top`, then an ogee to the apex at the centre of `r.top`.
-Path _ogee(Rect r, double rise, {bool close = true}) {
-  final cx = r.center.dx;
-  final spring = r.top + rise;
-  final path = Path()
-    ..moveTo(r.left, r.bottom)
-    ..lineTo(r.left, spring)
-    ..cubicTo(r.left, spring - rise * .55, cx - r.width * .12,
-        r.top + rise * .22, cx, r.top)
-    ..cubicTo(cx + r.width * .12, r.top + rise * .22, r.right,
-        spring - rise * .55, r.right, spring)
-    ..lineTo(r.right, r.bottom);
-  return close ? (path..close()) : path;
-}
-
-/// The sky above the crest: stars, and the crescent that crowns the arch like
-/// a finial, in its glow.
-class _SkyPainter extends CustomPainter {
-  _SkyPainter(this.n, this.twinkle, this.top, this.skyHeight)
-      : super(repaint: twinkle);
-
-  final NoorColors n;
-  final Animation<double>? twinkle;
-  final double top;
-  final double skyHeight;
-
-  // x as a share of the width, y in dp below the status bar; clear of the moon.
-  static const _stars = [
-    (.14, 26.0, 2.6), (.32, 12.0, 2.6), (.68, 20.0, 2.6), (.86, 40.0, 2.6), //
-    (.07, 60.0, 4.6), (.27, 46.0, 4.6), (.91, 12.0, 4.6), //
-    (.05, 22.0, 1.8), (.40, 34.0, 1.8), (.60, 8.0, 1.8), (.78, 58.0, 1.8),
-    (.95, 70.0, 2.6), (.19, 84.0, 1.8), (.35, 70.0, 2.6), (.62, 52.0, 1.8),
-  ];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final t = twinkle?.value;
-    final moon = Offset(size.width / 2, skyHeight - 34);
-    // The glow breathes once a cycle; still under Reduce Motion.
-    final breath = t == null ? 0.0 : math.sin(t * 2 * math.pi);
-    final glow = 70 + 8 * breath;
-    canvas.drawCircle(
-      moon,
-      glow,
-      Paint()
-        ..shader = RadialGradient(colors: [
-          n.onWindow
-              .withValues(alpha: (n.isDark ? .12 : .16) * (1 + .25 * breath)),
-          n.onWindow.withValues(alpha: 0),
-        ]).createShader(Rect.fromCircle(center: moon, radius: glow)),
-    );
-    canvas.drawPath(
-      Path.combine(
-        PathOperation.difference,
-        Path()..addOval(Rect.fromCircle(center: moon, radius: 17)),
-        Path()
-          ..addOval(
-              Rect.fromCircle(center: moon.translate(7, -4), radius: 14.5)),
-      ),
-      Paint()..color = n.onWindow,
-    );
-
-    for (var i = 0; i < _stars.length; i++) {
-      final (x, y, r) = _stars[i];
-      final g = t == null ? 1.0 : _glint(t, i);
-      canvas.drawPath(
-        _star(Offset(x * size.width, top + y), r * (.8 + .25 * g)),
-        Paint()..color = n.onWindow.withValues(alpha: g),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_SkyPainter old) =>
-      old.n != n || old.top != top || old.skyHeight != skyHeight;
-}
-
-/// The mosque's entrance: a carved ivory arch standing on a panel, a night
-/// niche cut into it. The name and time sit in the niche; the note and the two
-/// buttons sit on the panel below it.
-class _Crest extends StatelessWidget {
-  const _Crest({
-    required this.side,
-    required this.bottom,
-    required this.twinkle,
-    required this.niche,
-    required this.note,
-    required this.buttons,
-  });
-
-  final double side;
-  final double bottom;
-  final Animation<double>? twinkle;
-  final Widget niche;
-  final Widget? note;
-  final List<Widget> buttons;
+  final NoorSky sky;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
-    final c = _Ivory(context.noor);
-    return LayoutBuilder(
-      builder: (context, box) {
-        final g = _CrestGeometry(box.maxWidth, side);
-        return Column(
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: RepaintBoundary(
-                      child: CustomPaint(painter: _CrestPainter(c, g)),
-                    ),
-                  ),
-                  Positioned(
-                    left: g.nicheLeft,
-                    right: g.nicheLeft,
-                    top: g.nicheTop,
-                    bottom: 0,
-                    child: _Niche(
-                      rise: g.nicheRise,
-                      twinkle: twinkle,
-                      child: niche,
-                    ),
-                  ),
-                ],
-              ),
+    final variant = context.noor.isDark ? 'night' : 'paper';
+    return ExcludeSemantics(
+      child: Stack(
+        children: [
+          Positioned(
+            left: _skyRect.left * scale,
+            top: _skyRect.top * scale,
+            width: _skyRect.width * scale,
+            height: _skyRect.height * scale,
+            child: Image.asset(
+              key: const ValueKey('adhan-sky'),
+              sky.asset,
+              fit: BoxFit.cover,
+              // Left edges together, as the art was baked: the sun and moon
+              // then stand clear of the minarets.
+              alignment: Alignment.centerLeft,
+              gaplessPlayback: true,
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.face,
-                border: Border(top: BorderSide(color: c.carve)),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  g.nicheLeft,
-                  NoorSpace.s3,
-                  g.nicheLeft,
-                  bottom,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (note != null) ...[
-                      note!,
-                      const SizedBox(height: NoorSpace.s3),
-                    ],
-                    for (var i = 0; i < buttons.length; i++) ...[
-                      if (i > 0) const SizedBox(height: NoorSpace.s2),
-                      buttons[i],
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-/// The stone: ivory in Paper, the night card in Night. The shade behind it and
-/// the carving's tone derive from the face.
-class _Ivory {
-  _Ivory(NoorColors n)
-      : face = n.isDark ? n.card : const Color(0xFFF3EFE6),
-        shadow = n.depthShadow,
-        back = Color.lerp(n.isDark ? n.card : const Color(0xFFF3EFE6),
-            Colors.black, n.isDark ? .35 : .07)!,
-        carve = Color.lerp(n.isDark ? n.card : const Color(0xFFF3EFE6),
-            n.isDark ? Colors.white : Colors.black, n.isDark ? .12 : .17)!;
-
-  final Color face;
-  final Color back;
-  final Color carve;
-  final Color shadow;
-}
-
-/// Where the arches sit, from the width alone. Each arch is the outer one
-/// inset, sharing its springing line, so the carved band keeps its thickness
-/// on the legs and thins toward the apex in proportion.
-class _CrestGeometry {
-  _CrestGeometry(this.width, double side)
-      : outerLeft = side,
-        outerRight = width - side;
-
-  static const ratio = .9;
-  static const step = 9.0;
-  static const wall = 26.0;
-
-  final double width;
-  final double outerLeft;
-  final double outerRight;
-
-  double riseAt(double inset) => ((outerRight - outerLeft) / 2 - inset) * ratio;
-
-  Path archAt(double inset, double bottom, {bool close = true}) => _ogee(
-        Rect.fromLTRB(
-            outerLeft + inset, inset * ratio, outerRight - inset, bottom),
-        riseAt(inset),
-        close: close,
-      );
-
-  double get nicheLeft => outerLeft + step + wall;
-  double get nicheTop => (step + wall) * ratio;
-  double get nicheRise => riseAt(step + wall);
-}
-
-class _CrestPainter extends CustomPainter {
-  _CrestPainter(this.c, this.g);
-
-  final _Ivory c;
-  final _CrestGeometry g;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final h = size.height;
-    final front = g.archAt(_CrestGeometry.step, h);
-    canvas.drawPath(g.archAt(0, h), Paint()..color = c.back);
-    // The front arch's shadow on the back one: a wide soft one, a tight one.
-    for (final (dy, sigma, alpha) in const [(5.0, 6.0, .5), (2.0, 1.5, 1.0)]) {
-      canvas.drawPath(
-        front.shift(Offset(0, dy)),
-        Paint()
-          ..color = c.shadow.withValues(alpha: c.shadow.a * alpha)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, sigma),
-      );
-    }
-    canvas.drawPath(front, Paint()..color = c.face);
-    _carve(canvas, h);
-    _capital(canvas, g.outerLeft, 1, h);
-    _capital(canvas, g.outerRight, -1, h);
-  }
-
-  /// The carved band: a hairline each side and, between them, two vines that
-  /// cross at every rosette.
-  void _carve(Canvas canvas, double h) {
-    const step = _CrestGeometry.step, wall = _CrestGeometry.wall;
-    final line = Paint()
-      ..color = c.carve
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    for (final inset in [step + 3, step + wall - 3]) {
-      canvas.drawPath(g.archAt(inset, h, close: false), line);
-    }
-    final metric =
-        g.archAt(step + wall / 2, h, close: false).computeMetrics().first;
-    final count = (metric.length / 24).round();
-    final pitch = metric.length / count;
-    final vine = Paint()
-      ..color = c.carve
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    for (final phase in [0.0, math.pi]) {
-      final path = Path();
-      for (var s = 0.0; s <= metric.length; s += 2) {
-        final t = metric.getTangentForOffset(s)!;
-        final p = t.position +
-            Offset(-t.vector.dy, t.vector.dx) *
-                (4.5 * math.sin(2 * math.pi * s / pitch + phase));
-        s == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
-      }
-      canvas.drawPath(path, vine);
-    }
-    for (var i = 0; i < count; i++) {
-      final p = metric.getTangentForOffset(i * pitch + pitch / 4)!.position;
-      canvas
-        ..drawCircle(p, 3.2, Paint()..color = c.face)
-        ..drawCircle(p, 3.2, line)
-        ..drawCircle(p, 1.2, Paint()..color = c.carve);
-    }
-  }
-
-  /// The block each leg stands on, with a diamond cut in it. [inward] is +1
-  /// when the arch lies to the right of [legX].
-  void _capital(Canvas canvas, double legX, double inward, double h) {
-    const reach = _CrestGeometry.step + _CrestGeometry.wall;
-    final block = Rect.fromPoints(
-      Offset(legX - inward * 5, h - 14),
-      Offset(legX + inward * (reach + 5), h),
-    );
-    canvas
-      ..drawRect(block, Paint()..color = c.face)
-      ..drawRect(
-          block,
-          Paint()
-            ..color = c.carve
-            ..style = PaintingStyle.stroke);
-    final m = block.center;
-    canvas.drawPath(
-      Path()
-        ..moveTo(m.dx, m.dy - 4)
-        ..lineTo(m.dx + 6, m.dy)
-        ..lineTo(m.dx, m.dy + 4)
-        ..lineTo(m.dx - 6, m.dy)
-        ..close(),
-      Paint()..color = c.carve,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_CrestPainter old) =>
-      old.c.face != c.face || old.g.width != g.width;
-}
-
-/// The niche: a night window cut into the stone, shaded at its head so it
-/// reads as hollow; its stars twinkle with the sky's.
-class _Niche extends StatelessWidget {
-  const _Niche(
-      {required this.rise, required this.twinkle, required this.child});
-
-  final double rise;
-  final Animation<double>? twinkle;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => RepaintBoundary(
-        child: CustomPaint(
-          painter: _NichePainter(
-              context.noor.window, context.noor.onWindow, rise, twinkle),
-          child: Padding(
-            padding: EdgeInsets.only(top: rise * .4),
-            child: child,
           ),
-        ),
-      );
+          // Isha's sky has its own moon; the others get the crescent at the
+          // crown.
+          if (sky == NoorSky.isha)
+            Positioned.fill(
+              child: NoorTwinkle(
+                builder: (context, twinkle) => CustomPaint(
+                  painter: _StarsPainter(scale, twinkle),
+                ),
+              ),
+            )
+          else
+            Positioned.fill(
+              child: CustomPaint(
+                key: const ValueKey('adhan-moon'),
+                painter: _MoonPainter(scale),
+              ),
+            ),
+          Positioned.fill(
+            child: Image.asset(
+              key: const ValueKey('adhan-frame'),
+              NoorArt.adhanFrame(variant),
+              fit: BoxFit.fill,
+              gaplessPlayback: true,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _NichePainter extends CustomPainter {
-  _NichePainter(this.window, this.star, this.rise, this.twinkle)
-      : super(repaint: twinkle);
+/// The crescent at the window's crown, cut as tool/hero_art.py cuts the sky's.
+class _MoonPainter extends CustomPainter {
+  _MoonPainter(this.scale);
 
-  final Color window;
-  final Color star;
-  final double rise;
-  final Animation<double>? twinkle;
-
-  // Share of the niche's width and height, and the star's radius; clear of
-  // the name and the time in the middle.
-  static const _stars = [
-    (.5, .1, 2.6), (.2, .3, 2.6), (.82, .26, 2.6), (.1, .6, 2.6),
-    (.9, .66, 2.6), (.17, .84, 4.6), (.84, .88, 4.6), //
-    (.36, .2, 1.8), (.66, .18, 1.8), (.07, .42, 1.8), (.93, .46, 1.8),
-    (.28, .94, 1.8), (.62, .92, 1.8),
-  ];
+  final double scale;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    final niche = _ogee(Rect.fromLTWH(0, 0, w, h), rise);
-    canvas.drawPath(niche, Paint()..color = window);
-    canvas
-      ..save()
-      ..clipPath(niche);
-    final t = twinkle?.value;
-    for (var i = 0; i < _stars.length; i++) {
-      final (x, y, r) = _stars[i];
-      // Offset from the sky's own indices, so the two never flash in step.
-      final g = t == null ? 1.0 : _glint(t, i + 5);
-      canvas.drawPath(
-        _star(Offset(x * w, y * h), r * (.8 + .25 * g)),
-        Paint()..color = star.withValues(alpha: .8 * g),
-      );
-    }
+    canvas.scale(scale);
+    final (x, y, r) = _moon;
+    canvas.drawCircle(
+      Offset(x, y),
+      r * 1.6,
+      Paint()
+        ..color = const Color(0x40FFF8E6)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.9),
+    );
     canvas.drawPath(
       Path.combine(
         PathOperation.difference,
-        Path()..addRect(Rect.fromLTWH(-20, -20, w + 40, h + 40)),
-        niche.shift(const Offset(0, 6)),
+        Path()..addOval(Rect.fromCircle(center: Offset(x, y), radius: r)),
+        Path()
+          ..addOval(Rect.fromCircle(
+              center: Offset(x + r * .44, y - r * .22), radius: r * .82)),
       ),
-      Paint()
-        ..color = Colors.black.withValues(alpha: .55)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      Paint()..color = const Color(0xFFFBFAF7),
     );
-    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_NichePainter old) =>
-      old.window != window || old.star != star || old.rise != rise;
+  bool shouldRepaint(_MoonPainter old) => old.scale != scale;
 }
 
-/// The names, then the time: Latin and Arabic at equal weight, as the largest
-/// thing on the screen. Scaled down as a block when a large text scale would
-/// not fit the niche, never clipped.
-class _NicheContent extends StatelessWidget {
-  const _NicheContent({
-    required this.names,
-    required this.title,
-    required this.time,
-  });
+class _StarsPainter extends CustomPainter {
+  _StarsPainter(this.scale, this.twinkle) : super(repaint: twinkle);
 
-  final (String, String)? names;
-  final String title;
-  final String time;
+  final double scale;
+  final Animation<double>? twinkle;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(scale);
+    for (var i = 0; i < _stars.length; i++) {
+      final (x, y, r) = _stars[i];
+      final t = twinkle;
+      canvas.drawPath(
+        Path()
+          ..moveTo(x, y - r)
+          ..quadraticBezierTo(x, y, x + r, y)
+          ..quadraticBezierTo(x, y, x, y + r)
+          ..quadraticBezierTo(x, y, x - r, y)
+          ..quadraticBezierTo(x, y, x, y - r)
+          ..close(),
+        Paint()
+          ..color = const Color(0xFFF7F7F4).withValues(
+              alpha: t == null ? 1 : noorTwinkleOpacity(t.value, i)),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StarsPainter old) => old.scale != scale;
+}
+
+/// The names, the rule, the time and how far from it: Latin and Arabic
+/// stacked, the time the largest thing on the screen.
+class _Heading extends StatelessWidget {
+  const _Heading({required this.ring, required this.now});
+
+  final AdhanRing ring;
+  final DateTime now;
 
   @override
   Widget build(BuildContext context) {
     final n = context.noor;
-    final names = this.names;
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Column(
+    final prayer = ring.prayer;
+    final names = prayer == null ? null : _names[prayer.key];
+    // One line each: a large text scale shrinks a line rather than wrap it.
+    Widget line(Widget child) => FittedBox(fit: BoxFit.scaleDown, child: child);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (names != null) ...[
+          line(Text(
+            names.$1,
+            textDirection: TextDirection.ltr,
+            style: NoorText.displayLg(context)
+                .copyWith(fontSize: 46, height: 1.1, color: n.ink),
+          )),
+          line(Text(
+            names.$2,
+            textDirection: TextDirection.rtl,
+            style: NoorText.arabicDisplay(context)
+                .copyWith(fontSize: 34, height: 1.5, color: n.ink),
+          )),
+        ] else
+          Text(
+            ring.title,
+            textAlign: TextAlign.center,
+            style: NoorText.display(context).copyWith(color: n.ink),
+          ),
+        const SizedBox(height: NoorSpace.s2),
+        const NoorOrnament(),
+        const SizedBox(height: NoorSpace.s1),
+        line(Text(
+          // 'en' keeps Western digits 0-9 in every locale.
+          DateFormat('HH:mm', 'en').format(ring.prayerTime),
+          textDirection: TextDirection.ltr,
+          style: NoorText.numeral(context, size: 86, color: n.ink)
+              .copyWith(height: 1.15),
+        )),
+        if (prayer != null) ...[
+          const SizedBox(height: NoorSpace.s3),
+          _SincePill(text: _since(S.of(context), prayer)),
+        ],
+      ],
+    );
+  }
+
+  /// "In 10 min", "time for", then "4 min since": always the prayer's own time.
+  String _since(S s, Prayer prayer) {
+    final name = AdhanTexts(s).prayerName(prayer);
+    final seconds = now.difference(ring.prayerTime).inSeconds;
+    if (seconds < 0) return s.reminder_before((-seconds / 60).ceil(), name);
+    final minutes = seconds ~/ 60;
+    return minutes == 0 ? s.adhan_now(name) : s.reminder_after(minutes, name);
+  }
+}
+
+class _SincePill extends StatelessWidget {
+  const _SincePill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = context.noor;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: n.card,
+        borderRadius: BorderRadius.circular(NoorRadius.pill),
+        border: Border.all(color: n.line),
+        boxShadow: n.shadow1,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: NoorSpace.s5 + NoorSpace.s1, vertical: NoorSpace.s3 - 1),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (names != null) ...[
-              Text(
-                names.$1,
-                textDirection: TextDirection.ltr,
-                style: NoorText.displayLg(context).copyWith(color: n.onWindow),
-              ),
-              Text(
-                names.$2,
-                textDirection: TextDirection.rtl,
-                style:
-                    NoorText.arabicDisplay(context).copyWith(color: n.onWindow),
-              ),
-            ] else
-              Text(
-                title,
+            NoorIcon(NoorGlyph.clock, size: 19, color: n.muted),
+            const SizedBox(width: NoorSpace.s2 + 2),
+            Flexible(
+              child: Text(
+                text,
+                style: NoorText.bodySm(context)
+                    .copyWith(fontSize: 15, color: n.muted),
                 textAlign: TextAlign.center,
-                style: NoorText.display(context).copyWith(color: n.onWindow),
               ),
-            const SizedBox(height: NoorSpace.s2),
-            Text(
-              time,
-              textDirection: TextDirection.ltr,
-              style: NoorText.numeral(context, size: 72, color: n.onWindow),
             ),
           ],
         ),
