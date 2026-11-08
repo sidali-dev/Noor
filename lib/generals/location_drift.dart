@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
+import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/generals/location_flow.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
 import 'package:noor/generals/widgets/noor_sheet.dart';
@@ -71,7 +72,8 @@ Future<void> checkLocationDrift(BuildContext context) async {
 }
 
 /// IP location (ipwho.is, HTTPS; ipapi.co sits behind a bot challenge), then
-/// today's times there (aladhan, same default method as the saved calendar).
+/// today's times there (aladhan, with the saved calendar's settings, so only
+/// the place differs).
 Future<({String? city, int minutes})?> _detectDrift(List<String> saved) async {
   final ip = await _getJson(Uri.https('ipwho.is', '/'));
   final lat = ip['latitude'], lon = ip['longitude'];
@@ -82,7 +84,11 @@ Future<({String? city, int minutes})?> _detectDrift(List<String> saved) async {
   final day = await _getJson(Uri.https(
     'api.aladhan.com',
     '/v1/timings/${two(now.day)}-${two(now.month)}-${now.year}',
-    {'latitude': '$lat', 'longitude': '$lon'},
+    {
+      'latitude': '$lat',
+      'longitude': '$lon',
+      ...AppPrefs.prayerSettings.query(),
+    },
   ));
   final data = day['data'];
   final t = data is Map ? data['timings'] : null;
@@ -106,8 +112,9 @@ Future<Map<String, dynamic>> _getJson(Uri uri) async {
   return body;
 }
 
-/// Largest gap between paired "HH:mm" times (a " (TZ)" suffix is ignored),
-/// wrapping at midnight. Pairs that don't parse are skipped; null if none do.
+/// Largest gap between paired API times, each read on its place's clock
+/// ("HH:mm (TZ)" or ISO 8601), wrapping at midnight. Pairs that don't parse
+/// are skipped; null if none do.
 int? shiftMinutes(List<String> a, List<String> b) {
   int? max;
   for (var i = 0; i < math.min(a.length, b.length); i++) {
@@ -121,7 +128,7 @@ int? shiftMinutes(List<String> a, List<String> b) {
 }
 
 int? _minutes(String time) {
-  final parts = time.trim().split(RegExp(r'\s+')).first.split(':');
+  final parts = AdhanScheduler.clockOf(time).split(':');
   if (parts.length < 2) return null;
   final h = int.tryParse(parts[0]), m = int.tryParse(parts[1]);
   if (h == null || m == null) return null;

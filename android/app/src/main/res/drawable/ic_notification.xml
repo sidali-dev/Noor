@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar icon: Android draws only the alpha channel, so the mark is one flat colour. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="620"
+    android:viewportHeight="620">
+    <group
+        android:translateX="-40"
+        android:translateY="-55">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M349,142C322,185 282,202 222,240C172,272 147,312 147,367V487C232,502 312,535 349,600C387,535 467,502 552,487V367C552,312 527,272 477,240C417,202 377,185 349,142Z M392,245L264,407L323,409L303,510L417,358L363,356L392,245Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M348.03,74.13A34,34 0,1 0,380.31 125.23A31,31 0,0 1,348.03 74.13Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M115,513C202,522 302,550 349,663C312,645 242,620 152,592C127,585 115,570 115,545Z M584,513C497,522 397,550 349,663C387,645 457,620 547,592C572,585 584,570 584,545Z" />
+    </group>
+</vector>

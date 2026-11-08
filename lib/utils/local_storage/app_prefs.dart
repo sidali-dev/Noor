@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:noor/features/adhan/models/prayer_settings.dart';
 import 'package:noor/utils/constants/shared_pref_keys.dart';
 import 'package:noor/utils/local_storage/services/sharedpreferences_service.dart';
 
@@ -100,12 +101,64 @@ class AppPrefs {
   static String get state => _string(SharedPrefKeys.state, '');
   static String get city => _string(SharedPrefKeys.city, '');
 
-  static Future<void> setLocation(
-      String country, String state, String city) async {
+  static double? _double(String key) {
+    try {
+      return SharedPrefService.getDouble(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Where GPS put the user; null for a city picked by hand.
+  static ({double latitude, double longitude})? get coordinates {
+    final lat = _double(SharedPrefKeys.latitude);
+    final lng = _double(SharedPrefKeys.longitude);
+    return lat == null || lng == null ? null : (latitude: lat, longitude: lng);
+  }
+
+  /// Without [coordinates] the location counts as picked by hand, and any
+  /// saved ones are dropped.
+  static Future<void> setLocation(String country, String state, String city,
+      {({double latitude, double longitude})? coordinates}) async {
     await SharedPrefService.setString(SharedPrefKeys.country, country);
     await SharedPrefService.setString(SharedPrefKeys.state, state);
     await SharedPrefService.setString(SharedPrefKeys.city, city);
+    if (coordinates == null) {
+      await SharedPrefService.remove(SharedPrefKeys.latitude);
+      await SharedPrefService.remove(SharedPrefKeys.longitude);
+    } else {
+      await SharedPrefService.setDouble(
+          SharedPrefKeys.latitude, coordinates.latitude);
+      await SharedPrefService.setDouble(
+          SharedPrefKeys.longitude, coordinates.longitude);
+    }
   }
+
+  // ---- prayer calculation -------------------------------------------------
+
+  static PrayerSettings get prayerSettings {
+    final raw = _string(SharedPrefKeys.prayerSettings, '');
+    if (raw.isEmpty) return const PrayerSettings();
+    try {
+      return PrayerSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return const PrayerSettings();
+    }
+  }
+
+  static Future<void> setPrayerSettings(PrayerSettings settings) =>
+      SharedPrefService.setString(
+          SharedPrefKeys.prayerSettings, jsonEncode(settings.toJson()));
+
+  // ---- asma al-husna ------------------------------------------------------
+
+  static String? get asmaAlHusnaJson {
+    final raw = _string(SharedPrefKeys.asmaAlHusna, '');
+    return raw.isEmpty ? null : raw;
+  }
+
+  static Future<void> setAsmaAlHusnaJson(String json) =>
+      SharedPrefService.setString(SharedPrefKeys.asmaAlHusna, json);
 
   // ---- adhan sound --------------------------------------------------------
 
@@ -187,4 +240,15 @@ class AppPrefs {
 
   static Future<void> setPrayerYearJson(int year, String json) =>
       SharedPrefService.setString(SharedPrefKeys.adhanYear(year), json);
+
+  /// Drops every cached year: they were calculated for another place or
+  /// other settings.
+  static Future<void> clearPrayerYears() async {
+    final keys = SharedPrefService.getKeys()
+        .where(SharedPrefKeys.adhanYearPattern.hasMatch)
+        .toList();
+    for (final key in keys) {
+      await SharedPrefService.remove(key);
+    }
+  }
 }

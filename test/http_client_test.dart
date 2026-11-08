@@ -15,7 +15,7 @@ void main() {
     }));
 
     final body = await http.runWithClient(
-      () => SHttpHelper.get('Algeria', 'Algiers', '2026'),
+      () => SHttpHelper.getJson(Uri.https('api.aladhan.com', '/v1/methods')),
       () => MockClient((_) async => http.Response.bytes(reply, 200,
           headers: {'content-type': 'application/json'})),
     );

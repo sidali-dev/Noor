@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
 import 'package:noor/features/adhan/services/adhan_texts.dart';
-import 'package:noor/utils/http/http_client.dart';
+import 'package:noor/features/adhan/services/prayer_api.dart';
 import 'package:noor/utils/local_storage/app_prefs.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -142,8 +142,7 @@ class AdhanScheduler {
     final alarmsToSet = <PlannedAlarm>[];
     final idsToCancel = <int>[];
     final today = DateTime(now.year, now.month, now.day);
-    final windowEnd =
-        DateTime(now.year, now.month, now.day + windowDays - 1);
+    final windowEnd = DateTime(now.year, now.month, now.day + windowDays - 1);
 
     DateTime? prayerTimeOn(Prayer prayer, DateTime targetDate) {
       final calendar = getCalendar(targetDate.year);
@@ -222,8 +221,7 @@ class AdhanScheduler {
                 continue;
               }
             }
-            final reminderTime =
-                prayerTime.add(Duration(minutes: r.minutes));
+            final reminderTime = prayerTime.add(Duration(minutes: r.minutes));
             if (reminderTime.isAfter(now)) {
               alarmsToSet.add(PlannedAlarm(
                 id: idFor(prayer.alarmIdForSlot(r.slot), slot),
@@ -262,8 +260,12 @@ class AdhanScheduler {
     return (alarmsToSet: alarmsToSet, idsToCancel: idsToCancel);
   }
 
-  /// "HH:mm (TZ)" as given by the API, on [date]; null when unreadable.
+  /// The moment of an API time on this phone's clock; null when unreadable.
+  /// An ISO 8601 time carries its own date and offset. An older "HH:mm (TZ)"
+  /// one is read on [date] in the phone's time zone.
   static DateTime? parseTiming(DateTime date, String timeString) {
+    final iso = _isoTime(timeString);
+    if (iso != null) return iso.toLocal();
     try {
       final clean = timeString.trim().split(RegExp(r'\s+')).first;
       final parts = clean.split(':');
@@ -274,6 +276,18 @@ class AdhanScheduler {
     } catch (_) {
       return null;
     }
+  }
+
+  static DateTime? _isoTime(String timeString) {
+    final s = timeString.trim();
+    return s.contains('T') ? DateTime.tryParse(s) : null;
+  }
+
+  /// "HH:mm" as the place's own clock reads it, from either format.
+  static String clockOf(String timeString) {
+    final s = timeString.trim();
+    if (_isoTime(s) != null) return s.substring(11, 16);
+    return s.split(RegExp(r'\s+')).first;
   }
 
   /// Returns active reminders for [prayer].
@@ -357,8 +371,9 @@ class AdhanScheduler {
       slot++;
     }
 
-    final normalizedDate =
-        !everyDay && date != null ? DateTime(date.year, date.month, date.day) : null;
+    final normalizedDate = !everyDay && date != null
+        ? DateTime(date.year, date.month, date.day)
+        : null;
     current.add(PrayerReminder(
       slot: slot,
       minutes: minutes,
@@ -383,8 +398,9 @@ class AdhanScheduler {
     if (!await _ensureNotificationPermission()) return false;
 
     final current = List<PrayerReminder>.from(reminders(prayer));
-    final normalizedDate =
-        !everyDay && date != null ? DateTime(date.year, date.month, date.day) : null;
+    final normalizedDate = !everyDay && date != null
+        ? DateTime(date.year, date.month, date.day)
+        : null;
     final updated = PrayerReminder(
       slot: slot,
       minutes: minutes,
@@ -466,20 +482,14 @@ class AdhanScheduler {
     // From Dec 24, try (best effort, never throw) to fetch next year's calendar
     if (now.month == 12 && now.day >= 24) {
       final nextYear = now.year + 1;
-      if (AppPrefs.prayerYearJson(nextYear) == null) {
-        final country = AppPrefs.country;
-        final city = AppPrefs.city;
-        if (country.isNotEmpty && city.isNotEmpty) {
-          try {
-            final response =
-                await SHttpHelper.get(country, city, nextYear.toString());
-            final pt = PrayerTime.fromJson(response);
-            if (pt.code == 200) {
-              await AppPrefs.setPrayerYearJson(nextYear, jsonEncode(pt));
-            }
-          } catch (_) {
-            // best effort, never throw
-          }
+      if (AppPrefs.prayerYearJson(nextYear) == null &&
+          AppPrefs.country.isNotEmpty &&
+          AppPrefs.city.isNotEmpty) {
+        try {
+          final pt = await PrayerApi.fetchYear(nextYear);
+          await AppPrefs.setPrayerYearJson(nextYear, jsonEncode(pt));
+        } catch (_) {
+          // best effort, never throw
         }
       }
     }
@@ -557,6 +567,8 @@ class AdhanScheduler {
           title: title,
           body: body,
           stopButton: texts.stopAdhan,
+          icon: 'ic_notification',
+          iconColor: const Color(0xFF7A6436),
         ),
       );
 

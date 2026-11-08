@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor/features/duaa/adhkar_categories.dart';
 import 'package:noor/features/duaa/adhkar_display_screen.dart';
+import 'package:noor/features/duaa/asma_al_husna_screen.dart';
 import 'package:noor/features/duaa/data/adhkar_data.dart';
 import 'package:noor/features/duaa/data/adhkar_search.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
@@ -95,9 +96,14 @@ class _DuaaScreenState extends State<DuaaScreen> {
       return matchesQuery(category.title(s), _query);
     }).toList();
 
+    final showAsma = _query.trim().isEmpty ||
+        matchesQuery(s.asma_al_husna, _query) ||
+        matchesQuery(s.asma_subtitle, _query);
+
     final isQueryLongEnough = normalizeArabic(_query).trim().length >= 2;
     final showEmptyState = _query.trim().isNotEmpty &&
         filteredCategories.isEmpty &&
+        !showAsma &&
         (!isQueryLongEnough || (_textHits.isEmpty && !_isSearchingText));
 
     // The hero is the header and draws behind the status bar, so no SafeArea.
@@ -138,6 +144,25 @@ class _DuaaScreenState extends State<DuaaScreen> {
                       child: EmptyState.noResults(context),
                     )
                   else ...[
+                    if (showAsma) ...[
+                      NoorListGroup(
+                        children: [
+                          NoorListRow(
+                            leading: _icon(NoorGlyph.moonStars),
+                            title: s.asma_al_husna,
+                            titleMaxLines: 2,
+                            meta: s.asma_subtitle,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const AsmaAlHusnaScreen(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (filteredCategories.isNotEmpty)
+                        const SizedBox(height: NoorSpace.s4),
+                    ],
                     if (filteredCategories.isNotEmpty)
                       NoorListGroup(
                         children: [

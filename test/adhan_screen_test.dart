@@ -9,6 +9,7 @@ import 'package:noor/features/adhan/adhan_controller.dart';
 import 'package:noor/features/adhan/adhan_screen.dart';
 import 'package:noor/features/adhan/models/prayer.dart';
 import 'package:noor/features/adhan/models/prayer_time.dart';
+import 'package:noor/features/adhan/prayer_settings_screen.dart';
 import 'package:noor/features/adhan/services/adhan_scheduler.dart';
 import 'package:noor/features/adhan/widgets/adhan_line.dart';
 import 'package:noor/features/adhan/widgets/adhan_reminders_sheet.dart';
@@ -205,7 +206,59 @@ void main() {
     // Today's Hijri date sits under the day title.
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('${(now.day - 1) % 29 + 1} Rajab 1448'), findsOneWidget);
+
+    // The night's times sit under the list, with no bell.
+    expect(find.text('Imsak'), findsOneWidget);
+    expect(find.text('04:50'), findsOneWidget);
+    expect(find.text('Last third'), findsOneWidget);
+    expect(find.text('02:00'), findsOneWidget);
   });
+
+  testWidgets('the settings button opens the prayer settings screen',
+      (tester) async {
+    await _loadCalendar(DateTime.now());
+    await tester.pumpWidget(_buildTestApp(child: const AdhanScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Prayer settings'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PrayerSettingsScreen), findsOneWidget);
+    expect(find.byType(NoorSheet), findsNothing);
+    expect(find.text('Calculation method'), findsOneWidget);
+    // The method and the high-latitude rule both start on the API's choice.
+    expect(find.text('Automatic'), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final locale in const [Locale('en'), Locale('fr'), Locale('ar')]) {
+    testWidgets('prayer settings screen fits 320 dp at 130%: $locale',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _loadCalendar(DateTime.now());
+
+      await tester.pumpWidget(_buildTestApp(
+        locale: locale,
+        scale: 1.3,
+        child: const PrayerSettingsScreen(),
+      ));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Save stays on screen, disabled until something changes.
+      final save = find.byType(NoorButton).last;
+      expect(tester.getBottomLeft(save).dy, lessThanOrEqualTo(640));
+      expect(tester.widget<NoorButton>(save).onPressed, isNull);
+      final plus = find
+          .byTooltip('${Prayer.fajr.localizedTitle(tester.element(save))} +');
+      await tester.ensureVisible(plus);
+      await tester.pumpAndSettle();
+      await tester.tap(plus);
+      await tester.pump();
+      expect(tester.widget<NoorButton>(save).onPressed, isNotNull);
+    });
+  }
 
   testWidgets('AdhanScreen falls back to the raw Hijri date without a month',
       (tester) async {

@@ -75,7 +75,12 @@ void main() {
           await pump(tester, lang, dark, scale: 1.3);
           expect(find.byType(NoorHero), findsOneWidget);
           expect(find.byType(NoorSearchField), findsOneWidget);
-          expect(find.byType(NoorListRow), findsNWidgets(19));
+          // Every category, and the 99 names above them.
+          expect(find.byType(NoorListRow), findsNWidgets(20));
+          expect(
+              find.text(
+                  S.of(tester.element(find.byType(DuaaScreen))).asma_al_husna),
+              findsOneWidget);
           expect(tester.takeException(), isNull);
         });
       }

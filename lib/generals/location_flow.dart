@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:noor/features/adhan/adhan_controller.dart';
+import 'package:noor/features/adhan/services/prayer_api.dart';
 import 'package:noor/features/adhan/widgets/location_picker_sheet.dart';
 import 'package:noor/generals/widgets/empty_state.dart';
 import 'package:noor/generals/widgets/noor_button.dart';
@@ -38,6 +39,7 @@ Future<void> pickLocation(BuildContext context,
   final String selectedCountry;
   final String selectedState;
   final String selectedCity;
+  Coordinates? selectedCoordinates;
 
   if (source == LocationSource.gps) {
     // 2. GPS: WaitDialog, _currentPlacemark()
@@ -50,7 +52,7 @@ Future<void> pickLocation(BuildContext context,
     Placemark? placemark;
     var permissionDenied = false;
     try {
-      placemark = await _currentPlacemark();
+      (placemark, selectedCoordinates) = await _currentPlacemark();
     } on PermissionDeniedException {
       permissionDenied = true;
     } catch (_) {
@@ -135,7 +137,8 @@ Future<void> pickLocation(BuildContext context,
   }
 
   if (!context.mounted) return;
-  await _saveLocation(context, selectedCountry, selectedState, selectedCity);
+  await _saveLocation(context, selectedCountry, selectedState, selectedCity,
+      selectedCoordinates);
 }
 
 /// WaitDialog, refreshAdhanData, close wait dialog; offers a retry on failure.
@@ -144,6 +147,7 @@ Future<void> _saveLocation(
   String country,
   String state,
   String city,
+  Coordinates? coordinates,
 ) async {
   showDialog(
     context: context,
@@ -153,8 +157,9 @@ Future<void> _saveLocation(
 
   Object? error;
   try {
-    await Get.find<AdhanController>()
-        .refreshAdhanData(country, state, city, DateTime.now().year);
+    await Get.find<AdhanController>().refreshAdhanData(
+        country, state, city, DateTime.now().year,
+        coordinates: coordinates);
   } catch (e) {
     error = e;
   } finally {
@@ -173,7 +178,7 @@ Future<void> _saveLocation(
         ? S.of(context).no_internet
         : S.of(context).prayer_times_failed,
     actionLabel: S.of(context).try_again,
-    onAction: () => _saveLocation(context, country, state, city),
+    onAction: () => _saveLocation(context, country, state, city, coordinates),
   );
 }
 
@@ -200,9 +205,10 @@ Future<void> _showFailSheet(
   );
 }
 
-/// Current GPS position as a [Placemark]. Throws [PermissionDeniedException]
-/// when permission is still missing after one request.
-Future<Placemark> _currentPlacemark() async {
+/// Current GPS position and its [Placemark]. Throws
+/// [PermissionDeniedException] when permission is still missing after one
+/// request.
+Future<(Placemark, Coordinates)> _currentPlacemark() async {
   var status = (await FlutterQiblah.checkLocationStatus()).status;
   if (status == LocationPermission.denied) {
     await FlutterQiblah.requestPermissions();
@@ -213,7 +219,9 @@ Future<Placemark> _currentPlacemark() async {
     throw const PermissionDeniedException('location');
   }
   final p = await Geolocator.getCurrentPosition();
-  return (await placemarkFromCoordinates(p.latitude, p.longitude)).first;
+  final placemark =
+      (await placemarkFromCoordinates(p.latitude, p.longitude)).first;
+  return (placemark, (latitude: p.latitude, longitude: p.longitude));
 }
 
 class _LocationChoice extends StatefulWidget {

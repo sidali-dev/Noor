@@ -32,6 +32,10 @@ class SharedPrefService {
     return _prefs!.getDouble(key);
   }
 
+  static Set<String> getKeys() {
+    return _prefs!.getKeys();
+  }
+
   // Setters for various data types
   static Future<bool> setString(String key, String value) async {
     return _prefs!.setString(key, value);

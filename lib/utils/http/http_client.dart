@@ -26,15 +26,9 @@ class PrayerApiException implements Exception {
 class SHttpHelper {
   static const Duration _timeout = Duration(seconds: 15);
 
-  /// Helper method to make a GET request to the AlAdhan calendarByCity API.
-  /// Callers must pass raw (unencoded) strings for [country] and [city].
-  static Future<Map<String, dynamic>> get(
-      String country, String city, String year) async {
-    final uri = Uri.https('api.aladhan.com', '/v1/calendarByCity/$year', {
-      'city': city,
-      'country': country,
-    });
-
+  /// GETs an AlAdhan endpoint and returns its `{code, status, data}` reply,
+  /// throwing unless `code` is 200.
+  static Future<Map<String, dynamic>> getJson(Uri uri) async {
     http.Response response;
     try {
       response = await http.get(uri).timeout(_timeout);

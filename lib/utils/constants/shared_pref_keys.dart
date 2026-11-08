@@ -43,6 +43,15 @@ class SharedPrefKeys {
   static const String country = 'country';
   static const String state = 'state';
   static const String city = 'city';
+  // Set only when the location came from GPS (double).
+  static const String latitude = 'latitude';
+  static const String longitude = 'longitude';
+
+  // Prayer calculation settings (JSON String).
+  static const String prayerSettings = 'prayer_settings';
+
+  // Asma al-Husna as fetched from the API (JSON String).
+  static const String asmaAlHusna = 'asma_al_husna';
 
   // Adhan sound (String).
   static const String adhanSoundPath = 'adhan_sound_path';
@@ -60,6 +69,7 @@ class SharedPrefKeys {
 
   /// Cached prayer calendar for a year (JSON String), e.g. `Adhan2026`.
   static String adhanYear(int year) => 'Adhan$year';
+  static final RegExp adhanYearPattern = RegExp(r'^Adhan\d{4}$');
 
   /// Saved reminders list for a prayer (JSON String), e.g. `fajr_reminders`.
   static String prayerReminders(String prayerKey) => '${prayerKey}_reminders';
