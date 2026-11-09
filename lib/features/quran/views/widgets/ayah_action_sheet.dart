@@ -88,7 +88,8 @@ class _AyahActionSheetContentState extends State<_AyahActionSheetContent> {
   }
 
   Future<void> _copyAyah() async {
-    final arabic = quran.getVerse(widget.surah, widget.ayah, verseEndSymbol: true);
+    final arabic =
+        quran.getVerse(widget.surah, widget.ayah, verseEndSymbol: true);
     final surahAr = quran.getSurahNameArabic(widget.surah);
     await Clipboard.setData(
       ClipboardData(text: '$arabic [سورة $surahAr: ${widget.ayah}]'),
@@ -173,13 +174,15 @@ class _AyahActionSheetContentState extends State<_AyahActionSheetContent> {
               child: Row(
                 children: [
                   Expanded(
-                    child: SizedBox(height: 1, child: ColoredBox(color: n.line)),
+                    child:
+                        SizedBox(height: 1, child: ColoredBox(color: n.line)),
                   ),
                   const SizedBox(width: NoorSpace.s2),
                   MushafStar(size: 14, color: n.line),
                   const SizedBox(width: NoorSpace.s2),
                   Expanded(
-                    child: SizedBox(height: 1, child: ColoredBox(color: n.line)),
+                    child:
+                        SizedBox(height: 1, child: ColoredBox(color: n.line)),
                   ),
                 ],
               ),
@@ -201,9 +204,9 @@ class _AyahActionSheetContentState extends State<_AyahActionSheetContent> {
           final reciter = reciterByFolder(widget.audio.reciterFolder.value);
           return Center(
             child: NoorPill(
-              icon: Icon(Iconsax.microphone_2, size: 16),
+              icon: const Icon(Iconsax.microphone_2, size: 16),
               label: reciter.label(context),
-              trailing: Icon(Iconsax.arrow_down_1, size: 16),
+              trailing: const Icon(Iconsax.arrow_down_1, size: 16),
               onTap: () => showReciterPickerSheet(context, widget.audio),
             ),
           );
