@@ -37,10 +37,16 @@ class NoorCartouche extends StatelessWidget {
 
   /// One line of title: [style] replaces the `heading` in `on-window`, for a
   /// name set in another script.
-  factory NoorCartouche.title(String name, {Key? key, TextStyle? style}) =>
+  factory NoorCartouche.title(
+    String name, {
+    Key? key,
+    TextStyle? style,
+    VoidCallback? onTap,
+  }) =>
       NoorCartouche(
         key: key,
         maxWidth: 280,
+        onTap: onTap,
         child: _Title(name, style),
       );
 

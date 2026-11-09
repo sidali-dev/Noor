@@ -243,10 +243,11 @@ class AyahMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 1.35);
     return CloudMedallion(
       plain: true,
       // Wider would rewrap the verses and push a full page past its foot.
-      size: MediaQuery.textScalerOf(context).scale(30),
+      size: 28 * scale,
       child: Text(
         // The package prefixes the end-of-ayah sign; the digits are its own
         // numbering. Amiri, because the Quran font colours its digits.

@@ -59,8 +59,12 @@ class SharedPrefKeys {
 
   // Quran.
   static const String lastReadQuran = 'last_read_quran';
+  static const String lastListenedQuran = 'last_listened_quran';
   static const String quranBookmark = 'quran_bookmark';
   static const String quranReadPages = 'quran_read_pages';
+  static const String quranReciter = 'quran_reciter';
+  static const String quranAyahBookmarks = 'quran_ayah_bookmarks';
+  static const String quranPlayMode = 'quran_play_mode';
 
   // App settings.
   static const String language = 'language';

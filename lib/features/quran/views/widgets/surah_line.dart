@@ -26,8 +26,8 @@ class IndexNumber extends StatelessWidget {
 }
 
 /// One surah row of the index, to sit in a [NoorListGroup], set like a printed
-/// contents page: its number, the Arabic name over verses and place, and the
-/// Latin name across from it.
+/// contents page: its number, the Arabic name over verses and place, the
+/// Latin name across from it, and an optional play button to listen to the surah.
 class SurahLine extends StatelessWidget {
   final int number;
   final String? arabicName;
@@ -35,6 +35,8 @@ class SurahLine extends StatelessWidget {
   final int? verses;
   final String? revelationPlace;
   final VoidCallback? onTap;
+  final VoidCallback? onPlayTap;
+  final bool isPlaying;
 
   const SurahLine({
     super.key,
@@ -44,6 +46,8 @@ class SurahLine extends StatelessWidget {
     this.verses,
     this.revelationPlace,
     this.onTap,
+    this.onPlayTap,
+    this.isPlaying = false,
   });
 
   @override
@@ -74,7 +78,8 @@ class SurahLine extends StatelessWidget {
           // A share of the row, so a large text scale cannot squeeze the name.
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.32,
+              maxWidth: MediaQuery.sizeOf(context).width *
+                  (onPlayTap != null ? 0.24 : 0.32),
             ),
             child: Text(
               latinName,
@@ -83,8 +88,21 @@ class SurahLine extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: NoorSpace.s2),
-          Icon(Icons.chevron_right_rounded, color: n.muted, size: 22),
+          if (onPlayTap != null) ...[
+            const SizedBox(width: NoorSpace.s2),
+            NoorCloudButton(
+              icon: Icon(
+                isPlaying ? Icons.graphic_eq_rounded : Icons.play_arrow_rounded,
+                color: isPlaying ? n.brass : n.ink,
+                size: 20,
+              ),
+              tooltip: 'Listen to $latinName',
+              onTap: onPlayTap,
+            ),
+          ] else ...[
+            const SizedBox(width: NoorSpace.s2),
+            Icon(Icons.chevron_right_rounded, color: n.muted, size: 22),
+          ],
         ],
       ),
     );

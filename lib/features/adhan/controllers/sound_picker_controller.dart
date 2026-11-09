@@ -13,6 +13,13 @@ class SoundPickerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    try {
+      player.setAudioContext(AudioContext(
+        android: const AudioContextAndroid(
+          audioFocus: AndroidAudioFocus.none,
+        ),
+      ));
+    } catch (_) {}
     updateAdhanName();
     player.onPlayerComplete.listen((_) {
       playingPath.value = null;

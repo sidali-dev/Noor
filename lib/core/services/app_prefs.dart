@@ -182,6 +182,25 @@ class AppPrefs {
   static Future<void> setLastReadPage(int page) =>
       SharedPrefService.setInt(SharedPrefKeys.lastReadQuran, page);
 
+  /// Last listened surah & ayah (`"surah:ayah"`), or `null` if none saved.
+  static ({int surah, int ayah})? get lastListenedQuran {
+    final raw = _string(SharedPrefKeys.lastListenedQuran, '').trim();
+    if (raw.isEmpty) return null;
+    final parts = raw.split(':');
+    if (parts.length != 2) return null;
+    final s = int.tryParse(parts[0]) ?? 0;
+    final a = int.tryParse(parts[1]) ?? 0;
+    if (s < 1 || s > 114 || a < 1) return null;
+    return (surah: s, ayah: a);
+  }
+
+  static Future<void> setLastListenedQuran(int surah, int ayah) =>
+      SharedPrefService.setString(
+          SharedPrefKeys.lastListenedQuran, '$surah:$ayah');
+
+  static Future<void> clearLastListenedQuran() =>
+      SharedPrefService.remove(SharedPrefKeys.lastListenedQuran);
+
   static List<int> get bookmarks =>
       parseBookmarks(_string(SharedPrefKeys.quranBookmark, ''));
 
@@ -203,6 +222,47 @@ class AppPrefs {
 
   static Future<void> setQuranReadPages(String value) =>
       SharedPrefService.setString(SharedPrefKeys.quranReadPages, value);
+
+  static const String defaultQuranReciter = 'Alafasy_128kbps';
+
+  static String get quranReciter =>
+      _string(SharedPrefKeys.quranReciter, defaultQuranReciter);
+
+  static Future<void> setQuranReciter(String folder) =>
+      SharedPrefService.setString(SharedPrefKeys.quranReciter, folder);
+
+  static const String defaultQuranPlayMode = 'continuous';
+
+  static String get quranPlayMode =>
+      _string(SharedPrefKeys.quranPlayMode, defaultQuranPlayMode);
+
+  static Future<void> setQuranPlayMode(String mode) =>
+      SharedPrefService.setString(SharedPrefKeys.quranPlayMode, mode);
+
+  /// Saved ayah bookmarks formatted as `"surah:ayah"` (e.g. `["2:255", "18:10"]`).
+  static List<({int surah, int ayah})> get ayahBookmarks =>
+      parseAyahBookmarks(_string(SharedPrefKeys.quranAyahBookmarks, ''));
+
+  static Future<void> setAyahBookmarks(List<({int surah, int ayah})> list) =>
+      SharedPrefService.setString(
+          SharedPrefKeys.quranAyahBookmarks, serializeAyahBookmarks(list));
+
+  static List<({int surah, int ayah})> parseAyahBookmarks(String raw) {
+    final out = <({int surah, int ayah})>[];
+    for (final part in raw.split(',')) {
+      final segs = part.trim().split(':');
+      if (segs.length != 2) continue;
+      final s = int.tryParse(segs[0]) ?? 0;
+      final a = int.tryParse(segs[1]) ?? 0;
+      if (s >= 1 && s <= 114 && a >= 1) {
+        out.add((surah: s, ayah: a));
+      }
+    }
+    return out;
+  }
+
+  static String serializeAyahBookmarks(List<({int surah, int ayah})> list) =>
+      [for (final e in list) '${e.surah}:${e.ayah}'].join(',');
 
   // ---- app settings -------------------------------------------------------
 

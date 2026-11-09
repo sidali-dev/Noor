@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:noor/core/services/app_prefs.dart';
 import 'package:noor/core/utils/text_normalize.dart';
+import 'package:noor/features/quran/controllers/quran_search.dart';
+import 'package:noor/features/quran/models/hizb_pages.dart';
 import 'package:quran/quran.dart' as quran;
 
 class QuranController extends GetxController {
@@ -66,7 +68,25 @@ class QuranController extends GetxController {
     }
     return [
       for (var h = 1; h <= 60; h++)
-        if (matchesQuery(h.toString(), q)) h,
+        if (matchesQuery(h.toString(), q) ||
+            matchesQuery(((h + 1) ~/ 2).toString(), q) ||
+            matchesQuery(
+              quran.getSurahNameArabic(
+                  quran.getPageData(hizbStartPage(h)).first["surah"] as int),
+              q,
+            ) ||
+            matchesQuery(
+              quran.getSurahName(
+                  quran.getPageData(hizbStartPage(h)).first["surah"] as int),
+              q,
+            ))
+          h,
     ];
+  }
+
+  List<QuranAyahHit> get ayahHits {
+    final q = searchQuery.value.trim();
+    if (q.isEmpty) return const [];
+    return QuranSearch.instance.search(q);
   }
 }

@@ -46,7 +46,10 @@ const Map<String, String> _latinFold = {
 /// Folds one UTF-16 unit; returns '' for characters that are dropped.
 String _foldUnit(String ch) {
   final code = ch.codeUnitAt(0);
-  if ((code >= 0x064B && code <= 0x065F) || code == 0x0670 || code == 0x0640) {
+  if ((code >= 0x064B && code <= 0x065F) ||
+      code == 0x0670 ||
+      code == 0x0640 ||
+      (code >= 0x06D6 && code <= 0x06ED)) {
     return '';
   }
   switch (code) {

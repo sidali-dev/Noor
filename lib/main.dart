@@ -12,6 +12,7 @@ import 'package:noor/core/services/theme_service.dart';
 import 'package:noor/features/adhan/views/adhan_app.dart';
 import 'package:noor/core/services/adhan_scheduler.dart';
 import 'package:noor/features/duaa/controllers/adhkar_data.dart';
+import 'package:noor/features/quran/models/mushaf_data.dart';
 import 'package:noor/my_app.dart';
 import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:workmanager/workmanager.dart';
@@ -68,7 +69,10 @@ Future<void> _startup() async {
   // there the alarm plugin's own background fetch tops the window up.
   if (Platform.isAndroid) unawaited(_registerBackgroundSync());
 
-  await AdhkarData.init();
+  await Future.wait([
+    AdhkarData.init(),
+    MushafData.init(),
+  ]);
 }
 
 Future<void> _registerBackgroundSync() async {

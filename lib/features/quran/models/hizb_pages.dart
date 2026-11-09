@@ -75,8 +75,18 @@ int hizbOfPage(int page) {
 
 /// The first and last page of the juz (1-30) the page falls in: two hizbs each.
 (int, int) juzPagesOf(int page) {
-  final juz = (hizbOfPage(page) + 1) ~/ 2;
+  final juz = juzOfPage(page);
   final first = hizbStartPages[2 * juz - 2];
   final last = juz == 30 ? 604 : hizbStartPages[2 * juz] - 1;
   return (first, last);
 }
+
+/// The juz (1-30) a page falls in: two hizbs each.
+int juzOfPage(int page) => (hizbOfPage(page) + 1) ~/ 2;
+
+/// Starting page of juz [juz] (1-30).
+int juzStartPage(int juz) {
+  final clamped = juz.clamp(1, 30);
+  return hizbStartPages[2 * clamped - 2];
+}
+

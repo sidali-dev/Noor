@@ -59,6 +59,7 @@ flutter:
     - assets/logo/faith-mark-night.png
     - assets/sounds/
     - assets/data/adhkar.json
+    - assets/data/mushaf_15lines.json
 
   #------------- LOCAL FONTS -------------#
   fonts:

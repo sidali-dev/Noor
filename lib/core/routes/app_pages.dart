@@ -12,6 +12,7 @@ import 'package:noor/features/duaa/views/adhkar_display_view.dart';
 import 'package:noor/features/duaa/views/asma_al_husna_view.dart';
 import 'package:noor/features/main/controllers/main_controller.dart';
 import 'package:noor/features/main/views/main_view.dart';
+import 'package:noor/features/quran/controllers/quran_audio_controller.dart';
 import 'package:noor/features/quran/controllers/quran_controller.dart';
 import 'package:noor/features/quran/views/read_quran_view.dart';
 import 'package:noor/features/splash/views/splash_view.dart';
@@ -30,6 +31,7 @@ class AppPages {
     Get.lazyPut(() => SoundPickerController(), fenix: true);
     Get.lazyPut(() => AdhanController(), fenix: true);
     Get.lazyPut(() => QuranController(), fenix: true);
+    Get.put(QuranAudioController(), permanent: true);
   });
 
   static final routes = <GetPage>[
@@ -70,8 +72,19 @@ class AppPages {
     ),
     GetPage(
       name: Routes.READ_QURAN,
-      // arguments: the 0-based page to open on
-      page: () => ReadQuranView(pageIndex: Get.arguments as int?),
+      // arguments: either an `int` (0-based pageIndex) or
+      // `({int pageIndex, int? surah, int? ayah})`
+      page: () {
+        final args = Get.arguments;
+        if (args is ({int pageIndex, int? surah, int? ayah})) {
+          return ReadQuranView(
+            pageIndex: args.pageIndex,
+            initialSurah: args.surah,
+            initialAyah: args.ayah,
+          );
+        }
+        return ReadQuranView(pageIndex: args as int?);
+      },
     ),
     GetPage(
       name: Routes.ADHAN_RING,

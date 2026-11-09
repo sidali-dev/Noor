@@ -44,34 +44,30 @@ class _QiblaScreenState extends State<QiblaView> {
   }
 
   // The shell's Scaffold extends the body under the nav bar and reports its
-  // height as bottom padding. It goes inside the scroll views, not around them,
-  // so content scrolls behind the floating bar instead of being cut above it.
+  // height as bottom padding. It goes inside the scroll view so content
+  // scrolls behind the floating bar instead of being cut above it.
   double get _bottom => MediaQuery.paddingOf(context).bottom + NoorSpace.s4;
-
-  Widget _scroll(Widget child) => SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.only(top: NoorSpace.s4, bottom: _bottom),
-        child: child,
-      );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.noor.paper,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // The widest window, so the verse takes the first 40%.
-          NoorHero(
-            art: NoorArt.heroQibla,
-            settings: true,
-            title: S.of(context).nav_qibla,
-            subtitle: S.of(context).tagline_qibla,
-            textShare: 0.4,
-            overlap: const LocationPill(),
-          ),
-          Expanded(
-            child: Padding(
+      body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.only(bottom: _bottom),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The widest window, so the verse takes the first 40%.
+            NoorHero(
+              art: NoorArt.heroQibla,
+              settings: true,
+              title: S.of(context).nav_qibla,
+              subtitle: S.of(context).tagline_qibla,
+              textShare: 0.4,
+              overlap: const LocationPill(),
+            ),
+            Padding(
               padding: EdgeInsets.fromLTRB(
                 NoorLayout.gutter(context),
                 NoorSpace.s4,
@@ -80,8 +76,8 @@ class _QiblaScreenState extends State<QiblaView> {
               ),
               child: _buildBody(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -96,68 +92,63 @@ class _QiblaScreenState extends State<QiblaView> {
         // No button on these two: the sensor is checked again on resume, but a
         // retry here would only rebuild the same result.
         case QiblaStatus.sensorError:
-          return _scroll(EmptyState(
+          return EmptyState(
             danger: true,
             icon: NoorGlyph.alert,
             message: S.of(context).compass_error,
-          ));
+          );
         case QiblaStatus.sensorMissing:
-          return _scroll(EmptyState(
+          return EmptyState(
             icon: NoorGlyph.compass,
             message: S.of(context).sensor_not_supported,
-          ));
+          );
         case QiblaStatus.failed:
-          return _scroll(EmptyState(
+          return EmptyState(
             danger: true,
             icon: NoorGlyph.alert,
             message: S.of(context).location_failed,
             actionLabel: S.of(context).try_again,
             onAction: () => c.refreshStatus(ask: true),
-          ));
+          );
         case QiblaStatus.gpsOff:
-          return _scroll(EmptyState(
+          return EmptyState(
             icon: Iconsax.location_slash,
             message: S.of(context).gps_off,
             actionLabel: S.of(context).open_settings,
             // Resuming from settings re-checks.
             onAction: Geolocator.openLocationSettings,
-          ));
+          );
         case QiblaStatus.denied:
         case QiblaStatus.deniedForever:
-          return _scroll(EmptyState(
+          return EmptyState(
             icon: Iconsax.location_slash,
             message: S.of(context).enable_location_permission,
             actionLabel: c.status.value == QiblaStatus.deniedForever
                 ? S.of(context).open_settings
                 : S.of(context).try_again,
             onAction: c.allowLocation,
-          ));
+          );
         case QiblaStatus.ready:
           return _buildActiveCompass();
       }
     });
   }
 
-  // Padded so it stays centred above the bar.
-  Widget _buildCalmSpinner() => Padding(
-        padding: EdgeInsets.only(bottom: _bottom),
-        child: const LoadingState(),
+  Widget _buildCalmSpinner() => const Padding(
+        padding: EdgeInsets.symmetric(vertical: NoorSpace.s7),
+        child: LoadingState(),
       );
-
-  // Below this the compass can't keep 160 dp beside the card, so scroll.
-  // ponytail: fixed card-height estimate; measure the card if its content grows.
-  static const double _minFit = 160 + NoorSpace.s4 + 245;
 
   Widget _buildActiveCompass() {
     return StreamBuilder<QiblahDirection>(
       stream: _controller.direction,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return _scroll(EmptyState(
+          return EmptyState(
             danger: true,
             icon: NoorGlyph.alert,
             message: S.of(context).compass_error,
-          ));
+          );
         }
         if (!snapshot.hasData) return _buildCalmSpinner();
 
@@ -174,35 +165,14 @@ class _QiblaScreenState extends State<QiblaView> {
               )),
         );
 
-        return LayoutBuilder(
-          builder: (context, box) {
-            if (box.maxHeight - _bottom < _minFit) {
-              return SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: _bottom),
-                child: Column(
-                  children: [
-                    const SizedBox(height: NoorSpace.s6),
-                    SizedBox(height: 260, child: compass),
-                    const SizedBox(height: NoorSpace.s6),
-                    card,
-                  ],
-                ),
-              );
-            }
-            // The compass takes what the card leaves, so it shrinks first.
-            return SingleChildScrollView(
-              padding: EdgeInsets.only(bottom: _bottom),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: NoorSpace.s6),
-                  SizedBox(height: 260, child: compass),
-                  const SizedBox(height: NoorSpace.s6),
-                  card,
-                ],
-              ),
-            );
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: NoorSpace.s6),
+            SizedBox(height: 260, child: compass),
+            const SizedBox(height: NoorSpace.s6),
+            card,
+          ],
         );
       },
     );

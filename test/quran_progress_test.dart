@@ -175,7 +175,7 @@ void main() {
       await _useStore({});
       await pump(tester);
 
-      expect(find.text('Continue reading'), findsNothing);
+      expect(find.byTooltip('Continue reading'), findsNothing);
       expect(find.textContaining('of 604 pages'), findsNothing);
       // Rows carry no progress; only the continue card does.
       expect(find.textContaining('%'), findsNothing);
@@ -190,7 +190,7 @@ void main() {
       await QuranProgress.markRead(2);
       await pump(tester);
 
-      expect(find.text('Continue reading'), findsOneWidget);
+      expect(find.byTooltip('Continue reading'), findsOneWidget);
       expect(find.text('2 of 604 pages'), findsOneWidget);
       expect(find.textContaining('%'), findsNothing); // rows show no progress
 
