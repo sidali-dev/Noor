@@ -178,6 +178,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "hijri_adjustment":
             MessageLookupByLibrary.simpleMessage("Shift by days"),
         "hijri_date": MessageLookupByLibrary.simpleMessage("Hijri date"),
+        "splash_tagline":
+            MessageLookupByLibrary.simpleMessage("Your Islamic Companion"),
         "hizb": MessageLookupByLibrary.simpleMessage("Hizb"),
         "home_adhkar": MessageLookupByLibrary.simpleMessage(
             "Athkar for Entering and Leaving the House"),

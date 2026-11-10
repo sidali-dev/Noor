@@ -88,10 +88,24 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Android 12+: the system's splash (the icon on the ground colour) holds
+        // until Flutter's first frame, which is the Dart splash drawn to look
+        // exactly like it. Take the system one away at once; its own exit
+        // animation (a fade, a scale of the icon) would play over the Dart
+        // splash's entrance.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { it.remove() }
+        }
         launchTab = tabOf(intent)
         AlarmRingingLiveData.instance.observe(this, ringing)
         registerMediaReceiver()
     }
+
+    // main() reads the API level before its first frame, which copies whichever
+    // splash the system drew: no channel round trip under the native splash.
+    override fun getDartEntrypointArgs(): List<String> =
+        (super.getDartEntrypointArgs() ?: emptyList()) +
+            "androidSdk=${Build.VERSION.SDK_INT}"
 
     override fun onDestroy() {
         unregisterMediaReceiver()

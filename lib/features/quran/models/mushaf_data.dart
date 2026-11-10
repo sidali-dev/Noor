@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -120,11 +121,11 @@ class MushafData {
     if (_pages != null) return;
     try {
       final raw = await rootBundle.loadString('assets/data/mushaf_15lines.json');
-      final list = jsonDecode(raw) as List<dynamic>;
-      _pages = [
-        for (final item in list)
-          MushafPageData.fromMap(item as Map<String, dynamic>),
-      ];
+      // 1.8 MB: parsed off the UI thread, which is drawing the splash.
+      _pages = await Isolate.run(() => [
+            for (final item in jsonDecode(raw) as List<dynamic>)
+              MushafPageData.fromMap(item as Map<String, dynamic>),
+          ]);
     } catch (_) {
       // Fallback if asset bundle is unavailable in isolated unit tests.
     }

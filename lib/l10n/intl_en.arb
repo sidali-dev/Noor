@@ -223,6 +223,7 @@
     "adjust_times" : "Adjust times",
     "adjust_times_hint" : "Shift a prayer by a few minutes to match your mosque.",
     "hijri_date" : "Hijri date",
+    "splash_tagline" : "Your Islamic Companion",
     "hijri_adjustment" : "Shift by days",
     "hijri_adjust_hint" : "To shift the date by a day, choose astronomical calculation.",
     "reset" : "Reset",

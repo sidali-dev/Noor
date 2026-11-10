@@ -7,7 +7,7 @@ Faith (package `noor`) moves to the Hilal design system: cut paper in layers, on
 ## 0. Rules that override the Hilal README where they differ
 
 1. Hierarchy comes from layered paper and its shadow. Not from colour, not from borders, not from gradients.
-2. Gradients: only inside the hero ArchFrame (its paper-shade wash and sky-glow), plus the alarm ring screen's moon glow. Nowhere else, including buttons, backgrounds, text and the splash.
+2. Gradients: only inside the hero ArchFrame (its paper-shade wash and sky-glow), plus the alarm ring screen's moon glow, plus the splash (its baked plate and the fade on its loading ring, `HilalSplash`, decided by the owner, 2026-11-10). Nowhere else, including buttons, backgrounds and text.
 3. No glassmorphism, no blur backdrops, no emoji, no purple or blue AI palette. The cool ground is blue-grey (`surface #eef0f4`); it is paper, not an accent.
 4. Brass appears at most once per region (a region is one screen area that can be read in one glance: a hero, a list, a card, the dial). See section 6.
 5. Copy is warm, calm, brief, sentence case, no exclamation marks. See section 13.
@@ -132,7 +132,7 @@ Jost and Cormorant Garamond have no Arabic glyphs. Amiri has Arabic and also has
 | `bodySm` | Jost | 14 / 20 | 400 | 0 | 1.429 | Supporting text, hints, list secondary lines |
 | `label` | Jost | 15 / 20 | 500 | 0.2 | 1.333 | Buttons, field labels |
 | `caption` | Jost | 12 / 16 | 400 | 0 | 1.333 | Hijri dates, tab labels, timestamps |
-| `eyebrow` | Jost | 12 / 16 | 500 | 1.6 | 1.333 | **Defined, not used** |
+| `eyebrow` | Jost | 12 / 16 | 500 | 1.6 | 1.333 | The splash tagline only, in sentence case. Used nowhere else. |
 
 Arabic ramp for `ar` **[token]** where tokens.json defines it, otherwise tagged:
 
@@ -250,7 +250,7 @@ tokens.json has **no motion tokens**. These come from `README.md` / `bundle.css`
 - Press: the paper moves 1 dp down and drops to `shadow1`, 120 ms ease. This replaces ripples (`NoSplash`).
 - Toggle and trough thumb: 180 ms.
 - Twinkle: ArchFrame stars 0.85 ↔ 1.0 opacity over 4 s, staggered. Allowed in the Prayers hero and the alarm ring screen's sky only; every other loop is out.
-- Loops allowed: the compass (it follows the sensor) and the active alarm screen, as before. Nothing else loops.
+- Loops allowed: the compass (it follows the sensor), the active alarm screen, as before, and the splash's loading ring (one turn a second, still under Reduce Motion). Nothing else loops.
 - Reduce Motion (`MediaQuery.disableAnimations`): twinkle off, entrance becomes an instant or a 100 ms crossfade, press stays (it is feedback), the compass still rotates (it is the instrument, not a flourish).
 - Never animate layout; animate opacity and translate.
 
@@ -277,7 +277,7 @@ tokens.json has **no motion tokens**. These come from `README.md` / `bundle.css`
 | `HilalProgress` | `NoorProgressBar` | 4 dp rounded track in `surfaceSunken`, fill `window` (Night: `onWindow`). Not brass. Paired with a numeral percentage or "n of 604 pages". |
 | `HilalCompass` | Compass dial | See 8.1. |
 | `HilalToast` | | `radius-md`, `surfaceRaised`, `shadow2`. `success` / `danger` tones always carry a word or icon. |
-| `HilalSplash` | Custom splash | Flat `surface` or `window`, no gradient, no ray, no arch. The logo lockup (section 10), then crossfade out in 300 ms; no fixed delay, unchanged logic. |
+| `HilalSplash` | Custom splash | The owner's splash, rebuilt from `tool/sources/splash_reference.jpg` (decided 2026-11-10, superseding "flat, no gradient, no arch"). A full-bleed plate of layered cut-paper arches, clouds and the mosque (`splash_bg_paper.webp` / `splash_bg_night.webp`, the reference with its foreground removed, and its Night twin; baked, not drawn). On it, centred at fractions of the screen's height read off the reference: the mark (`NoorMark`, 0.71 of the width, held to 0.33 of the height) at 0.405; "Faith" at 0.613 (`displayXl` 56/60, Cormorant 600, `ink`, Latin in every locale); the tagline at 0.662 (`eyebrow`, `muted`, between two 48 dp `line` hairlines, localized: "Your Islamic Companion", "Votre compagnon musulman", "رفيقك الإسلامي"); a 24 dp loading ring at 0.94 (a `brass` arc fading behind its head over a 18 % `brass` circle, one turn a second). **Entrance (decided 2026-11-10):** it takes over from the native splash at once. The native splash waits only for the one picture that copies it (no app work runs under it); the first Flutter frame is that copy (the emblem centred on the screen, the same size, on the same ground), and the native splash is removed. It stands as that picture until the plate is decoded, then plays a 2200 ms entrance, no bounce: the mark grows from the native size to its own while it glides up to its place (0-1500 ms, scale and translate, ease-in-out, since it starts from rest), the plate fades in around it (300-1400), "Faith" fades in rising 6 dp (1000-1700), the tagline (1200-1900), the ring (1500-2200); the fades ease out. Only then does the app's startup run (data, alarms, icons; the 1.8 MB Mushaf data parsed off the UI thread), under the turning ring, with a hold of at least 1200 ms; the shell then fades in over it in 400 ms (that is the splash's exit). Reduce Motion shows everything at once and keeps the ring still. Android 12 and later let the app draw nothing but an icon on a colour, so there the first frame copies that icon exactly (`splash_icon*.png`, 240 dp canvas, emblem 120 dp, no shadow, screen centre; MainActivity passes the API level as a Dart entrypoint argument), the mark's shadow fades in under it (0-500), only then does the icon fade out over the identical emblem (500-900), and the system's own exit animation is switched off (`setOnExitAnimationListener`) so the hand-off is a cut. Before Android 12 and on iOS the splash image is the same emblem at 0.8 of a 288 dp canvas (230 dp), and the mark grows from that. No other fixed delay. Text is fixed size (no text scaling), like the artwork. |
 
 **Hero objects.** Every `NoorHero` art has one main object in the Qibla header's manner: big, in stepped arches of cut paper that each cast a shadow on the layer behind, the object lit and standing out from the sky. Quran: a pointed mihrab holding the Mushaf. Prayers: a tall round arch holding the mosque. Revised, 2026-11-03: the Quran and Prayers objects are authored cut-paper vector art, `object_quran.svg` and `object_mosque.svg`, in the Kaaba's manner and laid over the hero art by `NoorHero` in its upright overlay table, the way the Kaaba is (the owner's raster `.webp` objects are gone). Each is flat layered shapes: three stepped black shadow copies baked in, a shaded face and a lit face in a gradient, and one ornament layer. The Mushaf is a closed book, navy faces with a cream eight-point star, frame and page edge, on two stepped slabs; the mosque is cream shaded and lit faces with a dome, two small domes, two minarets and navy bands and openings. The hero SVGs hold the sky and the stepped arch each sits in: a pointed arch for the Mushaf, a round one for the mosque, each cut to the object's height so it fills its niche and stands in the cloud base like the Kaaba. The niche is chosen for contrast, a light plate behind the navy book (Paper) and the lighter night niche in Night, and the dark window behind the cream mosque in both themes. The overlay keeps its place in RTL and is never mirrored; its shadows are baked in, so like the Kaaba's they keep falling right and down and do not follow the moon. Redrawn, 2026-11-03, because the first pass read as generated clip art (a dome split down the middle into one dark and one light half, flat plates, ghost-stepped shadows): both objects and both niches are rebuilt as stacked paper with one light. On the objects the moon is on the left: lit faces are on the left and every cast shadow falls right and down, as the Kaaba's do; they do not mirror. The niche mirrors with the layout in RTL, so its light comes from straight above: a recessed stair of three paper rings round a deep window, each ring on stepped shadow copies that fall straight down on the ring behind it, and a rim of light along the top of each edge that fades out down the sides. The Prayers niche holds a further, dimmer mosque in the window (a spire and a dome in the sky's own tones) so the near mosque has something to stand in front of. The mosque is two planes (the minarets behind, the hall in front, each casting a soft shadow on the one behind it), with a lit and a shaded half to every dome and shaft, ribs on the dome, piers standing proud of the facade, recessed windows with a lit sill and a framed portal. The Mushaf has a lit spine with raised bands, a bevelled cover with a double frame, an eight-point star and a rosette, ruled page edges, a ribbon, and two slabs. The Quran niche carries a second arch line and a row of dots along it. `flutter_svg` has no blur, so a soft shadow is five offset copies, darkest nearest. Every `NoorHero` now carries a settings button, on the Quran and Athkar headers as well. Athkar: a round window holding a misbaha with a brass tassel. Paper draws the object dark on a light arch; Night inverts it. Stars stay inside the window (`noorHeroStars`, checked by `tool/hero_art.py`). Decided by the owner, 2026-11-02.
 
@@ -358,6 +358,7 @@ New brand files in `docs/design-system/assets/Logos/`: `faith-logo-paper.svg`, `
 - **flutter_svg limit.** The `faith-mark-paper.svg` file uses `feDropShadow` filters (three of them) and a gradient; `flutter_svg` does not render SVG filters. Decided: rasterise the logos to PNG at 1x/2x/3x for the splash and headers; keep the SVGs as masters. The app-icon SVG is used only for native icon export.
 - Native Android splash/icon assets in the working tree are already changed; they must match the new app icon and ground colour (`surface` Paper, `window`-near ground in Night). Do not touch the application id (`com.sidalidev.noor`) or the Dart package (`noor`).
 - Old `assets/logo/faith_logo.svg` / `faith_emblem.svg` and the teal-mint splash art are retired once the new files are wired.
+- **The mark, 2026-11-10.** Decided by the owner: the app's mark is the core of the owner's two logo renders (`tool/sources/faith_logo_paper.jpg`, `faith_logo_night.jpg`), not the SVG masters. The core is the emblem alone (arch shield, night window, bolt, stars, brass crescent, the two wings) cut out of its app-icon tile and baked with a soft depth shadow by `tool/splash_art.py`: `assets/logo/faith-mark-{paper,night}.png` at 1x, 2x and 3x (220, 440, 660 px tall, 0.824 wide over tall, the clear space and shadow room included). The same cut-out makes the native splash images, the Android 12 splash icon and the launcher icons (emblem on `surface`). The SVGs in `docs/design-system/assets/Logos/` stay as the lockup masters and are no longer the source of the app's rasters. Paper and Night are two renders (the Night window is darker and the wings charcoal), not one recoloured.
 
 ## 11. Accessibility
 
@@ -381,7 +382,7 @@ Values the mocks or code need that `tokens.json` does not define. The contract u
 7. **Search field radius.** Decided by the owner, 2026-11-02: a pill, `radius-pill`. This replaces the earlier `radius-sm` 8.
 8. **No warning/info colours, no tints.** Hilal has only `success` and `danger`. The old five icon tints are dropped.
 9. **No tabular/lining numeral feature data** for Cormorant.
-10. **Logo lockup sizes** (splash, header): not specified.
+10. **Logo lockup sizes** (splash, header): not specified. The splash's are the fractions in section 8 (`HilalSplash`), read off the owner's reference. Its plate is a generated image at 720 x 1280, covered to the screen. The generated plates came out in cream and a warm charcoal, so `tool/splash_art.py` recolours them onto the app's ground: the plate's open paper is `surface` (`#eef0f4` Paper, `#101217` Night), its shade steps darker from that, its highlights go to white (Paper) or moon-white (the Night mosque). Only the warm light in the mosque's windows keeps a warm tone. The first frame, the native splash, is the same `surface`.
 11. **Shared piece sizes (8.2)**: ornaments of 56, 64, 132 and 136 dp, a 40 dp plain disc, a 56 dp cartouche, bands of 44, 52 and 72 dp. Design values with no token, listed here so they are not read as hard-coding by accident.
 
 ## 13. Copy
@@ -403,7 +404,7 @@ Do
 
 Don't
 - Don't use a border to separate or elevate. `line` is a decorative rule and a Night seam, never a control's only edge. `lineStrong` is for controls.
-- Don't use gradients outside `HilalArchFrame` and the ring screen's moon glow, and none on text, buttons, backgrounds or the splash.
+- Don't use gradients outside `HilalArchFrame`, the ring screen's moon glow and the splash (`HilalSplash`), and none on text, buttons or backgrounds.
 - Don't use glass, blur backdrops, emoji icons, side-stripe borders, gradient text, or a purple/blue palette.
 - Don't put brass text on a window in Paper, or brass on moon-white in Night.
 - Don't use `ink` or `inkMuted` on a window; use `onWindow` / `onWindowMuted`.
@@ -432,4 +433,4 @@ Don't
 | soft teal shadow, none in dark | `shadow1`–`shadow3`, `shadowInset`, with Night variants |
 | `NoorHero`, `NoorArt` | `HilalArchFrame` (Prayers) or plain header |
 | `NoorNavBar` cloud-medallion tab | `HilalTabBar` window pill |
-| teal/mint splash | `HilalSplash` with the logo lockup |
+| teal/mint splash | `HilalSplash`: the plate, the mark, "Faith", the tagline and the loading ring (section 8) |

@@ -20,8 +20,9 @@ import 'package:noor/features/splash/views/splash_view.dart';
 class AppPages {
   static const INITIAL = Routes.SPLASH;
 
-  /// App startup, set by main() before runApp. The splash holds until it ends.
-  static Future<void> startup = Future.value();
+  /// App startup, set by main() before runApp. The splash runs it after its
+  /// entrance and holds until it ends.
+  static Future<void> Function() startup = () async {};
 
   /// The shell and its four tabs. QiblaView owns its controller: it starts and
   /// stops the compass with the tab. fenix: a tab warmed while another route
@@ -37,13 +38,13 @@ class AppPages {
   static final routes = <GetPage>[
     GetPage(
       name: Routes.SPLASH,
-      page: () => SplashView(ready: startup),
+      page: () => SplashView(startup: startup),
     ),
     GetPage(
       name: Routes.MAIN,
       page: () => const MainView(),
       binding: mainBinding,
-      transitionDuration: const Duration(milliseconds: 240),
+      transitionDuration: const Duration(milliseconds: 400),
       customTransition: _ReduceMotionFade(),
     ),
     GetPage(

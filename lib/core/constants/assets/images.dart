@@ -10,9 +10,21 @@ class AppImages {
 
 /// Illustrated art.
 abstract final class NoorArt {
-  /// The Faith mark alone, rendered from the Hilal SVGs. Use [NoorMark].
+  /// The Faith mark alone, cut from the owner's logo renders by
+  /// tool/splash_art.py. Use [NoorMark].
   static const String markPaper = 'assets/logo/faith-mark-paper.png';
   static const String markNight = 'assets/logo/faith-mark-night.png';
+
+  /// The icon Android 12+ draws as its splash, which the Dart splash copies on
+  /// its first frame. [variant] is 'paper' or 'night'.
+  static String systemIcon(String variant) => variant == 'night'
+      ? 'assets/logo/splash_icon_dark.png'
+      : 'assets/logo/splash_icon.png';
+
+  /// The splash plate: layered paper arches, clouds and the mosque, with the
+  /// middle left empty for the mark. [variant] is 'paper' or 'night'.
+  static String splashBg(String variant) =>
+      'assets/images/art/splash_bg_$variant.webp';
   static const String surahCartouche =
       'assets/images/ornaments/surah_cartouche.svg';
   static const String pageCorner = 'assets/images/ornaments/page_corner.svg';

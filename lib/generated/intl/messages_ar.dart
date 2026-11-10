@@ -176,6 +176,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hijri_adjustment":
             MessageLookupByLibrary.simpleMessage("تعديل بالأيام"),
         "hijri_date": MessageLookupByLibrary.simpleMessage("التاريخ الهجري"),
+        "splash_tagline": MessageLookupByLibrary.simpleMessage("رفيقك الإسلامي"),
         "hizb": MessageLookupByLibrary.simpleMessage("حزب"),
         "home_adhkar":
             MessageLookupByLibrary.simpleMessage("أذكار دخول وخروج المنزل"),

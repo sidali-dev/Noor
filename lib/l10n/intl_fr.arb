@@ -167,6 +167,7 @@
     "adjust_times" : "Ajuster les heures",
     "adjust_times_hint" : "Décalez une prière de quelques minutes pour suivre votre mosquée.",
     "hijri_date" : "Date de l'Hégire",
+    "splash_tagline" : "Votre compagnon musulman",
     "hijri_adjustment" : "Décaler de jours",
     "hijri_adjust_hint" : "Pour décaler la date d'un jour, choisissez le calcul astronomique.",
     "reset" : "Réinitialiser",

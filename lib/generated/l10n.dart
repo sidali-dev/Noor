@@ -1710,6 +1710,16 @@ class S {
     );
   }
 
+  /// `Your Islamic Companion`
+  String get splash_tagline {
+    return Intl.message(
+      'Your Islamic Companion',
+      name: 'splash_tagline',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Shift by days`
   String get hijri_adjustment {
     return Intl.message(

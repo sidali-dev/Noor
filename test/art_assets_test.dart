@@ -12,6 +12,8 @@ void main() {
   for (final p in [
     NoorArt.markPaper,
     NoorArt.markNight,
+    NoorArt.splashBg('paper'),
+    NoorArt.splashBg('night'),
     NoorArt.surahCartouche,
     NoorArt.pageCorner,
     NoorArt.divider,

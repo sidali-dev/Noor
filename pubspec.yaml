@@ -57,6 +57,8 @@ flutter:
     - assets/images/ornaments/
     - assets/logo/faith-mark-paper.png
     - assets/logo/faith-mark-night.png
+    - assets/logo/splash_icon.png
+    - assets/logo/splash_icon_dark.png
     - assets/sounds/
     - assets/data/adhkar.json
     - assets/data/mushaf_15lines.json

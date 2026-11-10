@@ -13,6 +13,7 @@ import 'package:noor/features/adhan/views/adhan_app.dart';
 import 'package:noor/core/services/adhan_scheduler.dart';
 import 'package:noor/features/duaa/controllers/adhkar_data.dart';
 import 'package:noor/features/quran/models/mushaf_data.dart';
+import 'package:noor/features/splash/views/splash_view.dart';
 import 'package:noor/my_app.dart';
 import 'package:noor/core/services/shared_prefs_service.dart';
 import 'package:workmanager/workmanager.dart';
@@ -34,9 +35,11 @@ void callbackDispatcher() {
   });
 }
 
-void main() async {
+void main(List<String> args) async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  // Held only until the splash's first frame, a copy of it, is drawn.
   FlutterNativeSplash.preserve(widgetsBinding: binding);
+  SplashView.androidSdk = _androidSdk(args);
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -46,8 +49,16 @@ void main() async {
   Get.put(LanguageService(), permanent: true);
   Get.put(LocationService(), permanent: true);
 
-  AppPages.startup = _startup();
+  AppPages.startup = _startup;
   runApp(const MyApp());
+}
+
+/// MainActivity passes `androidSdk=<API level>`; null off Android.
+int? _androidSdk(List<String> args) {
+  for (final a in args) {
+    if (a.startsWith('androidSdk=')) return int.tryParse(a.substring(11));
+  }
+  return null;
 }
 
 /// The adhan screen's own engine, started by Android's AdhanActivity when an
@@ -61,8 +72,10 @@ Future<void> adhanMain() async {
   runApp(const AdhanApp());
 }
 
-/// The rest of startup. The custom splash waits on it, so alarm and background
-/// work setup run alongside instead: Alarm.init re-arms every stored alarm.
+/// The rest of startup. The custom splash starts it once its entrance has
+/// played, so the work never runs under the native splash or the animation,
+/// and waits on it. Alarm and background work setup run alongside instead:
+/// Alarm.init re-arms every stored alarm.
 Future<void> _startup() async {
   unawaited(AdhanScheduler.init());
   // Workmanager's iOS side needs AppDelegate wiring this app does not have;
