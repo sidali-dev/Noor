@@ -111,9 +111,10 @@ void main() {
             findsNothing,
           );
 
-          // Chrome on: top bar + pager.
+          // Chrome on: top bar + pager, slid in.
           await tester.tap(find.byType(ReadQuranView));
-          await tester.pump(const Duration(milliseconds: 300));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 400));
           expect(tester.takeException(), isNull);
 
           // The counter names the hizb in a snackbar.

@@ -201,17 +201,12 @@ class _ReadQuranScreenState extends State<ReadQuranView> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: AnimatedOpacity(
-                  opacity: _showChrome ? 1.0 : 0.0,
-                  duration:
-                      noorDuration(context, const Duration(milliseconds: 200)),
-                  curve: Curves.easeOutCubic,
-                  child: IgnorePointer(
-                    ignoring: !_showChrome,
-                    child: Directionality(
-                      textDirection: appDirection,
-                      child: _buildTopBar(context, pageNumber, isBookmarked),
-                    ),
+                child: _chrome(
+                  context,
+                  hiddenOffset: const Offset(0, -1),
+                  child: Directionality(
+                    textDirection: appDirection,
+                    child: _buildTopBar(context, pageNumber, isBookmarked),
                   ),
                 ),
               ),
@@ -219,19 +214,41 @@ class _ReadQuranScreenState extends State<ReadQuranView> {
                 bottom: NoorSpace.s2,
                 left: 0,
                 right: 0,
-                child: AnimatedOpacity(
-                  opacity: _showChrome ? 1.0 : 0.0,
-                  duration:
-                      noorDuration(context, const Duration(milliseconds: 200)),
-                  curve: Curves.easeOutCubic,
-                  child: IgnorePointer(
-                    ignoring: !_showChrome,
-                    child: _buildBottomBar(context, pageNumber),
-                  ),
+                child: _chrome(
+                  context,
+                  hiddenOffset: const Offset(0, 1.2),
+                  child: _buildBottomBar(context, pageNumber),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Floating reader chrome: slides in from its edge while fading, and back out.
+  Widget _chrome(
+    BuildContext context, {
+    required Offset hiddenOffset,
+    required Widget child,
+  }) {
+    final duration = noorDuration(
+      context,
+      Duration(milliseconds: _showChrome ? 320 : 240),
+    );
+    final curve = _showChrome ? Curves.easeOutCubic : Curves.easeInCubic;
+    return IgnorePointer(
+      ignoring: !_showChrome,
+      child: AnimatedSlide(
+        offset: _showChrome ? Offset.zero : hiddenOffset,
+        duration: duration,
+        curve: curve,
+        child: AnimatedOpacity(
+          opacity: _showChrome ? 1.0 : 0.0,
+          duration: duration,
+          curve: curve,
+          child: child,
         ),
       ),
     );
